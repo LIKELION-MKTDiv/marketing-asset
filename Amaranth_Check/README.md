@@ -16,8 +16,8 @@ Amaranth HR 시스템에서 출퇴근 확인 버튼을 클릭하면 Google Sheet
 
 ## 설치 가이드
 
-처음 설치하는 경우 **[setup/README.md](setup/README.md)** 를 참고하세요.
-GCP 설정부터 확장프로그램 설치까지 단계별로 안내합니다.
+> ### 👉 [setup.html](setup.html) 파일을 Chrome으로 열어 설치 마법사를 실행하세요
+> GCP 설정부터 확장프로그램 설치까지 **화면으로 보면서** 단계별로 완료할 수 있습니다.
 
 ---
 
@@ -69,6 +69,7 @@ GCP 설정부터 확장프로그램 설치까지 단계별로 안내합니다.
 
 ```
 Amaranth_Check/
+├── setup.html      - 설치 마법사 (여기서 시작!)
 ├── manifest.json   - 확장 프로그램 설정
 ├── content.js      - Amaranth 다이얼로그 감지
 ├── background.js   - OAuth2 + Google Sheets API
