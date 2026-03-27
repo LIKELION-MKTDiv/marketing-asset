@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Amaranth 출퇴근 체크 — 설치 마법사</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #1a73e8;
+    --primary-dark: #1557b0;
+    --success: #34a853;
+    --warn: #fbbc04;
+    --danger: #ea4335;
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #202124;
+    --muted: #5f6368;
+    --border: #dadce0;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .container { max-width: 700px; margin: 0 auto; }
+
+  /* 헤더 */
+  .header { text-align: center; margin-bottom: 32px; }
+  .header h1 { font-size: 24px; font-weight: 700; color: var(--primary); }
+  .header p  { color: var(--muted); margin-top: 6px; font-size: 14px; }
+
+  /* 진행 바 */
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-bar  {
+    height: 6px; background: var(--border); border-radius: 99px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--primary); border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--muted); margin-top: 6px;
+  }
+
+  /* 카드 */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 28px 28px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+
+  .step-badge {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+    letter-spacing: .5px;
+  }
+
+  .card h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .card .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+
+  /* 인스트럭션 목록 */
+  ol.guide { padding-left: 20px; }
+  ol.guide li { margin-bottom: 14px; font-size: 15px; line-height: 1.6; }
+  ol.guide li:last-child { margin-bottom: 0; }
+
+  /* 링크 버튼 */
+  .link-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--primary); color: #fff;
+    text-decoration: none; border: none; cursor: pointer;
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    transition: background .15s;
+    margin: 6px 0;
+  }
+  .link-btn:hover { background: var(--primary-dark); }
+  .link-btn.outline {
+    background: transparent; color: var(--primary);
+    border: 1.5px solid var(--primary);
+  }
+  .link-btn.outline:hover { background: #e8f0fe; }
+  .link-btn.success { background: var(--success); }
+  .link-btn.success:hover { background: #2d8f47; }
+
+  /* 코드/복사 */
+  .code-block {
+    background: #f1f3f4;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 13px;
+    word-break: break-all;
+    position: relative;
+    margin: 6px 0;
+  }
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--primary); color: #fff;
+    border: none; cursor: pointer;
+    padding: 3px 10px; border-radius: 6px;
+    font-size: 12px; font-weight: 600;
+    transition: background .15s;
+  }
+  .copy-btn:hover { background: var(--primary-dark); }
+  .copy-btn.copied { background: var(--success); }
+
+  /* 입력 */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: 'Menlo', 'Consolas', monospace;
+    transition: border-color .15s;
+    outline: none;
+  }
+  .field input:focus { border-color: var(--primary); }
+  .field input.error { border-color: var(--danger); }
+  .field .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .field .err-msg { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+
+  /* 알림 박스 */
+  .notice {
+    border-radius: 8px; padding: 12px 14px;
+    font-size: 13px; line-height: 1.6;
+    margin: 14px 0;
+  }
+  .notice.info { background: #e8f0fe; border-left: 4px solid var(--primary); color: #174ea6; }
+  .notice.warn { background: #fef7e0; border-left: 4px solid var(--warn); color: #7a4f00; }
+  .notice.success { background: #e6f4ea; border-left: 4px solid var(--success); color: #137333; }
+
+  /* 결과 카드 */
+  .result-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { font-size: 12px; color: var(--muted); font-weight: 600; width: 120px; flex-shrink: 0; }
+  .result-val {
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 13px; flex: 1; word-break: break-all;
+    color: var(--text);
+  }
+  .result-copy {
+    background: none; border: 1.5px solid var(--border);
+    border-radius: 6px; padding: 3px 10px;
+    font-size: 12px; cursor: pointer; color: var(--muted);
+    transition: all .15s; flex-shrink: 0;
+  }
+  .result-copy:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* 하단 네비게이션 */
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+  .nav-btn {
+    padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 15px; font-weight: 600; transition: all .15s;
+  }
+  .btn-prev {
+    background: transparent; color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-prev:hover { border-color: var(--muted); }
+  .btn-next {
+    background: var(--primary); color: #fff;
+    min-width: 120px;
+  }
+  .btn-next:hover { background: var(--primary-dark); }
+  .btn-next:disabled { background: #ccc; cursor: not-allowed; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  .done-icon {
+    font-size: 48px; text-align: center; margin: 16px 0;
+  }
+  .done-title {
+    font-size: 22px; font-weight: 700; text-align: center; color: var(--success);
+    margin-bottom: 6px;
+  }
+  .done-sub {
+    text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 24px;
+  }
+
+  /* 숨김/표시 */
+  .step-page { display: none; }
+  .step-page.active { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Amaranth 출퇴근 체크</h1>
+    <p>설치 마법사 — 단계별로 따라하면 5분 안에 완료됩니다</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label">
+      <span id="step-label">시작 전</span>
+      <span id="step-count">0 / 7</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 0: 시작
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page active" id="page-0">
+    <div class="card">
+      <div class="step-badge">시작</div>
+      <h2>설치를 시작합니다</h2>
+      <p class="subtitle">필요한 것: Chrome 브라우저 · Google 계정</p>
+
+      <div class="notice info">
+        <strong>이 마법사가 안내하는 것</strong><br>
+        Amaranth에서 출퇴근 확인 버튼을 누르면 <strong>내 Google Sheets에 자동 기록</strong>되는
+        Chrome 확장 프로그램을 설치합니다.<br>
+        모든 데이터는 내 구글 계정에만 저장됩니다.
+      </div>
+
+      <hr class="divider" />
+
+      <ol class="guide">
+        <li><strong>구글 시트 복사</strong> — 출퇴근 기록 시트를 내 계정으로 복사합니다</li>
+        <li><strong>GCP 설정</strong> — 구글 API 사용 등록을 합니다</li>
+        <li><strong>Client ID 발급</strong> — 앱이 시트에 접근할 수 있는 키를 받습니다</li>
+        <li><strong>확장프로그램 설치</strong> — Chrome에 플러그인을 올립니다</li>
+        <li><strong>연결 완료</strong> — 모든 값을 확장프로그램에 입력합니다</li>
+      </ol>
+    </div>
+    <div class="nav">
+      <div></div>
+      <button class="nav-btn btn-next" onclick="goNext()">시작하기 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 1: 구글 시트 복사
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-1">
+    <div class="card">
+      <div class="step-badge">1단계 / 7</div>
+      <h2>구글 시트 복사</h2>
+      <p class="subtitle">출퇴근 기록용 템플릿 시트를 내 계정에 복사합니다</p>
+
+      <ol class="guide">
+        <li>
+          아래 버튼을 클릭하면 구글 시트 복사 화면이 열립니다.<br>
+          <a class="link-btn success" href="https://docs.google.com/spreadsheets/d/128ON9UI-t7HE4yOipBt4XhC-MEW2x5pW7QeJUeR3Otk/copy" target="_blank">
+            📋 구글 시트 복사하기
+          </a>
+        </li>
+        <li>구글 계정 로그인 후 <strong>"사본 만들기"</strong> 버튼을 클릭합니다</li>
+        <li>
+          시트가 열리면 주소창의 URL에서 <strong>Spreadsheet ID</strong>를 복사합니다<br>
+          <div class="notice info" style="margin-top:8px">
+            URL 형식: <code>https://docs.google.com/spreadsheets/d/<strong>[여기가 ID]</strong>/edit</code><br>
+            예시: <code>1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</code>
+          </div>
+        </li>
+        <li>아래 입력칸에 복사한 ID를 붙여넣으세요</li>
+      </ol>
+
+      <hr class="divider" />
+
+      <div class="field">
+        <label>Spreadsheet ID</label>
+        <input type="text" id="inp-sheet-id" placeholder="예: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" />
+        <div class="hint">URL에서 /d/ 와 /edit 사이의 문자열입니다</div>
+        <div class="err-msg" id="err-sheet-id">Spreadsheet ID를 입력해주세요</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goPrev()">← 이전</button>
+      <button class="nav-btn btn-next" onclick="validateAndNext('sheet')">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 2: GCP 프로젝트
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-2">
+    <div class="card">
+      <div class="step-badge">2단계 / 7</div>
+      <h2>GCP 프로젝트 생성</h2>
+      <p class="subtitle">구글 API를 사용하려면 GCP에 앱을 등록해야 합니다</p>
+
+      <ol class="guide">
+        <li>
+          아래 버튼으로 GCP 콘솔을 엽니다 (같은 구글 계정으로 로그인)<br>
+          <a class="link-btn" href="https://console.cloud.google.com/" target="_blank">GCP 콘솔 열기 →</a>
+        </li>
+        <li>
+          화면 상단 구글 로고 오른쪽 <strong>"프로젝트 선택"</strong> 드롭다운 클릭
+        </li>
+        <li>팝업 우측 상단 <strong>"새 프로젝트"</strong> 클릭</li>
+        <li>프로젝트 이름 입력 (예: <code>amaranth-check</code>) → <strong>"만들기"</strong> 클릭</li>
+        <li>잠시 후 상단에 만든 프로젝트 이름이 표시되면 완료</li>
+      </ol>
+
+      <div class="notice warn">
+        다음 단계부터는 <strong>방금 만든 프로젝트가 선택된 상태</strong>여야 합니다.<br>
+        상단에 프로젝트 이름이 표시되는지 확인하세요.
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goPrev()">← 이전</button>
+      <button class="nav-btn btn-next" onclick="goNext()">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 3: API + OAuth 설정
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-3">
+    <div class="card">
+      <div class="step-badge">3단계 / 7</div>
+      <h2>Sheets API 활성화 &amp; OAuth 동의 화면</h2>
+      <p class="subtitle">구글 시트 접근 권한과 앱 등록을 완료합니다</p>
+
+      <p style="font-weight:700; margin-bottom:10px">① Google Sheets API 활성화</p>
+      <ol class="guide">
+        <li>
+          <a class="link-btn" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com" target="_blank">Sheets API 설정 열기 →</a>
+        </li>
+        <li>파란색 <strong>"사용 설정"</strong> 버튼 클릭<br>
+          <span style="font-size:13px;color:var(--muted)">("API 사용 중지"로 표시되면 이미 활성화된 것 — 다음으로)</span>
+        </li>
+      </ol>
+
+      <hr class="divider" />
+
+      <p style="font-weight:700; margin-bottom:10px">② OAuth 동의 화면 설정</p>
+      <ol class="guide">
+        <li>
+          <a class="link-btn" href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth 동의 화면 열기 →</a>
+        </li>
+        <li>User Type: <strong>"외부"</strong> 선택 → <strong>"만들기"</strong></li>
+        <li>
+          앱 정보 입력:<br>
+          · 앱 이름: 아무거나 (예: <code>Amaranth Check</code>)<br>
+          · 사용자 지원 이메일: 드롭다운에서 내 이메일 선택<br>
+          · 나머지: 비워도 됨 → <strong>"저장 후 계속"</strong>
+        </li>
+        <li><strong>범위</strong> 페이지: 건드리지 않고 <strong>"저장 후 계속"</strong></li>
+        <li>
+          <strong>테스트 사용자</strong> 페이지:<br>
+          <strong>"+ ADD USERS"</strong> → 내 구글 이메일 입력 → 추가 → <strong>"저장 후 계속"</strong>
+          <div class="notice warn" style="margin-top:8px">
+            ⚠️ 여기서 이메일을 추가하지 않으면 나중에 구글 로그인이 안 됩니다. 반드시 추가하세요.
+          </div>
+        </li>
+        <li><strong>"대시보드로 돌아가기"</strong> 클릭</li>
+      </ol>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goPrev()">← 이전</button>
+      <button class="nav-btn btn-next" onclick="goNext()">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 4: Client ID 발급
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-4">
+    <div class="card">
+      <div class="step-badge">4단계 / 7</div>
+      <h2>Client ID &amp; Secret 발급</h2>
+      <p class="subtitle">확장프로그램이 구글 시트에 접근할 수 있는 키를 만듭니다</p>
+
+      <ol class="guide">
+        <li>
+          <a class="link-btn" href="https://console.cloud.google.com/apis/credentials" target="_blank">사용자 인증 정보 열기 →</a>
+        </li>
+        <li>상단 <strong>"+ 사용자 인증 정보 만들기"</strong> → <strong>"OAuth 클라이언트 ID"</strong></li>
+        <li>애플리케이션 유형: <strong>"웹 애플리케이션"</strong></li>
+        <li>이름: 아무거나 (예: <code>Amaranth Check</code>)</li>
+        <li>
+          <strong>"승인된 리디렉션 URI"</strong>는 지금 건드리지 않아도 됩니다<br>
+          <span style="font-size:13px;color:var(--muted)">확장프로그램 URI는 6단계에서 등록합니다</span>
+        </li>
+        <li><strong>"만들기"</strong> 클릭 → 팝업에 Client ID와 Client Secret이 표시됩니다</li>
+      </ol>
+
+      <div class="notice warn">
+        ⚠️ 지금 <strong>바로 복사</strong>하세요. 팝업을 닫으면 Client Secret을 다시 볼 수 없습니다.
+      </div>
+
+      <hr class="divider" />
+
+      <div class="field">
+        <label>Client ID</label>
+        <input type="text" id="inp-client-id" placeholder="예: 123456789-abc...apps.googleusercontent.com" />
+        <div class="err-msg" id="err-client-id">Client ID를 입력해주세요</div>
+      </div>
+      <div class="field">
+        <label>Client Secret</label>
+        <input type="text" id="inp-client-secret" placeholder="예: GOCSPX-..." />
+        <div class="err-msg" id="err-client-secret">Client Secret을 입력해주세요</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goPrev()">← 이전</button>
+      <button class="nav-btn btn-next" onclick="validateAndNext('client')">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 5: 확장프로그램 설치
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-5">
+    <div class="card">
+      <div class="step-badge">5단계 / 7</div>
+      <h2>Chrome 확장프로그램 설치</h2>
+      <p class="subtitle">Chrome에 플러그인을 올리고 확장프로그램 ID를 확인합니다</p>
+
+      <ol class="guide">
+        <li>
+          Chrome 주소창에 아래를 입력하고 Enter
+          <div class="code-block" style="margin-top:6px">
+            chrome://extensions
+            <button class="copy-btn" onclick="copyText('chrome://extensions', this)">복사</button>
+          </div>
+        </li>
+        <li>화면 <strong>우측 상단</strong> "개발자 모드" 토글을 켭니다 (파란색)</li>
+        <li>
+          <strong>"압축해제된 확장 프로그램을 로드합니다"</strong> 클릭<br>
+          <span style="font-size:13px;color:var(--muted)"><strong>marketing-asset → Amaranth_Check 폴더</strong>를 선택하세요</span>
+        </li>
+        <li>"Amaranth 출퇴근 체크" 카드가 생기면 성공</li>
+        <li>카드 하단에 표시된 <strong>영문+숫자 32자리 ID</strong>를 복사합니다</li>
+      </ol>
+
+      <hr class="divider" />
+
+      <div class="field">
+        <label>확장프로그램 ID (32자리)</label>
+        <input type="text" id="inp-ext-id" placeholder="예: abcdefghijklmnopqrstuvwxyzabcdef" maxlength="32" />
+        <div class="hint">chrome://extensions 화면에서 카드 하단 ID 문자열</div>
+        <div class="err-msg" id="err-ext-id">확장프로그램 ID 32자리를 입력해주세요</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goPrev()">← 이전</button>
+      <button class="nav-btn btn-next" onclick="validateAndNext('ext')">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 6: Redirect URI 추가
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-6">
+    <div class="card">
+      <div class="step-badge">6단계 / 7</div>
+      <h2>Redirect URI 추가</h2>
+      <p class="subtitle">확장프로그램 고유 주소를 GCP에 등록합니다</p>
+
+      <p style="margin-bottom:10px; font-size:14px;">
+        확장프로그램 ID를 기반으로 생성된 URI를 GCP에 추가해야 합니다.
+      </p>
+
+      <p style="font-weight:700; margin-bottom:6px">추가할 Redirect URI:</p>
+      <div class="code-block" id="redirect-uri-display">
+        (이전 단계에서 ID를 입력하면 자동으로 생성됩니다)
+        <button class="copy-btn" onclick="copyRedirectUri(this)">복사</button>
+      </div>
+
+      <hr class="divider" />
+
+      <ol class="guide">
+        <li>
+          <a class="link-btn" href="https://console.cloud.google.com/apis/credentials" target="_blank">사용자 인증 정보 열기 →</a>
+        </li>
+        <li>4단계에서 만든 OAuth 클라이언트 이름을 클릭합니다</li>
+        <li>
+          <strong>"승인된 리디렉션 URI"</strong> 섹션 → <strong>"+ URI 추가"</strong><br>
+          위에 표시된 URI를 붙여넣습니다
+        </li>
+        <li>
+          <div class="notice warn">
+            ⚠️ URI 끝에 <code>/</code>가 있는지 확인하세요.
+          </div>
+        </li>
+        <li><strong>"저장"</strong> 클릭</li>
+      </ol>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goPrev()">← 이전</button>
+      <button class="nav-btn btn-next" onclick="goNext()">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 7: 설정 입력 (최종)
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-7">
+    <div class="card">
+      <div class="step-badge">7단계 / 7</div>
+      <h2>확장프로그램 설정 입력</h2>
+      <p class="subtitle">아래 값을 확장프로그램 설정 화면에 복사해 넣으세요</p>
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
+        아래 값들을 순서대로 확장프로그램 설정 화면에 입력하세요
+      </p>
+
+      <p style="font-weight:700; font-size:13px; color:var(--muted); letter-spacing:.5px; margin-bottom:8px">GOOGLE OAUTH 2.0 설정</p>
+      <div id="result-oauth"></div>
+
+      <hr class="divider" />
+
+      <p style="font-weight:700; font-size:13px; color:var(--muted); letter-spacing:.5px; margin-bottom:8px">GOOGLE SHEETS 설정</p>
+      <div id="result-sheets"></div>
+      <div class="notice info" style="margin-top:10px">
+        <strong>출퇴근 시트 이름</strong>은 비워두면 <code>출퇴근 기록부</code>로 자동 적용됩니다. 건드리지 않아도 돼요.
+      </div>
+
+      <hr class="divider" />
+
+      <p style="font-weight:700; margin-bottom:10px">설정 화면 여는 방법</p>
+      <ol class="guide">
+        <li>
+          Chrome 툴바 <strong>퍼즐 조각(🧩) 아이콘</strong> 클릭 →
+          "Amaranth 출퇴근 체크" 옆 <strong>핀(📌)</strong> 클릭해서 고정
+        </li>
+        <li>툴바 아이콘 클릭 → 팝업 우측 상단 <strong>⚙ (설정)</strong> 클릭</li>
+        <li>위 값들을 차례대로 붙여넣고 <strong>"저장"</strong> 클릭</li>
+        <li><strong>"Google 인증"</strong> 버튼 클릭 → 구글 계정 선택 → <strong>"허용"</strong></li>
+      </ol>
+
+      <div class="notice warn">
+        ⚠️ <strong>"앱이 확인되지 않았습니다"</strong> 화면이 뜨면:<br>
+        <strong>"고급"</strong> 클릭 → <strong>"...안전하지 않음으로 이동"</strong> 클릭 → 허용<br>
+        <span style="font-size:12px">내가 직접 만든 앱이라서 뜨는 경고입니다. 안전합니다.</span>
+      </div>
+
+      <div class="notice success" style="margin-top:12px">
+        ✅ <strong>"Google 인증 성공!"</strong> 메시지가 나오면 설치 완료!<br>
+        이제 Amaranth에서 퇴근 확인 버튼을 누르면 자동으로 기록됩니다.
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goPrev()">← 이전</button>
+      <button class="nav-btn btn-next" style="background:var(--success)" onclick="goDone()">설치 완료 ✓</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       DONE
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="step-page" id="page-done">
+    <div class="card">
+      <div class="done-icon">🎉</div>
+      <div class="done-title">설치 완료!</div>
+      <div class="done-sub">이제 Amaranth 출퇴근 체크가 준비되었습니다</div>
+
+      <div class="notice success">
+        <strong>확인 방법</strong><br>
+        Amaranth HR 시스템에서 출근/퇴근 <strong>확인 버튼</strong>을 누르면<br>
+        내 구글 시트에 자동으로 기록됩니다.<br>
+        Chrome 툴바 아이콘을 클릭해 대시보드에서 근무시간을 확인하세요.
+      </div>
+
+      <hr class="divider" />
+
+      <p style="font-weight:700; margin-bottom:10px">문제 해결</p>
+      <table style="width:100%; font-size:13px; border-collapse:collapse;">
+        <tr style="background:#f1f3f4;">
+          <th style="padding:8px 10px; text-align:left; border-radius:8px 0 0 0">증상</th>
+          <th style="padding:8px 10px; text-align:left; border-radius:0 8px 0 0">해결</th>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px">"앱이 확인되지 않았습니다"</td>
+          <td style="padding:8px 10px">"고급" → "안전하지 않음으로 이동"</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px">구글 로그인이 안 됨</td>
+          <td style="padding:8px 10px">3단계 테스트 사용자에 이메일 추가 확인</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px">아이콘이 툴바에 없음</td>
+          <td style="padding:8px 10px">🧩 클릭 → 핀 아이콘으로 고정</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 10px">출퇴근이 기록 안 됨</td>
+          <td style="padding:8px 10px">설정 재확인 후 Chrome 재시작</td>
+        </tr>
+      </table>
+    </div>
+    <div class="nav">
+      <button class="nav-btn btn-prev" onclick="goToStep(7)">← 설정 다시 보기</button>
+      <div></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+'use strict';
+
+const TOTAL_STEPS = 7;
+let currentStep = 0;
+
+// ── 네비게이션 ─────────────────────────────────────────────────────────────
+
+function goNext() {
+  if (currentStep < TOTAL_STEPS) {
+    goToStep(currentStep + 1);
+  }
+}
+
+function goPrev() {
+  if (currentStep > 0) {
+    goToStep(currentStep - 1);
+  }
+}
+
+function goDone() {
+  // 모든 페이지 숨김
+  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-done').classList.add('active');
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('step-label').textContent = '설치 완료';
+  document.getElementById('step-count').textContent = '완료';
+  currentStep = 8;
+}
+
+function goToStep(n) {
+  // step 6에 진입하면 redirect URI 표시
+  if (n === 6) renderRedirectUri();
+  // step 7에 진입하면 결과 표시
+  if (n === 7) renderResult();
+
+  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById(`page-${n}`);
+  if (page) page.classList.add('active');
+
+  currentStep = n;
+
+  const pct = Math.round((n / TOTAL_STEPS) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const labels = ['시작 전','구글 시트 복사','GCP 프로젝트','API & OAuth','Client ID 발급','확장프로그램 설치','Redirect URI','설정 입력'];
+  document.getElementById('step-label').textContent = labels[n] || '';
+  document.getElementById('step-count').textContent = n === 0 ? '0 / 7' : `${n} / ${TOTAL_STEPS}`;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── 유효성 검사 & 다음 ────────────────────────────────────────────────────
+
+function validateAndNext(type) {
+  if (type === 'sheet') {
+    const val = document.getElementById('inp-sheet-id').value.trim();
+    if (!val) {
+      showErr('err-sheet-id', 'inp-sheet-id');
+      return;
+    }
+    hideErr('err-sheet-id', 'inp-sheet-id');
+  }
+
+  if (type === 'client') {
+    const id  = document.getElementById('inp-client-id').value.trim();
+    const sec = document.getElementById('inp-client-secret').value.trim();
+    let ok = true;
+    if (!id)  { showErr('err-client-id', 'inp-client-id'); ok = false; }
+    else hideErr('err-client-id', 'inp-client-id');
+    if (!sec) { showErr('err-client-secret', 'inp-client-secret'); ok = false; }
+    else hideErr('err-client-secret', 'inp-client-secret');
+    if (!ok) return;
+  }
+
+  if (type === 'ext') {
+    const val = document.getElementById('inp-ext-id').value.trim();
+    if (!val || val.length !== 32) {
+      showErr('err-ext-id', 'inp-ext-id');
+      return;
+    }
+    hideErr('err-ext-id', 'inp-ext-id');
+  }
+
+  goNext();
+}
+
+function showErr(errId, inputId) {
+  document.getElementById(errId).style.display = 'block';
+  document.getElementById(inputId).classList.add('error');
+}
+
+function hideErr(errId, inputId) {
+  document.getElementById(errId).style.display = 'none';
+  document.getElementById(inputId).classList.remove('error');
+}
+
+// ── Redirect URI 생성 ─────────────────────────────────────────────────────
+
+function getRedirectUri() {
+  const extId = document.getElementById('inp-ext-id').value.trim();
+  return extId ? `https://${extId}.chromiumapp.org/` : '';
+}
+
+function renderRedirectUri() {
+  const uri = getRedirectUri();
+  const el  = document.getElementById('redirect-uri-display');
+  if (uri) {
+    el.childNodes[0].textContent = uri + ' ';
+  }
+}
+
+function copyRedirectUri(btn) {
+  const uri = getRedirectUri();
+  if (!uri) return;
+  copyText(uri, btn);
+}
+
+// ── 결과 렌더링 ───────────────────────────────────────────────────────────
+
+function renderResult() {
+  const sheetId  = document.getElementById('inp-sheet-id').value.trim();
+  const clientId = document.getElementById('inp-client-id').value.trim();
+  const secret   = document.getElementById('inp-client-secret').value.trim();
+
+  const oauthRows = [
+    { label: 'Client ID',      val: clientId },
+    { label: 'Client Secret',  val: secret   },
+  ];
+  const sheetsRows = [
+    { label: 'Spreadsheet ID', val: sheetId  },
+  ];
+
+  const toHtml = r => `
+    <div class="result-row">
+      <span class="result-label">${r.label}</span>
+      <span class="result-val">${escHtml(r.val)}</span>
+      <button class="result-copy" onclick="copyText('${escAttr(r.val)}', this)">복사</button>
+    </div>
+  `;
+
+  document.getElementById('result-oauth').innerHTML  = oauthRows.map(toHtml).join('');
+  document.getElementById('result-sheets').innerHTML = sheetsRows.map(toHtml).join('');
+}
+
+// ── 복사 유틸 ─────────────────────────────────────────────────────────────
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '복사됨 ✓';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.classList.remove('copied');
+    }, 1800);
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escAttr(s) {
+  return String(s).replace(/'/g, "\\'");
+}
+</script>
+</body>
+</html>
