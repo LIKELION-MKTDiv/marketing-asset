@@ -16,8 +16,40 @@ Amaranth HR 시스템에서 출퇴근 확인 버튼을 클릭하면 Google Sheet
 
 ## 설치 가이드
 
-> ### 👉 [setup.html](setup.html) 파일을 Chrome으로 열어 설치 마법사를 실행하세요
-> GCP 설정부터 확장프로그램 설치까지 **화면으로 보면서** 단계별로 완료할 수 있습니다.
+> ### 👉 아래 순서대로 진행하세요
+
+**1. 클론할 폴더에서 터미널 열기**
+
+두 가지 방법 중 편한 걸로 하세요.
+
+**방법 A. 터미널에서 폴더로 이동**
+VS Code / Cursor 상단 메뉴 → **Terminal → New Terminal** 실행 후:
+```bash
+cd ~/Desktop
+# 또는 원하는 경로로 이동
+```
+
+**방법 B. 원하는 폴더에서 바로 터미널 열기**
+- **Mac**: Finder에서 저장할 폴더 우클릭 → **"폴더에서 새로운 터미널 열기"**
+- **Windows**: 저장할 폴더에서 우클릭 → **"터미널에서 열기"**
+
+**2. 레포 클론**
+```bash
+git clone https://github.com/LIKELION-MKTDiv/marketing-asset.git
+```
+→ 현재 위치에 `marketing-asset` 폴더가 생성됩니다
+
+**3. 설치 마법사 실행**
+
+`marketing-asset/Amaranth_Check/setup.html` 파일을 **Chrome으로 열기**
+→ 화면 안내에 따라 단계별로 진행하세요
+
+**4. 업데이트 시**
+```bash
+cd marketing-asset
+git pull
+```
+이후 `chrome://extensions` 에서 새로고침(🔄) 클릭
 
 ---
 
