@@ -20,9 +20,16 @@ Amaranth HR 시스템에서 출퇴근 확인 버튼을 클릭하면 Google Sheet
 
 **1. 클론할 폴더에서 터미널 열기**
 
+> ⚠️ **반드시 개인 로컬 폴더에 저장하세요.**
+>
+> `marketing-asset` 폴더 **안에** 클론하면 git 레포가 중첩되어 오류가 발생합니다.
+>
+> 권장 경로: `~/Desktop` · `~/Documents` · `~/workspace`
+
 두 가지 방법 중 편한 걸로 하세요.
 
 **방법 A. 터미널에서 폴더로 이동**
+
 VS Code / Cursor 상단 메뉴 → **Terminal → New Terminal** 실행 후:
 ```bash
 cd ~/Desktop
