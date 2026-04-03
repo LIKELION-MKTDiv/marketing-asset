@@ -17,17 +17,17 @@
   document.addEventListener('click', (e) => {
 
     // 클릭 대상이 파란색 확인 버튼(또는 그 자식)인지 확인
-    const btn = e.target.closest('.OBTButton_themeblue__3JTE9');
+    const btn = e.target.closest('[class*="themeblue"]');
     if (!btn) return;
 
-    const labelText = btn.querySelector('.OBTButton_labelText__1s2qO')?.textContent?.trim();
+    const labelText = btn.querySelector('[class*="labelText"]')?.textContent?.trim();
     if (labelText !== '확인') return;
 
     // 출퇴근 체크 다이얼로그 안에 있는지 확인
-    const confirmBox = btn.closest('.OBTConfirm_confirmBoxStyle__3aqwI');
+    const confirmBox = btn.closest('[class*="confirmBox"]');
     if (!confirmBox) return;
 
-    const msgEl = confirmBox.querySelector('.OBTConfirm_confirmMessageStyle__EtroK p');
+    const msgEl = confirmBox.querySelector('[class*="confirmMessage"] p');
     const message = msgEl?.textContent?.trim() || '';
 
     let checkType = null;
