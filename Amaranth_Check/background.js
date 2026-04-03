@@ -441,12 +441,14 @@ function calcGrossHours(startTime, endTime) {
   return ((eh * 60 + em) - (sh * 60 + sm)) / 60;
 }
 
-// 근로기준법 제54조 휴게시간 공제
+// 근로기준법 제54조 휴게시간 공제 (P1-P5 구간, 역전 현상 방지)
 function applyBreak(grossHours) {
-  if (grossHours < 0)  return 0;
-  if (grossHours >= 8) return grossHours - 1;
-  if (grossHours >= 4) return grossHours - 0.5;
-  return grossHours;
+  if (grossHours <= 0)   return 0;
+  if (grossHours > 9)    return grossHours - 1;   // P5: 9h 초과 → 1h 공제
+  if (grossHours > 8.5)  return 8;                // P4: 8.5h~9h → 8h 고정
+  if (grossHours > 4.5)  return grossHours - 0.5; // P3: 4.5h~8.5h → 30m 공제
+  if (grossHours > 4)    return 4;                // P2: 4h~4.5h → 4h 고정
+  return grossHours;                               // P1: 4h 이하 → 공제 없음
 }
 
 // Sheets API 요청 헬퍼

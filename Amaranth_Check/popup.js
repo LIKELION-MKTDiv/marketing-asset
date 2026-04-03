@@ -288,10 +288,43 @@ function renderFriday(days, weeklyHours, weekId, assumedFridayStart) {
   const body = document.getElementById('friday-body');
   if (!body) return;
 
-  const TARGET   = 40;
-  const friday   = days[4]; // days[4] = 금요일
-  // 금요일 근무시간을 제외한 월~목 기준으로 remaining 계산
-  const remaining = Math.max(0, TARGET - weeklyHours + (friday?.netHours || 0));
+  const TARGET     = 40;
+  const todayIndex = days.findIndex(d => d.isToday);
+  const today      = todayIndex >= 0 ? days[todayIndex] : null;
+
+  // 마지막 근무 예정일 탐색 (금요일부터 역순, 연차/공휴일 제외)
+  let lastWorkDayIndex = -1;
+  for (let i = 4; i >= 0; i--) {
+    if (!days[i].isHoliday && days[i].leaveType !== '연차') {
+      lastWorkDayIndex = i;
+      break;
+    }
+  }
+
+  // 이번 주 전체 연차/공휴일
+  if (lastWorkDayIndex === -1) {
+    body.innerHTML = `<div class="fri-done">이번 주 전체 연차/공휴일</div>`;
+    return;
+  }
+
+  const targetDay = days[lastWorkDayIndex];
+
+  // 카드 제목 동적 업데이트 (yyyy-mm-dd 주차 O요일 예상 퇴근)
+  const titleEl = document.getElementById('last-day-title');
+  if (titleEl) titleEl.textContent = `${weekId} 주차 ${DAY_FULL[new Date(targetDay.date + 'T00:00:00').getDay()]} 예상 퇴근`;
+
+  // 오늘 유효 업무시간: 근무 중이고 마지막 근무일 이전이면 8h 가정
+  const todayEffective = (today && today.startTime && !today.endTime && todayIndex < lastWorkDayIndex) ? 8 : 0;
+
+  // 오늘 이후 ~ 마지막 근무일 직전까지 계획 근무시간 (연차/공휴일 제외)
+  const plannedHours = (todayIndex >= 0 && todayIndex < lastWorkDayIndex)
+    ? days.slice(todayIndex + 1, lastWorkDayIndex).reduce((sum, d) => {
+        if (d.isHoliday || d.leaveType === '연차') return sum;
+        return sum + (d.leaveType === '반차' ? 4 : 8);
+      }, 0)
+    : 0;
+
+  const remaining = Math.max(0, TARGET - weeklyHours - todayEffective - plannedHours);
 
   // 목표 달성
   if (weeklyHours >= TARGET) {
@@ -302,24 +335,17 @@ function renderFriday(days, weeklyHours, weekId, assumedFridayStart) {
     return;
   }
 
-  // 금요일 연차
-  if (friday?.leaveType === '연차') {
-    body.innerHTML = `
-      <div class="fri-done">금요일 연차</div>
-      <div class="fri-done-sub">주간 누적 ${fmtHours(weeklyHours)} · 남은 ${fmtHours(remaining)}</div>
-    `;
-    return;
-  }
-
   // 하루 기준 gross: 반차면 4h, 아니면 남은 시간(최대 8h)
-  const dailyNet   = friday?.leaveType === '반차' ? 4 : Math.min(8, remaining);
+  const dailyNet   = targetDay.leaveType === '반차' ? 4 : Math.min(8, remaining);
   const dailyGross = netToGross(dailyNet);
-  const dailyLabel = friday?.leaveType === '반차' ? '하루 4h 기준 (반차)'
+  const dailyLabel = targetDay.leaveType === '반차' ? '하루 4h 기준 (반차)'
                    : remaining < 8 ? `남은 ${fmtHours(remaining)} 기준`
                    : '하루 8h 기준';
+  const dayLabel   = DAY_FULL[new Date(targetDay.date + 'T00:00:00').getDay()];
 
-  // 금요일 실제 출근 기록 > WeeklySettings 예상 출근 > 기본값 09:00
-  const prefill = padTime(friday?.startTime || assumedFridayStart) || '09:00';
+  // 실제 출근 기록 > WeeklySettings(금요일만) > 기본값 09:00
+  const assumedStart = lastWorkDayIndex === 4 ? assumedFridayStart : '';
+  const prefill = padTime(targetDay.startTime || assumedStart) || '09:00';
 
   body.innerHTML = `
     <div class="fri-summary" id="fri-summary">
@@ -327,7 +353,7 @@ function renderFriday(days, weeklyHours, weekId, assumedFridayStart) {
     </div>
     <div class="fri-calc">
       <div class="fri-row">
-        <span class="label">금요일 출근</span>
+        <span class="label">${dayLabel} 출근</span>
         <input type="text" id="friday-checkin" placeholder="09:00" maxlength="5" value="${prefill}" class="fri-time-input" />
       </div>
       <div class="fri-row" style="margin-top:2px">
@@ -355,7 +381,8 @@ function renderFriday(days, weeklyHours, weekId, assumedFridayStart) {
 
     updateFridayCheckout(v, dailyGross);
     clearTimeout(fridaySaveTimer);
-    if (weekId) {
+    // WeeklySettings 저장은 마지막 근무일이 금요일인 경우만
+    if (weekId && lastWorkDayIndex === 4) {
       fridaySaveTimer = setTimeout(() => {
         chrome.runtime.sendMessage({ action: 'saveWeekSetting', weekId, assumedStartTime: v });
       }, 1500);
@@ -391,13 +418,12 @@ function updateFridayCheckout(checkinTime, grossHours) {
   }
 }
 
-// 순근무시간(net) → 총체류시간(gross) 역산
-// applyBreak의 역함수: gross >= 8 → break 1h / gross >= 4 → break 30m
+// 순근무시간(net) → 총체류시간(gross) 역산 (P1-P5 역함수)
 function netToGross(net) {
-  if (net <= 0)   return 0;
-  if (net >= 7)   return net + 1;    // gross = net+1 ≥ 8 → 1h 공제 성립
-  if (net >= 3.5) return net + 0.5;  // gross = net+0.5 ≥ 4 → 30m 공제 성립
-  return net;
+  if (net <= 0) return 0;
+  if (net > 8)  return net + 1;   // P5 구간: gross = net + 1h (> 9h)
+  if (net > 4)  return net + 0.5; // P3 구간: gross = net + 0.5h (4.5h~8.5h)
+  return net;                      // P1 구간: gross = net (4h 이하)
 }
 
 // ─ 실시간 업데이트 ────────────────────────────────────────────────────────────
@@ -449,20 +475,41 @@ function liveUpdateAll() {
       (liveWeekly >= TARGET ? ' over' : liveWeekly >= TARGET * 0.9 ? ' warn' : '');
   }
 
-  // 금요일 카드 요약 업데이트 (남은 시간은 월~목 기준 고정)
-  const friday = days[4];
-  const fridayRemaining = Math.max(0, TARGET - liveWeekly + todayNet);
+  // 마지막 근무 예정일 탐색 (금요일부터 역순, 연차/공휴일 제외)
+  const todayIndex = days.findIndex(d => d.isToday);
+  let lastWorkDayIndex = -1;
+  for (let i = 4; i >= 0; i--) {
+    if (!days[i].isHoliday && days[i].leaveType !== '연차') {
+      lastWorkDayIndex = i;
+      break;
+    }
+  }
+  if (lastWorkDayIndex === -1) return; // 이번 주 전체 연차/공휴일
+
+  const targetDay = days[lastWorkDayIndex];
+
+  // 오늘 유효 업무시간: 마지막 근무일 이전이면 8h/실제 적용, 마지막 근무일 당일이면 0(자신 제외)
+  const weeklyExcludingToday = baseWeekly - today.netHours;
+  const todayEffective = (todayIndex < lastWorkDayIndex) ? (todayNet >= 8 ? todayNet : 8) : 0;
+
+  const plannedHours = (todayIndex >= 0 && todayIndex < lastWorkDayIndex)
+    ? days.slice(todayIndex + 1, lastWorkDayIndex).reduce((sum, d) => {
+        if (d.isHoliday || d.leaveType === '연차') return sum;
+        return sum + (d.leaveType === '반차' ? 4 : 8);
+      }, 0)
+    : 0;
+  const fridayRemaining = Math.max(0, TARGET - weeklyExcludingToday - todayEffective - plannedHours);
   const friSummary = document.getElementById('fri-summary');
   if (friSummary) {
     friSummary.innerHTML =
       `주간 누적 <span class="em">${fmtHours(liveWeekly)}</span>` +
       `<span class="sep">|</span>남은 시간 <span class="em">${fmtHours(fridayRemaining)}</span>`;
   }
-  const dailyNet = friday?.leaveType === '반차' ? 4 : Math.min(8, fridayRemaining);
+  const dailyNet = targetDay.leaveType === '반차' ? 4 : Math.min(8, fridayRemaining);
   const checkinEl = document.getElementById('friday-checkin');
-  // 실제 금요일 출근 시간이 확정되면 입력 필드에 반영 (WeeklySettings 값보다 우선)
-  if (checkinEl && friday?.startTime && checkinEl.value !== friday.startTime) {
-    checkinEl.value = friday.startTime;
+  // 실제 출근 시간이 확정되면 입력 필드에 반영
+  if (checkinEl && targetDay.startTime && checkinEl.value !== padTime(targetDay.startTime)) {
+    checkinEl.value = padTime(targetDay.startTime);
   }
   if (checkinEl?.value) updateFridayCheckout(checkinEl.value, netToGross(dailyNet));
 }
@@ -544,12 +591,14 @@ function calcGrossHours(start, end) {
   return ((eh * 60 + em) - (sh * 60 + sm)) / 60;
 }
 
-// 근로기준법 제54조
+// 근로기준법 제54조 (P1-P5 구간, 역전 현상 방지)
 function applyBreak(gross) {
-  if (gross < 0)  return 0;
-  if (gross >= 8) return gross - 1;
-  if (gross >= 4) return gross - 0.5;
-  return gross;
+  if (gross <= 0)  return 0;
+  if (gross > 9)   return gross - 1;   // P5: 9h 초과 → 1h 공제
+  if (gross > 8.5) return 8;           // P4: 8.5h~9h → 8h 고정 (ceiling)
+  if (gross > 4.5) return gross - 0.5; // P3: 4.5h~8.5h → 30m 공제
+  if (gross > 4)   return 4;           // P2: 4h~4.5h → 4h 고정 (ceiling)
+  return gross;                         // P1: 4h 이하 → 공제 없음
 }
 
 function fmtHours(h) {
