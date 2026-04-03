@@ -41,20 +41,24 @@
 
     console.log(`[출퇴근 체크] ${checkType} 감지 → ${date} ${time}`);
 
-    chrome.runtime.sendMessage(
-      { action: 'recordAttendance', type: checkType, date, time },
-      (response) => {
-        if (chrome.runtime.lastError) {
-          console.error('[출퇴근 체크] 백그라운드 통신 오류:', chrome.runtime.lastError.message);
-          return;
+    try {
+      chrome.runtime.sendMessage(
+        { action: 'recordAttendance', type: checkType, date, time },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('[출퇴근 체크] 백그라운드 통신 오류:', chrome.runtime.lastError.message);
+            return;
+          }
+          if (response?.success) {
+            console.log(`[출퇴근 체크] ${checkType} 기록 완료 ✓ ${date} ${time}`);
+          } else {
+            console.error('[출퇴근 체크] 기록 실패:', response?.error);
+          }
         }
-        if (response?.success) {
-          console.log(`[출퇴근 체크] ${checkType} 기록 완료 ✓ ${date} ${time}`);
-        } else {
-          console.error('[출퇴근 체크] 기록 실패:', response?.error);
-        }
-      }
-    );
+      );
+    } catch (e) {
+      console.warn('[출퇴근 체크] 확장 컨텍스트 만료. 탭을 새로고침 해주세요.');
+    }
 
   }, true /* capture phase */);
 
