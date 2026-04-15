@@ -313,8 +313,10 @@ function renderFriday(days, weeklyHours, weekId, assumedFridayStart) {
   const titleEl = document.getElementById('last-day-title');
   if (titleEl) titleEl.textContent = `${weekId} 주차 ${DAY_FULL[new Date(targetDay.date + 'T00:00:00').getDay()]} 예상 퇴근`;
 
-  // 오늘 유효 업무시간: 근무 중이고 마지막 근무일 이전이면 8h 가정
-  const todayEffective = (today && today.startTime && !today.endTime && todayIndex < lastWorkDayIndex) ? 8 : 0;
+  // 오늘 유효 업무시간: 마지막 근무일 이전인 정상 근무일이면 8h 가정 (출근 전/근무 중 모두 포함)
+  const todayEffective = (today && !today.isHoliday && today.leaveType !== '연차' && !today.endTime && todayIndex < lastWorkDayIndex)
+    ? (today.leaveType === '반차' ? 4 : 8)
+    : 0;
 
   // 오늘 이후 ~ 마지막 근무일 직전까지 계획 근무시간 (연차/공휴일 제외)
   const plannedHours = (todayIndex >= 0 && todayIndex < lastWorkDayIndex)
@@ -335,21 +337,21 @@ function renderFriday(days, weeklyHours, weekId, assumedFridayStart) {
     return;
   }
 
-  // 하루 기준 gross: 반차면 4h, 아니면 남은 시간(최대 8h)
-  const dailyNet   = targetDay.leaveType === '반차' ? 4 : Math.min(8, remaining);
+  // 하루 기준 gross: 반차면 4h, 아니면 실제 남은 시간 그대로 반영
+  const dailyNet   = targetDay.leaveType === '반차' ? 4 : remaining;
   const dailyGross = netToGross(dailyNet);
   const dailyLabel = targetDay.leaveType === '반차' ? '하루 4h 기준 (반차)'
-                   : remaining < 8 ? `남은 ${fmtHours(remaining)} 기준`
-                   : '하루 8h 기준';
+                   : `남은 ${fmtHours(remaining)} 기준`;
   const dayLabel   = DAY_FULL[new Date(targetDay.date + 'T00:00:00').getDay()];
 
   // 실제 출근 기록 > WeeklySettings(금요일만) > 기본값 09:00
   const assumedStart = lastWorkDayIndex === 4 ? assumedFridayStart : '';
   const prefill = padTime(targetDay.startTime || assumedStart) || '09:00';
 
+  const weekRemaining = Math.max(0, TARGET - weeklyHours - todayEffective);
   body.innerHTML = `
     <div class="fri-summary" id="fri-summary">
-      주간 누적 <span class="em">${fmtHours(weeklyHours)}</span><span class="sep">|</span>남은 시간 <span class="em">${fmtHours(remaining)}</span>
+      주간 누적 <span class="em">${fmtHours(weeklyHours + todayEffective)}</span><span class="sep">|</span>남은 시간 <span class="em">${fmtHours(weekRemaining)}</span>
     </div>
     <div class="fri-calc">
       <div class="fri-row">
@@ -418,12 +420,12 @@ function updateFridayCheckout(checkinTime, grossHours) {
   }
 }
 
-// 순근무시간(net) → 총체류시간(gross) 역산 (P1-P5 역함수)
+// 순근무시간(net) → 총체류시간(gross) 역산
 function netToGross(net) {
-  if (net <= 0) return 0;
-  if (net > 8)  return net + 1;   // P5 구간: gross = net + 1h (> 9h)
-  if (net > 4)  return net + 0.5; // P3 구간: gross = net + 0.5h (4.5h~8.5h)
-  return net;                      // P1 구간: gross = net (4h 이하)
+  if (net <= 0)  return 0;
+  if (net > 7.5) return net + 1;   // 8.5h 이상 체류 구간 역산: gross = net + 1h
+  if (net > 4)   return net + 0.5; // 4.5h~8.5h 체류 구간 역산: gross = net + 0.5h
+  return net;                       // 4h 이하: 공제 없음
 }
 
 // ─ 실시간 업데이트 ────────────────────────────────────────────────────────────
@@ -501,11 +503,12 @@ function liveUpdateAll() {
   const fridayRemaining = Math.max(0, TARGET - weeklyExcludingToday - todayEffective - plannedHours);
   const friSummary = document.getElementById('fri-summary');
   if (friSummary) {
+    const weekRemainingLive = Math.max(0, TARGET - liveWeekly);
     friSummary.innerHTML =
       `주간 누적 <span class="em">${fmtHours(liveWeekly)}</span>` +
-      `<span class="sep">|</span>남은 시간 <span class="em">${fmtHours(fridayRemaining)}</span>`;
+      `<span class="sep">|</span>남은 시간 <span class="em">${fmtHours(weekRemainingLive)}</span>`;
   }
-  const dailyNet = targetDay.leaveType === '반차' ? 4 : Math.min(8, fridayRemaining);
+  const dailyNet = targetDay.leaveType === '반차' ? 4 : fridayRemaining;
   const checkinEl = document.getElementById('friday-checkin');
   // 실제 출근 시간이 확정되면 입력 필드에 반영
   if (checkinEl && targetDay.startTime && checkinEl.value !== padTime(targetDay.startTime)) {
@@ -591,14 +594,15 @@ function calcGrossHours(start, end) {
   return ((eh * 60 + em) - (sh * 60 + sm)) / 60;
 }
 
-// 근로기준법 제54조 (P1-P5 구간, 역전 현상 방지)
+// 근로기준법 제54조 (역전 현상 방지)
+// 4h/8h 순근무 달성 후 각 30분 휴게 구간 동안 net 고정
 function applyBreak(gross) {
-  if (gross <= 0)  return 0;
-  if (gross > 9)   return gross - 1;   // P5: 9h 초과 → 1h 공제
-  if (gross > 8.5) return 8;           // P4: 8.5h~9h → 8h 고정 (ceiling)
-  if (gross > 4.5) return gross - 0.5; // P3: 4.5h~8.5h → 30m 공제
-  if (gross > 4)   return 4;           // P2: 4h~4.5h → 4h 고정 (ceiling)
-  return gross;                         // P1: 4h 이하 → 공제 없음
+  if (gross <= 0)   return 0;
+  if (gross >= 9)   return gross - 1;   // P5: 9h 이상 → 1h 공제
+  if (gross >= 8.5) return 8;           // P4: 8h 순근무 달성 후 30분 휴게 구간 → 8h 고정
+  if (gross > 4.5)  return gross - 0.5; // P3: 4.5h~8.5h → 30분 공제
+  if (gross > 4)    return 4;           // P2: 4h 순근무 달성 후 30분 휴게 구간 → 4h 고정
+  return gross;                          // P1: 4h 이하 → 공제 없음
 }
 
 function fmtHours(h) {
