@@ -1,0 +1,377 @@
+{
+  "name": "클래스챗_공지_발송",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [1],
+              "triggerAtHour": 17,
+              "triggerAtMinute": 50
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-3760, -1040],
+      "id": "69750815-6f92-4526-be79-0e564cabcd62",
+      "name": "발송 시각"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fa9ddb74-73f2-488e-b26b-ab7881b724a7",
+              "leftValue": "={{ $now }}",
+              "rightValue": "2026-04-13T00:00:00",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            },
+            {
+              "id": "894ed436-e464-41d5-afff-3fb52da8f1fc",
+              "leftValue": "={{ $now }}",
+              "rightValue": "2026-04-29T00:00:00",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-3568, -1040],
+      "id": "efc066a6-51c7-4083-9155-d030c9a7dfc1",
+      "name": "4/13~4/30 사이 기간일경우"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "채널",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "active",
+              "lookupValue": "Y"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-3376, -1040],
+      "id": "af9d11a8-0678-4aab-b117-18d81acd5051",
+      "name": "채널 시트 읽기",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4e3d143d-179b-4d70-8799-0f0adfad599c",
+              "leftValue": "={{ $json.active }}",
+              "rightValue": "Y",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-3216, -1040],
+      "id": "ac2e73bf-ad02-49ad-aff0-b1f9fa37d384",
+      "name": "active = Y 인 경우"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "메시지"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "type",
+              "lookupValue": "={{$json.type}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-3008, -1040],
+      "id": "b7d5429e-7b22-4410-bfae-a4655e54a38b",
+      "name": "메시지 시트 조회",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-webhook",
+              "name": "webhook_url",
+              "value": "={{ $('active = Y 인 경우').item.json.webhook_url }}",
+              "type": "string"
+            },
+            {
+              "id": "set-message",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "set-bootcamp-name",
+              "name": "bootcamp_name",
+              "value": "={{ $('active = Y 인 경우').item.json.bootcamp_name }}",
+              "type": "string"
+            },
+            {
+              "id": "set-type",
+              "name": "type",
+              "value": "={{ $('active = Y 인 경우').item.json.type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-2832, -1040],
+      "id": "7e28e028-0b83-445c-8e68-bf8c54fbe3bb",
+      "name": "발송 데이터 정리"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [-2672, -1040],
+      "id": "05c8638e-8987-406a-9bad-fe45e4b01031",
+      "name": "클래스챗 공지 발송"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      sent_count: $items(\"발송 데이터 정리\").length,\n      sent_time: $now.toFormat(\"yyyy-MM-dd HH:mm\"),\n      bootcamps: $items(\"발송 데이터 정리\")\n        .map(item => `• ${item.json.bootcamp_name} (${item.json.type})`)\n        .join('\\n')\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-2480, -1040],
+      "id": "f6cedf01-0974-44ef-b585-6da9208511a4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"text\": \"*[TIL 클래스챗 공지 발송 완료]*\\n\\n📣 발송 채널: \" + $json.sent_count + \"개\\n🕒 발송 시각: \" + $json.sent_time + \"\\n\\n📚 발송 부트캠프:\\n\" + $json.bootcamps\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [-2288, -1040],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "슬랙 알림 발송"
+    },
+    {
+      "parameters": {
+        "content": "## 사용 설명서\n\n### 워크플로우 자동화 구조\n\n본 워크플로우는 클래스챗 공지를 여러 부트캠프 채널에 자동으로 일괄 발송하기 위한 자동화 구조입니다.\n\n\n### 수정시 유의사항\n",
+        "height": 400,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-2272, 176],
+      "typeVersion": 1,
+      "id": "51449fec-96fc-4659-bddd-8d47b4dc4b75",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "발송 시각": {
+      "main": [
+        [
+          {
+            "node": "4/13~4/30 사이 기간일경우",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4/13~4/30 사이 기간일경우": {
+      "main": [
+        [
+          {
+            "node": "채널 시트 읽기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "채널 시트 읽기": {
+      "main": [
+        [
+          {
+            "node": "active = Y 인 경우",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "active = Y 인 경우": {
+      "main": [
+        [
+          {
+            "node": "메시지 시트 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "메시지 시트 조회": {
+      "main": [
+        [
+          {
+            "node": "발송 데이터 정리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "발송 데이터 정리": {
+      "main": [
+        [
+          {
+            "node": "클래스챗 공지 발송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "클래스챗 공지 발송": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "슬랙 알림 발송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "tags": []
+}
