@@ -17,17 +17,17 @@
   document.addEventListener('click', (e) => {
 
     // 클릭 대상이 파란색 확인 버튼(또는 그 자식)인지 확인
-    const btn = e.target.closest('.OBTButton_themeblue__3JTE9');
+    const btn = e.target.closest('[class*="themeblue"]');
     if (!btn) return;
 
-    const labelText = btn.querySelector('.OBTButton_labelText__1s2qO')?.textContent?.trim();
+    const labelText = btn.querySelector('[class*="labelText"]')?.textContent?.trim();
     if (labelText !== '확인') return;
 
     // 출퇴근 체크 다이얼로그 안에 있는지 확인
-    const confirmBox = btn.closest('.OBTConfirm_confirmBoxStyle__3aqwI');
+    const confirmBox = btn.closest('[class*="confirmBox"]');
     if (!confirmBox) return;
 
-    const msgEl = confirmBox.querySelector('.OBTConfirm_confirmMessageStyle__EtroK p');
+    const msgEl = confirmBox.querySelector('[class*="confirmMessage"] p');
     const message = msgEl?.textContent?.trim() || '';
 
     let checkType = null;
@@ -41,20 +41,24 @@
 
     console.log(`[출퇴근 체크] ${checkType} 감지 → ${date} ${time}`);
 
-    chrome.runtime.sendMessage(
-      { action: 'recordAttendance', type: checkType, date, time },
-      (response) => {
-        if (chrome.runtime.lastError) {
-          console.error('[출퇴근 체크] 백그라운드 통신 오류:', chrome.runtime.lastError.message);
-          return;
+    try {
+      chrome.runtime.sendMessage(
+        { action: 'recordAttendance', type: checkType, date, time },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('[출퇴근 체크] 백그라운드 통신 오류:', chrome.runtime.lastError.message);
+            return;
+          }
+          if (response?.success) {
+            console.log(`[출퇴근 체크] ${checkType} 기록 완료 ✓ ${date} ${time}`);
+          } else {
+            console.error('[출퇴근 체크] 기록 실패:', response?.error);
+          }
         }
-        if (response?.success) {
-          console.log(`[출퇴근 체크] ${checkType} 기록 완료 ✓ ${date} ${time}`);
-        } else {
-          console.error('[출퇴근 체크] 기록 실패:', response?.error);
-        }
-      }
-    );
+      );
+    } catch (e) {
+      console.warn('[출퇴근 체크] 확장 컨텍스트 만료. 탭을 새로고침 해주세요.');
+    }
 
   }, true /* capture phase */);
 
