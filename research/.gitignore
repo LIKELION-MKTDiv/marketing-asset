@@ -1,0 +1,28 @@
+# 환경변수 (절대 커밋 금지)
+.env
+
+# Python 캐시
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+# 스크래핑 캐시 (재생성 가능)
+data/cache/
+
+# outputs: MD 리포트는 포함, 원시 JSON은 제외
+outputs/**/research.json
+outputs/**/analysis.json
+outputs/**/insights.json
+outputs/**/final.json
+
+# 디버그 임시 파일
+debug_*.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
