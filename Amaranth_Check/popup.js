@@ -185,13 +185,17 @@ function buildTimeGrid(day, isWorking) {
   // 실시간 순근무
   let netVal = '';
   if (day.startTime) {
-    const endT  = day.endTime ? day.endTime : formatTime(new Date());
-    const gross = calcGrossHours(day.startTime, endT);
-    const net   = applyBreak(gross);
-    const extra = day.leaveType === '반차' ? 4 : 0;
-    netVal = `<span class="value${isWorking ? '' : ''}" id="live-net">${fmtHours(net + extra)}</span>`;
+    const endT    = day.endTime ? day.endTime : formatTime(new Date());
+    const gross   = calcGrossHours(day.startTime, endT);
+    const net     = applyBreak(gross);
+    const extra   = day.leaveType === '반차' ? 4 : 0;
+    const inBreak = isWorking && isBreakZone(gross);
+    const showNet = inBreak ? 8 : net;
+    netVal = `<span class="value" id="live-net">${fmtHours(showNet + extra)}</span>`;
     if (day.leaveType === '반차') {
       netVal += `<div style="font-size:10px;color:#66bb6a;margin-top:2px">+반차 4h</div>`;
+    } else if (isWorking) {
+      netVal += `<div style="font-size:10px;color:#fb8c00;margin-top:2px;${inBreak ? '' : 'display:none'}" id="live-break">휴게시간</div>`;
     }
   } else {
     netVal = `<span class="value muted">–</span>`;
@@ -449,14 +453,20 @@ function liveUpdateAll() {
   if (!today?.startTime || today.endTime) return;
 
   // 오늘 현재 순근무
-  const gross   = calcGrossHours(today.startTime, formatTime(new Date()));
-  const net     = applyBreak(gross);
-  const extra   = today.leaveType === '반차' ? 4 : 0;
-  const todayNet = Math.max(0, net + extra);
+  const gross      = calcGrossHours(today.startTime, formatTime(new Date()));
+  const net        = applyBreak(gross);
+  const extra      = today.leaveType === '반차' ? 4 : 0;
+  const inBreak    = isBreakZone(gross);
+  const todayNet   = Math.max(0, net + extra);
+  const displayNet = Math.max(0, (inBreak ? 8 : net) + extra);
 
-  // 오늘 카드 순근무 업데이트
+  // 오늘 카드 순근무 업데이트 (휴게 구간 8h freeze)
   const netEl = document.getElementById('live-net');
-  if (netEl) netEl.textContent = fmtHours(todayNet);
+  if (netEl) netEl.textContent = fmtHours(displayNet);
+
+  // 휴게시간 badge 토글
+  const breakEl = document.getElementById('live-break');
+  if (breakEl) breakEl.style.display = inBreak ? '' : 'none';
 
   // 주간 카드 오늘 행 시간 업데이트
   const dayHoursEl = document.getElementById('live-day-hours');
@@ -594,15 +604,18 @@ function calcGrossHours(start, end) {
   return ((eh * 60 + em) - (sh * 60 + sm)) / 60;
 }
 
-// 근로기준법 제54조 (역전 현상 방지)
-// 4h/8h 순근무 달성 후 각 30분 휴게 구간 동안 net 고정
+// 근로기준법 제54조 휴게시간 공제 (Amaranth 기준)
+// 8.5h 이상 → 1h 공제, 4.5h~8.5h → 30분 공제
 function applyBreak(gross) {
   if (gross <= 0)   return 0;
-  if (gross >= 9)   return gross - 1;   // P5: 9h 이상 → 1h 공제
-  if (gross >= 8.5) return 8;           // P4: 8h 순근무 달성 후 30분 휴게 구간 → 8h 고정
-  if (gross > 4.5)  return gross - 0.5; // P3: 4.5h~8.5h → 30분 공제
-  if (gross > 4)    return 4;           // P2: 4h 순근무 달성 후 30분 휴게 구간 → 4h 고정
-  return gross;                          // P1: 4h 이하 → 공제 없음
+  if (gross >= 8.5) return gross - 1;   // 8.5h 이상 → 1h 공제
+  if (gross > 4.5)  return gross - 0.5; // P3: 30분 공제
+  if (gross > 4)    return 4;           // P2: 4h 고정 (휴게 구간)
+  return gross;                          // P1: 공제 없음
+}
+
+function isBreakZone(gross) {
+  return gross >= 8.5 && gross < 9.0;
 }
 
 function fmtHours(h) {
