@@ -1,14 +1,13 @@
-# C.D.Chapter 콘텐츠 가이드
+# 콘텐츠 가이드
 
-> C.D.Chapter(Customer Decision Chapter) 콘텐츠 작성 글로벌 가이드입니다.
+> 멋쟁이사자처럼 MKT Div 콘텐츠 작성 글로벌 가이드입니다.
 > 모든 팀원이 이 기준을 공통으로 사용합니다.
 
 ## 가이드 목록
 
 | 파일 | 내용 |
 |---|---|
-| [01_브랜드_가이드.md](./01_브랜드_가이드.md) | 보이스 & 톤 / 공통 용어사전 |
-| [02_인블로그_작성_가이드.md](./02_인블로그_작성_가이드.md) | 블로그 작성 기준 / SEO 템플릿 |
+| [SEO_인터뷰_콘텐츠_템플릿.md](./SEO_인터뷰_콘텐츠_템플릿.md) | SEO 최적화 기반 인터뷰 콘텐츠 템플릿 구조화안 |
 
 ---
 
@@ -16,7 +15,7 @@
 
 ### 클론 (처음 시작)
 ```bash
-git clone https://github.com/likelion-cdc/marketing-asset.git
+git clone https://github.com/LIKELION-MKTDiv/marketing-asset.git
 ```
 
 ### 글로벌 가이드 업데이트 받기
