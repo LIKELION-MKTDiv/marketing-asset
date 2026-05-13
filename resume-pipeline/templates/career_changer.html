@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block extra_style %}
+/* career_changer: 2단 컬럼 + 전환 하이라이트 */
+{% endblock %}
+
+{% block content %}
+<!-- 전환 하이라이트 -->
+{% if transition_highlight %}
+<div class="transition-highlight">
+    <div class="transition-highlight-title">커리어 전환 하이라이트</div>
+    <div>{{ transition_highlight | safe }}</div>
+</div>
+{% endif %}
+
+<div class="two-column">
+    <!-- 좌측: 기술스택 + 역량 요약 -->
+    <div class="col-left">
+        {% for section in resume.sections if section.section_id in ['tech_stack', 'existing_competencies', 'soft_skills'] %}
+        <div class="section">
+            <div class="section-title">
+                {{ section.title }}
+                {% if section.is_projected %}<span class="projected-badge">수료 후 예상</span>{% endif %}
+            </div>
+            <div class="section-content">
+                {{ section.content | safe }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 우측: 경력 + 교육 + 프로젝트 -->
+    <div class="col-right">
+        {% for section in resume.sections if section.section_id not in ['tech_stack', 'existing_competencies', 'soft_skills'] %}
+        <div class="section">
+            <div class="section-title">
+                {{ section.title }}
+                {% if section.is_projected %}<span class="projected-badge">수료 후 예상</span>{% endif %}
+            </div>
+            <div class="section-content">
+                {{ section.content | safe }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

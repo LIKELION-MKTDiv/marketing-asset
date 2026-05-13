@@ -1,0 +1,230 @@
+/* ── Pretendard 폰트 ── */
+@font-face {
+    font-family: "Pretendard";
+    src: url("fonts/Pretendard-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("fonts/Pretendard-Medium.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("fonts/Pretendard-SemiBold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("fonts/Pretendard-Bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("fonts/Pretendard-ExtraBold.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+
+@page {
+    size: A4;
+    margin: 20mm;
+
+    @bottom-center {
+        content: "본 이력서는 부트캠프 수료 후 예상 역량을 기반으로 작성되었습니다. | 멋쟁이사자처럼";
+        font-size: 7pt;
+        color: #999;
+        font-family: "Pretendard", sans-serif;
+    }
+}
+
+:root {
+    --brand-primary: #FF7816;
+    --brand-dark: #333333;
+    --brand-light: #FFF5ED;
+    --text-primary: #1A1A1A;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+    --border-light: #E5E5E5;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Pretendard", "Malgun Gothic", sans-serif;
+    font-size: 10pt;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+/* ── 헤더 ── */
+.header {
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid var(--brand-primary);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+.header-logo {
+    width: 48px;
+    height: 48px;
+    margin-right: 14px;
+}
+
+.header-info {
+    flex: 1;
+}
+
+.header-name {
+    font-size: 20pt;
+    font-weight: 700;
+    color: var(--brand-dark);
+    margin-bottom: 2px;
+}
+
+.header-headline {
+    font-size: 11pt;
+    color: var(--brand-primary);
+    font-weight: 500;
+}
+
+.header-contact {
+    text-align: right;
+    font-size: 9pt;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* ── 부트캠프 배지 ── */
+.bootcamp-badge {
+    background: var(--brand-light);
+    border-left: 4px solid var(--brand-primary);
+    padding: 8px 14px;
+    margin-bottom: 18px;
+    font-size: 9.5pt;
+    color: var(--brand-dark);
+}
+
+.bootcamp-badge strong {
+    color: var(--brand-primary);
+}
+
+/* ── 섹션 공통 ── */
+.section {
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+}
+
+.section-title {
+    font-size: 12pt;
+    font-weight: 700;
+    color: var(--brand-dark);
+    border-bottom: 1.5px solid var(--brand-primary);
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+}
+
+.section-content {
+    font-size: 10pt;
+    color: var(--text-primary);
+    line-height: 1.7;
+}
+
+.section-content ul {
+    padding-left: 18px;
+    margin-top: 4px;
+}
+
+.section-content li {
+    margin-bottom: 3px;
+}
+
+/* ── 예상 역량 표시 ── */
+.projected-badge {
+    display: inline-block;
+    background: var(--brand-light);
+    color: var(--brand-primary);
+    font-size: 7.5pt;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ── 기술 스택 태그 ── */
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.skill-tag {
+    display: inline-block;
+    background: var(--border-light);
+    color: var(--text-primary);
+    font-size: 9pt;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.skill-tag.projected {
+    background: var(--brand-light);
+    color: var(--brand-primary);
+    border: 1px solid var(--brand-primary);
+}
+
+/* ── 2단 컬럼 (career_changer / experienced) ── */
+.two-column {
+    display: flex;
+    gap: 24px;
+}
+
+.col-left {
+    width: 35%;
+}
+
+.col-right {
+    width: 65%;
+}
+
+/* ── 커리어 목표 ── */
+.career-objective {
+    background: #FAFAFA;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 10pt;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+/* ── 전환 하이라이트 (career_changer 전용) ── */
+.transition-highlight {
+    background: var(--brand-light);
+    border: 1px solid var(--brand-primary);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+}
+
+.transition-highlight-title {
+    font-size: 10pt;
+    font-weight: 700;
+    color: var(--brand-primary);
+    margin-bottom: 4px;
+}

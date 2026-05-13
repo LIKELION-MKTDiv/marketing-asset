@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block extra_style %}
+/* student: 단일 컬럼, 학력·프로젝트 강조 */
+{% endblock %}
+
+{% block content %}
+{% for section in resume.sections %}
+<div class="section">
+    <div class="section-title">
+        {{ section.title }}
+        {% if section.is_projected %}<span class="projected-badge">수료 후 예상</span>{% endif %}
+    </div>
+    <div class="section-content">
+        {{ section.content | safe }}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

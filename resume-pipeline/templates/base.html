@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        {% block extra_style %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div class="header">
+        {% if logo_path %}
+        <img class="header-logo" src="{{ logo_path }}" alt="멋쟁이사자처럼">
+        {% endif %}
+        <div class="header-info">
+            <div class="header-name">{{ personal_info.name }}</div>
+            <div class="header-headline">{{ resume.headline }}</div>
+        </div>
+        <div class="header-contact">
+            {% if personal_info.email %}{{ personal_info.email }}<br>{% endif %}
+            {% if personal_info.phone %}{{ personal_info.phone }}{% endif %}
+        </div>
+    </div>
+
+    <!-- 부트캠프 배지 -->
+    <div class="bootcamp-badge">
+        <strong>{{ bootcamp_info.bootcamp_name }}</strong>
+        {% if bootcamp_info.track %} · {{ bootcamp_info.track }}{% endif %}
+        {% if bootcamp_info.duration %} · {{ bootcamp_info.duration }}{% endif %}
+        {% if resume.bootcamp_highlight %}<br>{{ resume.bootcamp_highlight }}{% endif %}
+    </div>
+
+    <!-- 커리어 목표 -->
+    {% if resume.career_objective %}
+    <div class="career-objective">
+        {{ resume.career_objective }}
+    </div>
+    {% endif %}
+
+    <!-- 본문 -->
+    {% block content %}
+    {% for section in resume.sections %}
+    <div class="section">
+        <div class="section-title">
+            {{ section.title }}
+            {% if section.is_projected %}
+            <span class="projected-badge">수료 후 예상</span>
+            {% endif %}
+        </div>
+        <div class="section-content">
+            {{ section.content | safe }}
+        </div>
+    </div>
+    {% endfor %}
+    {% endblock %}
+</body>
+</html>
