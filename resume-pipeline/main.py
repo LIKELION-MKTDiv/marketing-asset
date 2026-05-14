@@ -82,12 +82,14 @@ def main() -> None:
             if col not in (personal_info_mapping.values()):
                 essay_columns.append(str(col))
 
-    # 지원 완료자 + 자소서 작성자만 필터링
+    # 지원 완료자 + 검토전 + 자소서 작성자만 필터링
     status_col = None
+    result_col = None
     for col in columns:
         if "지원상태" in str(col):
             status_col = col
-            break
+        if "합불상태" in str(col):
+            result_col = col
 
     if status_col:
         before = len(applications_df)
@@ -95,6 +97,13 @@ def main() -> None:
             applications_df[status_col].astype(str).str.strip() == "지원완료"
         ]
         print(f"  지원상태 필터: {before}명 → {len(applications_df)}명 (지원완료만)")
+
+    if result_col:
+        before = len(applications_df)
+        applications_df = applications_df[
+            applications_df[result_col].astype(str).str.strip() == "검토전"
+        ]
+        print(f"  합불상태 필터: {before}명 → {len(applications_df)}명 (검토전만)")
 
     if essay_columns:
         before = len(applications_df)

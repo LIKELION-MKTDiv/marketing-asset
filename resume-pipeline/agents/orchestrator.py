@@ -11,7 +11,8 @@ from typing import Any
 from config import OUTPUTS_DIR
 from utils.schema import to_json
 
-from agents import extractor, profiler, resume_writer, template_renderer, pdf_generator
+from agents import extractor, profiler, resume_writer
+from generate_future_resume import render_md, render_html
 
 
 def run_single(
@@ -22,7 +23,7 @@ def run_single(
     output_dir: Path,
     log_lines: list[str],
 ) -> dict[str, Any]:
-    """단일 지원자에 대해 5-Phase 파이프라인 실행."""
+    """단일 지원자에 대해 파이프라인 실행 → 미래이력서(MD+HTML) 생성."""
     t0 = time.time()
     intermediate_dir = output_dir / "intermediate"
     intermediate_dir.mkdir(parents=True, exist_ok=True)
@@ -49,19 +50,21 @@ def run_single(
     _save_intermediate(intermediate_dir / f"{name}_3_content.json", resume_content.to_dict())
     _log(log_lines, f"Phase 3 완료: {len(resume_content.sections)}개 섹션 생성")
 
-    # Phase 4: Markdown 렌더링
-    _log(log_lines, f"Phase 4: {name} Markdown 렌더링 시작")
-    md_text = template_renderer.run(
-        resume_content, extracted.personal_info, extracted.bootcamp_info
-    )
-    md_preview_path = intermediate_dir / f"{name}_4_rendered.md"
-    md_preview_path.write_text(md_text, encoding="utf-8")
-    _log(log_lines, f"Phase 4 완료: {md_preview_path}")
+    # Phase 4: 미래이력서 MD + HTML 생성
+    _log(log_lines, f"Phase 4: {name} 미래이력서 렌더링 시작")
+    ext_dict = extracted.to_dict()
+    prof_dict = profile.to_dict()
+    content_dict = resume_content.to_dict()
 
-    # Phase 5: MD 파일 저장
-    _log(log_lines, f"Phase 5: {name} MD 파일 저장 시작")
-    md_path = pdf_generator.run(md_text, output_dir, name)
-    _log(log_lines, f"Phase 5 완료: {md_path}")
+    md_text = render_md(ext_dict, prof_dict, content_dict)
+    md_path = output_dir / f"{name}_미래이력서.md"
+    md_path.write_text(md_text, encoding="utf-8")
+
+    html_text = render_html(ext_dict, prof_dict, content_dict)
+    html_path = output_dir / f"{name}_미래이력서.html"
+    html_path.write_text(html_text, encoding="utf-8")
+
+    _log(log_lines, f"Phase 4 완료: {md_path.name} + {html_path.name}")
 
     elapsed = time.time() - t0
     _log(log_lines, f"{name} 전체 완료 ({elapsed:.1f}초)")
@@ -70,10 +73,29 @@ def run_single(
         "name": name,
         "applicant_type": profile.applicant_type,
         "md_path": str(md_path),
+        "html_path": str(html_path),
         "sections_count": len(resume_content.sections),
         "elapsed_seconds": round(elapsed, 1),
         "success": True,
     }
+
+
+def _find_already_generated(output_base: Path) -> set[str]:
+    """outputs/ 하위 전체 날짜 디렉토리를 스캔하여 이미 미래이력서가 생성된 이름 목록 반환."""
+    generated: set[str] = set()
+    if not output_base.exists():
+        return generated
+    for date_dir in output_base.iterdir():
+        if not date_dir.is_dir():
+            continue
+        for f in date_dir.iterdir():
+            if f.is_file() and (
+                f.name.endswith("_미래이력서.md")
+                or f.name.endswith("_미래이력서.html")
+            ):
+                name = f.name.rsplit("_", 1)[0]
+                generated.add(name)
+    return generated
 
 
 def run_batch(
@@ -85,18 +107,42 @@ def run_batch(
 ) -> Path:
     """배치 처리: 전체 지원자에 대해 파이프라인 실행."""
     run_date = datetime.now().strftime("%Y-%m-%d")
-    output_dir = (output_base or OUTPUTS_DIR) / run_date
+    base = output_base or OUTPUTS_DIR
+    output_dir = base / run_date
     output_dir.mkdir(parents=True, exist_ok=True)
 
     log_lines: list[str] = []
     _log(log_lines, f"=== 배치 시작: {len(applicants)}명 ===")
     _log(log_lines, f"출력 디렉토리: {output_dir}")
 
+    # 중복 생성 방지: 이미 생성된 이름 스캔
+    already_generated = _find_already_generated(base)
+    if already_generated:
+        _log(log_lines, f"이미 생성 완료된 이력서: {len(already_generated)}명 — {', '.join(sorted(already_generated))}")
+
     results: list[dict[str, Any]] = []
     success_count = 0
     fail_count = 0
+    skip_count = 0
 
     for i, applicant_raw in enumerate(applicants, 1):
+        # 이름 추출 후 중복 체크
+        name_col = personal_info_mapping.get("name")
+        applicant_name = None
+        if name_col and name_col in applicant_raw:
+            applicant_name = str(applicant_raw[name_col]).strip()
+
+        if applicant_name and applicant_name in already_generated:
+            _log(log_lines, f"[SKIP] {applicant_name} — 이미 생성된 이력서 존재")
+            print(f"\n[{i}/{len(applicants)}] {applicant_name} — 스킵 (이미 생성됨)")
+            results.append({
+                "name": applicant_name,
+                "success": True,
+                "skipped": True,
+            })
+            skip_count += 1
+            continue
+
         print(f"\n{'='*60}")
         print(f"[{i}/{len(applicants)}] 처리 중...")
         print(f"{'='*60}")
@@ -112,10 +158,7 @@ def run_batch(
             print(f"  -> 완료: {result['name']} ({result['elapsed_seconds']}초)")
 
         except Exception as e:
-            name = "알 수 없음"
-            name_col = personal_info_mapping.get("name")
-            if name_col and name_col in applicant_raw:
-                name = str(applicant_raw[name_col])
+            name = applicant_name or "알 수 없음"
 
             error_msg = f"{name}: {type(e).__name__}: {e}"
             _log(log_lines, f"[ERROR] {error_msg}")
@@ -133,6 +176,7 @@ def run_batch(
         "run_date": run_date,
         "total": len(applicants),
         "success": success_count,
+        "skipped": skip_count,
         "failed": fail_count,
         "results": results,
     }
@@ -146,12 +190,15 @@ def run_batch(
 
     # 활용법 가이드 생성
     if success_count > 0:
-        _generate_usage_guide(output_dir)
-        _log(log_lines, "활용법 가이드 생성 완료: 역량이력서_활용가이드.txt")
+        from generate_future_resume import generate_guide
+        guide = generate_guide()
+        guide_path = output_dir / "미래이력서_활용가이드.txt"
+        guide_path.write_text(guide, encoding="utf-8")
+        _log(log_lines, "활용법 가이드 생성 완료: 미래이력서_활용가이드.txt")
 
-    _log(log_lines, f"=== 배치 완료: 성공 {success_count} / 실패 {fail_count} ===")
+    _log(log_lines, f"=== 배치 완료: 성공 {success_count} / 스킵 {skip_count} / 실패 {fail_count} ===")
     print(f"\n{'='*60}")
-    print(f"배치 완료: 성공 {success_count}건, 실패 {fail_count}건")
+    print(f"배치 완료: 성공 {success_count}건, 스킵(중복) {skip_count}건, 실패 {fail_count}건")
     print(f"출력: {output_dir}")
     print(f"{'='*60}")
 

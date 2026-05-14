@@ -167,7 +167,8 @@ def render_html(ext: dict, prof: dict, content: dict) -> str:
                 result_lines.append('<table>')
                 for i, row in enumerate(table_rows):
                     tag = "th" if i == 0 else "td"
-                    result_lines.append("<tr>" + "".join(f"<{tag}>{c}</{tag}>" for c in row) + "</tr>")
+                    converted = [re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", c) for c in row]
+                    result_lines.append("<tr>" + "".join(f"<{tag}>{c}</{tag}>" for c in converted) + "</tr>")
                 result_lines.append("</table>")
                 in_table = False
                 table_rows = []
@@ -203,7 +204,8 @@ def render_html(ext: dict, prof: dict, content: dict) -> str:
             result_lines.append('<table>')
             for i, row in enumerate(table_rows):
                 tag = "th" if i == 0 else "td"
-                result_lines.append("<tr>" + "".join(f"<{tag}>{c}</{tag}>" for c in row) + "</tr>")
+                converted = [re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", c) for c in row]
+                result_lines.append("<tr>" + "".join(f"<{tag}>{c}</{tag}>" for c in converted) + "</tr>")
             result_lines.append("</table>")
 
         return "\n".join(result_lines)
@@ -617,15 +619,74 @@ Likelion | 멋쟁이사자처럼
 """
 
 
+def _find_eligible_names(outputs_base: Path) -> list[tuple[str, Path]]:
+    """outputs/ 전체를 스캔하여 Phase 3 완료(_3_content.json 존재) &&
+    미래이력서 미생성인 이름과 intermediate 경로를 반환."""
+    # 1) intermediate에서 _3_content.json 보유 이름 수집
+    candidates: dict[str, Path] = {}  # name -> intermediate dir
+    for date_dir in sorted(outputs_base.iterdir()):
+        inter = date_dir / "intermediate"
+        if not inter.is_dir():
+            continue
+        for f in inter.iterdir():
+            if f.name.endswith("_3_content.json"):
+                name = f.name.replace("_3_content.json", "")
+                candidates[name] = inter  # 최신 날짜가 덮어씀
+
+    # 2) 이미 미래이력서가 존재하는 이름 제외
+    already: set[str] = set()
+    for date_dir in outputs_base.iterdir():
+        if not date_dir.is_dir():
+            continue
+        for f in date_dir.iterdir():
+            if f.name.endswith("_미래이력서.html") or f.name.endswith("_미래이력서.md"):
+                already.add(f.name.rsplit("_", 1)[0])
+
+    eligible = [(n, d) for n, d in candidates.items() if n not in already]
+    return eligible
+
+
 def main():
-    data_dir = Path("outputs/2026-05-11/intermediate")
+    import argparse
+
+    parser = argparse.ArgumentParser(description="미래이력서 생성 (MD + HTML)")
+    parser.add_argument("--data-dir", default=None, help="intermediate 디렉토리 경로 (미지정 시 자동 스캔)")
+    parser.add_argument("--names", nargs="*", default=None, help="생성할 이름 목록 (미지정 시 미생성 대상 자동 탐색)")
+    parser.add_argument("--output-dir", default=None, help="출력 디렉토리 (미지정 시 outputs/오늘날짜)")
+    args = parser.parse_args()
+
     today = datetime.now().strftime("%Y-%m-%d")
-    output_dir = Path(f"outputs/{today}")
+    outputs_base = Path("outputs")
+    output_dir = Path(args.output_dir) if args.output_dir else outputs_base / today
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    names = ["김지수", "변재우"]
+    # 대상 결정
+    if args.names and args.data_dir:
+        # 명시 지정 모드
+        targets = [(n, Path(args.data_dir)) for n in args.names]
+    elif args.names:
+        # 이름만 지정 → intermediate 자동 탐색
+        candidates: dict[str, Path] = {}
+        for date_dir in sorted(outputs_base.iterdir()):
+            inter = date_dir / "intermediate"
+            if not inter.is_dir():
+                continue
+            for f in inter.iterdir():
+                if f.name.endswith("_3_content.json"):
+                    name = f.name.replace("_3_content.json", "")
+                    candidates[name] = inter
+        targets = [(n, candidates[n]) for n in args.names if n in candidates]
+    else:
+        # 자동 모드: 미생성 대상 탐색
+        targets = _find_eligible_names(outputs_base)
 
-    for name in names:
+    if not targets:
+        print("미래이력서 생성 대상이 없습니다 (모두 생성 완료 또는 intermediate 데이터 없음).")
+        return
+
+    print(f"생성 대상: {len(targets)}명 — {', '.join(n for n, _ in targets)}")
+
+    for name, data_dir in targets:
         print(f"\n{'='*50}")
         print(f" {name} 미래이력서 생성")
         print(f"{'='*50}")
