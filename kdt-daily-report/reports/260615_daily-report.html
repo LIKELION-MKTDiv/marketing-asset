@@ -1,0 +1,277 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KDT 모객현황 데일리 리포트 · 260615</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
+<style>
+:root{--bg:#0f1115;--card:#181b22;--card2:#1f232c;--line:#2a2f3a;--txt:#e6e8ec;--sub:#9aa3b2;--accent:#ff7a45;--blue:#4dabf7;--green:#51cf66;--red:#ff6b6b;--yellow:#ffd43b;--purple:#b197fc}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;line-height:1.5;padding:28px 20px;max-width:1180px;margin:0 auto}
+header{border-bottom:2px solid var(--accent);padding-bottom:14px}
+h1{font-size:23px;font-weight:800;letter-spacing:-.5px}
+.meta{color:var(--sub);font-size:13px;margin-top:6px}
+.tag{display:inline-block;background:var(--card2);color:var(--sub);font-size:11px;padding:2px 8px;border-radius:10px;margin-right:6px}
+.tabs{display:flex;gap:6px;margin:18px 0 22px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:10;border-bottom:1px solid var(--line)}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--sub);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;transition:.15s}
+.tab:hover{color:var(--txt)}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.panel{display:none}.panel.active{display:block}
+h2{font-size:17px;margin:30px 0 12px;padding-left:10px;border-left:4px solid var(--accent)}
+h3{font-size:13.5px;color:var(--sub);margin:0 0 8px;font-weight:600}
+.grid{display:grid;gap:14px}
+.kpi-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi .label{font-size:12px;color:var(--sub)}.kpi .val{font-size:26px;font-weight:800;margin-top:4px}.kpi .sub{font-size:12px;color:var(--sub);margin-top:2px}
+.acc{color:var(--accent)}.up{color:var(--green)}.down{color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+th,td{padding:9px 11px;text-align:center;border-bottom:1px solid var(--line)}
+th{background:var(--card2);color:var(--sub);font-weight:600;font-size:12px}
+td.name{text-align:left;font-weight:700}
+.two{grid-template-columns:1fr 1fr}@media(max-width:760px){.two{grid-template-columns:1fr}}
+canvas{max-height:300px}
+.pill{font-size:11px;padding:2px 7px;border-radius:8px;font-weight:700}
+.pill.g{background:rgba(81,207,102,.15);color:var(--green)}.pill.r{background:rgba(255,107,107,.15);color:var(--red)}
+.insight{background:var(--card2);border-left:3px solid var(--blue);padding:11px 15px;border-radius:8px;margin-bottom:10px;font-size:13.5px}
+.insight.warn{border-left-color:var(--yellow)}.insight.alert{border-left-color:var(--red)}
+.insight b{color:var(--accent)}.insight .h{font-weight:800;display:block;margin-bottom:3px;color:var(--txt)}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--sub);font-size:12px}
+.barmini{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+.barmini .t{width:78px;color:var(--sub);text-align:right;flex-shrink:0}
+.barmini .bar{flex:1;height:18px;background:var(--card2);border-radius:5px;overflow:hidden;position:relative}
+.barmini .bar>span{display:block;height:100%}
+.barmini .v{width:96px;flex-shrink:0;font-size:11px;color:var(--sub)}
+.comment-card{border-left:3px solid var(--yellow);background:rgba(255,212,59,.05)}
+.comments{margin:4px 0 0;padding-left:0;list-style:none}
+.comments li{position:relative;padding:8px 10px 8px 26px;font-size:13.5px;border-bottom:1px solid var(--line);line-height:1.55}
+.comments li:last-child{border-bottom:none}
+.comments li::before{content:'▹';position:absolute;left:6px;top:8px;color:var(--yellow);font-weight:700}
+.comments b{color:var(--accent)}
+</style></head><body>
+<header><h1>📊 KDT 모객현황 데일리 리포트</h1>
+<div class="meta"><span class="tag">기준일 2026-06-15</span><span class="tag">소스: kdt 지원서 CSV 2종</span><span class="tag">내부직원·테스트 제외</span><span class="tag">TEST 출력본</span></div>
+</header>
+<div class="tabs" id="tabs"></div>
+<div class="panel active" id="p0">
+<h2>전체 요약</h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">총 지원시작</div><div class="val">509</div><div class="sub">AI+ NLP 5기 352 · 백엔드 자바 26기 157</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">143</div><div class="sub">완료전환 28.1%</div></div>
+  <div class="card kpi"><div class="label">미완료(지원중)</div><div class="val down">356</div><div class="sub">전체의 70% 적체</div></div>
+  <div class="card kpi"><div class="label">내배카 보유율</div><div class="val">47.7%</div><div class="sub">유효응답 262명</div></div>
+  <div class="card kpi"><div class="label">대상 캠프</div><div class="val">2</div><div class="sub">개</div></div>
+</div>
+<h2>캠프별 퍼널 비교</h2>
+<div class="card"><table>
+<thead><tr><th>캠프</th><th>지원시작</th><th>지원중</th><th>지원완료</th><th>완료전환율</th><th>유효취소</th><th>내배카 보유율</th></tr></thead><tbody>
+<tr><td class='name'>AI+ NLP 5기</td><td>352</td><td>250</td><td><b class='acc'>97</b></td><td><span class='pill r'>27.6%</span></td><td>5 (1.4%)</td><td>45.5%</td></tr>
+<tr><td class='name'>백엔드 자바 26기</td><td>157</td><td>106</td><td><b class='acc'>46</b></td><td><span class='pill g'>29.3%</span></td><td>5 (3.2%)</td><td>53.5%</td></tr>
+</tbody></table></div>
+<h2>캠프별 비교 차트</h2>
+<div class="grid two">
+  <div class="card"><h3>지원시작 vs 완료 (명)</h3><canvas id="sum_funnel"></canvas></div>
+  <div class="card"><h3>완료전환율 · 내배카 보유율 (%)</h3><canvas id="sum_rate"></canvas></div>
+</div>
+<h2>지원중 유저 만나이 분포 — 캠프 비교 (박스플롯)</h2>
+<div class="card"><h3>박스 = Q1~Q3 · 중앙선 = 중앙값 · 수염 = min~max</h3><canvas id="sum_box" style="max-height:300px"></canvas>
+<table style="margin-top:12px"><thead><tr><th>캠프</th><th>중앙값</th><th>평균</th><th>Q1</th><th>Q3</th><th>min</th><th>max</th><th>n</th></tr></thead><tbody>
+<tr><td class='name'>AI+ NLP 5기</td><td><b class='acc'>24.0</b></td><td>25.4</td><td>22.0</td><td>26.0</td><td>17.0</td><td>71.0</td><td>251</td></tr><tr><td class='name'>백엔드 자바 26기</td><td><b class='acc'>25.0</b></td><td>27.8</td><td>23.0</td><td>29.0</td><td>18.0</td><td>70.0</td><td>115</td></tr>
+</tbody></table></div>
+<h2>핵심 인사이트</h2>
+<div class="insight alert"><span class="h">🚨 미완료 적체가 최대 누수 — 전체 시작자의 70%가 지원중에서 멈춤</span>완료전환율 평균 28.1%. 트래픽은 유입되나 <b>지원서 완료</b> 단계 대규모 이탈. 완료유도 넛지 ROI 최상위 구간.</div>
+<div class="insight warn"><span class="h">⚠️ 내배카(국비) 의존도 캠프별 격차 — 최고 백엔드 자바 26기 53.5%</span>국비 지원 메시지 민감도가 캠프마다 다름 → 소구 메시지 분리 검토.</div>
+<div class="insight"><span class="h">💡 전환율 격차 — 백엔드 자바 26기 29.3% vs AI+ NLP 5기 27.6%</span>탭에서 캠프별 연령·성별·신분 교차분석으로 차이 원인 추적.</div>
+</div><div class="panel" id="p1">
+<h2>현황 점검 (인사이트)</h2>
+<div class="insight "><span class="h">🟢 AI+ NLP 5기 — 목표 임박 (80%+)</span>
+목표 지원완료 <b>120명</b> 중 <b>97명</b> 달성 · 목표 달성율 <b>80.8%</b> · 목표까지 <b>23명</b> 남음. 지원완료 달성율(시작 대비) 27.6% — 시작 352명 중 97명 완료.</div>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">목표 지원완료수</div><div class="val">120</div><div class="sub">설정 목표</div></div>
+  <div class="card kpi"><div class="label">지원완료수</div><div class="val acc">97</div><div class="sub">현재</div></div>
+  <div class="card kpi"><div class="label">지원완료 달성율</div><div class="val">27.6%</div><div class="sub">= 완료/시작</div></div>
+  <div class="card kpi"><div class="label">목표 달성율</div><div class="val up">80.8%</div><div class="sub">= 완료/목표</div></div>
+</div>
+<div class="card comment-card" style="margin-top:14px"><h3>🧐 점검 코멘트 (비판적 점검 포인트)</h3>
+<ul class="comments">
+<li><b>목표 달성율 80.8%를 절대값으로 판단하지 말 것</b> — 최근 7일 일평균 완료 5.1명 기준, 잔여 23명은 단순 추세로 약 <b>5일</b> 소요. 모집 잔여기간 안에 도달 가능한지 run-rate로 점검해야 함.</li><li><b>완료전환 27.6% vs 미완료 71%</b> — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.</li><li><b>대학(원)생 내배카 보유율 30.0%</b>(n=110) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.</li>
+</ul></div>
+<h2>AI+ NLP 5기 — 퍼널 요약</h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">지원시작</div><div class="val">352</div><div class="sub">원본 389행</div></div>
+  <div class="card kpi"><div class="label">지원중</div><div class="val down">250</div><div class="sub">미완료</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">97</div><div class="sub">전환 27.6%</div></div>
+  <div class="card kpi"><div class="label">유효취소</div><div class="val">5</div><div class="sub">1.4%</div></div>
+  <div class="card kpi"><div class="label">내배카 보유율</div><div class="val">45.5%</div><div class="sub">유효 191명</div></div>
+</div>
+<h2>일별 추이</h2>
+<div class="card"><h3>일별 신규 지원시작 (명)</h3><canvas id="p1_daily" style="max-height:240px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>누적 지원시작 vs 완료 (일자별 수치 표기)</h3><canvas id="p1_cum"></canvas></div>
+<h2>지원자 프로필</h2>
+<div class="card"><h3>연령대 분포 (지원중, 만나이) — 중앙값 24.0세 · 평균 25.4 · Q1~Q3 22.0~26.0 · 범위 17.0~71.0</h3>
+<div class='barmini'><span class='t'>~19세</span><span class='bar'><span style='width:3%;background:var(--blue)'></span></span><span class='v'>4명</span></div><div class='barmini'><span class='t'>20-24세</span><span class='bar'><span style='width:100%;background:var(--blue)'></span></span><span class='v'>139명</span></div><div class='barmini'><span class='t'>25-29세</span><span class='bar'><span style='width:55%;background:var(--blue)'></span></span><span class='v'>77명</span></div><div class='barmini'><span class='t'>30-34세</span><span class='bar'><span style='width:17%;background:var(--blue)'></span></span><span class='v'>23명</span></div><div class='barmini'><span class='t'>35-39세</span><span class='bar'><span style='width:1%;background:var(--blue)'></span></span><span class='v'>2명</span></div><div class='barmini'><span class='t'>40+세</span><span class='bar'><span style='width:4%;background:var(--blue)'></span></span><span class='v'>6명</span></div></div>
+<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) — 일자별 <span style="color:var(--red)">Q3</span>·<span style="color:var(--accent)">중앙</span>·<span style="color:var(--blue)">Q1</span> 표기 · 전체 중앙값 24.0세 점선</h3><canvas id="p1_box" style="max-height:360px"></canvas></div>
+<h2>내일배움카드 교차분석 (melt · cast)</h2>
+<div class="grid two">
+  <div class="card"><h3>① 연령대별 내배카 YES/NO + YES비율</h3><canvas id="p1_age"></canvas></div>
+  <div class="card"><h3>② 성별 내배카 YES/NO + YES비율</h3><canvas id="p1_gender"></canvas></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>③ 상태1(신분)별 내배카 보유율 — 공란은 '알 수 없음'</h3><canvas id="p1_status" style="max-height:260px"></canvas></div>
+<div class='grid two' style='margin-top:14px'><div class='card'><h3>연령대 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>~19</td><td>1</td><td>3</td><td>4</td><td><b class='acc'>25.0%</b></td></tr><tr><td class='name'>20-24</td><td>29</td><td>73</td><td>102</td><td><b class='acc'>28.4%</b></td></tr><tr><td class='name'>25-29</td><td>38</td><td>24</td><td>62</td><td><b class='acc'>61.3%</b></td></tr><tr><td class='name'>30-34</td><td>14</td><td>4</td><td>18</td><td><b class='acc'>77.8%</b></td></tr><tr><td class='name'>35-39</td><td>1</td><td>0</td><td>1</td><td><b class='acc'>100.0%</b></td></tr><tr><td class='name'>40+</td><td>4</td><td>0</td><td>4</td><td><b class='acc'>100.0%</b></td></tr></tbody></table></div><div class='card'><h3>성별 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>남성</td><td>42</td><td>59</td><td>101</td><td><b class='acc'>41.6%</b></td></tr><tr><td class='name'>여성</td><td>45</td><td>45</td><td>90</td><td><b class='acc'>50.0%</b></td></tr></tbody></table></div></div><div style='margin-top:14px'><div class='card'><h3>상태1(신분) × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>대학(원)생</td><td>33</td><td>77</td><td>110</td><td><b class='acc'>30.0%</b></td></tr><tr><td class='name'>취업준비생</td><td>39</td><td>17</td><td>56</td><td><b class='acc'>69.6%</b></td></tr><tr><td class='name'>직장인/프리랜서</td><td>7</td><td>2</td><td>9</td><td><b class='acc'>77.8%</b></td></tr><tr><td class='name'>기타</td><td>5</td><td>2</td><td>7</td><td><b class='acc'>71.4%</b></td></tr><tr><td class='name'>알 수 없음</td><td>3</td><td>6</td><td>9</td><td><b class='acc'>33.3%</b></td></tr></tbody></table></div></div></div>
+<div class="panel" id="p2">
+<h2>현황 점검 (인사이트)</h2>
+<div class="insight alert"><span class="h">🔴 백엔드 자바 26기 — 목표 미달 — 가속 필요</span>
+목표 지원완료 <b>105명</b> 중 <b>46명</b> 달성 · 목표 달성율 <b>43.8%</b> · 목표까지 <b>59명</b> 남음. 지원완료 달성율(시작 대비) 29.3% — 시작 157명 중 46명 완료.</div>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">목표 지원완료수</div><div class="val">105</div><div class="sub">설정 목표</div></div>
+  <div class="card kpi"><div class="label">지원완료수</div><div class="val acc">46</div><div class="sub">현재</div></div>
+  <div class="card kpi"><div class="label">지원완료 달성율</div><div class="val">29.3%</div><div class="sub">= 완료/시작</div></div>
+  <div class="card kpi"><div class="label">목표 달성율</div><div class="val down">43.8%</div><div class="sub">= 완료/목표</div></div>
+</div>
+<div class="card comment-card" style="margin-top:14px"><h3>🧐 점검 코멘트 (비판적 점검 포인트)</h3>
+<ul class="comments">
+<li><b>목표 달성율 43.8%를 절대값으로 판단하지 말 것</b> — 최근 7일 일평균 완료 2.3명 기준, 잔여 59명은 단순 추세로 약 <b>26일</b> 소요. 모집 잔여기간 안에 도달 가능한지 run-rate로 점검해야 함.</li><li><b>완료전환 29.3% vs 미완료 68%</b> — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.</li><li><b>최근 3일 신규 지원 급감</b>(일평균 8→3명) — 매체 예산 소진·타깃 피로 가능성. 채널별 잔여 예산·CPA를 우선 점검.</li>
+</ul></div>
+<h2>백엔드 자바 26기 — 퍼널 요약</h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">지원시작</div><div class="val">157</div><div class="sub">원본 171행</div></div>
+  <div class="card kpi"><div class="label">지원중</div><div class="val down">106</div><div class="sub">미완료</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">46</div><div class="sub">전환 29.3%</div></div>
+  <div class="card kpi"><div class="label">유효취소</div><div class="val">5</div><div class="sub">3.2%</div></div>
+  <div class="card kpi"><div class="label">내배카 보유율</div><div class="val">53.5%</div><div class="sub">유효 71명</div></div>
+</div>
+<h2>일별 추이</h2>
+<div class="card"><h3>일별 신규 지원시작 (명)</h3><canvas id="p2_daily" style="max-height:240px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>누적 지원시작 vs 완료 (일자별 수치 표기)</h3><canvas id="p2_cum"></canvas></div>
+<h2>지원자 프로필</h2>
+<div class="card"><h3>연령대 분포 (지원중, 만나이) — 중앙값 25.0세 · 평균 27.8 · Q1~Q3 23.0~29.0 · 범위 18.0~70.0</h3>
+<div class='barmini'><span class='t'>~19세</span><span class='bar'><span style='width:6%;background:var(--blue)'></span></span><span class='v'>3명</span></div><div class='barmini'><span class='t'>20-24세</span><span class='bar'><span style='width:100%;background:var(--blue)'></span></span><span class='v'>47명</span></div><div class='barmini'><span class='t'>25-29세</span><span class='bar'><span style='width:79%;background:var(--blue)'></span></span><span class='v'>37명</span></div><div class='barmini'><span class='t'>30-34세</span><span class='bar'><span style='width:38%;background:var(--blue)'></span></span><span class='v'>18명</span></div><div class='barmini'><span class='t'>35-39세</span><span class='bar'><span style='width:6%;background:var(--blue)'></span></span><span class='v'>3명</span></div><div class='barmini'><span class='t'>40+세</span><span class='bar'><span style='width:15%;background:var(--blue)'></span></span><span class='v'>7명</span></div></div>
+<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) — 일자별 <span style="color:var(--red)">Q3</span>·<span style="color:var(--accent)">중앙</span>·<span style="color:var(--blue)">Q1</span> 표기 · 전체 중앙값 25.0세 점선</h3><canvas id="p2_box" style="max-height:360px"></canvas></div>
+<h2>내일배움카드 교차분석 (melt · cast)</h2>
+<div class="grid two">
+  <div class="card"><h3>① 연령대별 내배카 YES/NO + YES비율</h3><canvas id="p2_age"></canvas></div>
+  <div class="card"><h3>② 성별 내배카 YES/NO + YES비율</h3><canvas id="p2_gender"></canvas></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>③ 상태1(신분)별 내배카 보유율 — 공란은 '알 수 없음'</h3><canvas id="p2_status" style="max-height:260px"></canvas></div>
+<div class='grid two' style='margin-top:14px'><div class='card'><h3>연령대 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>~19</td><td>0</td><td>1</td><td>1</td><td><b class='acc'>0.0%</b></td></tr><tr><td class='name'>20-24</td><td>11</td><td>8</td><td>19</td><td><b class='acc'>57.9%</b></td></tr><tr><td class='name'>25-29</td><td>19</td><td>19</td><td>38</td><td><b class='acc'>50.0%</b></td></tr><tr><td class='name'>30-34</td><td>6</td><td>2</td><td>8</td><td><b class='acc'>75.0%</b></td></tr><tr><td class='name'>35-39</td><td>1</td><td>1</td><td>2</td><td><b class='acc'>50.0%</b></td></tr><tr><td class='name'>40+</td><td>1</td><td>2</td><td>3</td><td><b class='acc'>33.3%</b></td></tr></tbody></table></div><div class='card'><h3>성별 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>남성</td><td>23</td><td>25</td><td>48</td><td><b class='acc'>47.9%</b></td></tr><tr><td class='name'>여성</td><td>15</td><td>8</td><td>23</td><td><b class='acc'>65.2%</b></td></tr></tbody></table></div></div><div style='margin-top:14px'><div class='card'><h3>상태1(신분) × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>대학(원)생</td><td>5</td><td>11</td><td>16</td><td><b class='acc'>31.2%</b></td></tr><tr><td class='name'>취업준비생</td><td>25</td><td>14</td><td>39</td><td><b class='acc'>64.1%</b></td></tr><tr><td class='name'>직장인/프리랜서</td><td>4</td><td>3</td><td>7</td><td><b class='acc'>57.1%</b></td></tr><tr><td class='name'>기타</td><td>3</td><td>4</td><td>7</td><td><b class='acc'>42.9%</b></td></tr><tr><td class='name'>알 수 없음</td><td>1</td><td>1</td><td>2</td><td><b class='acc'>50.0%</b></td></tr></tbody></table></div></div></div>
+
+<footer>생성 2026-06-15 10:33 · 소스 노트북 <code>kdt 모객현황 데이터 추출.ipynb</code> 로직 기반 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리<br>⚠️ TEST 출력본 — 지표 정의·디밸롭 협의 후 정식화 예정</footer>
+<script>
+const DATA = {"generated": "2026-06-15 10:33", "camps": [{"name": "AI+ NLP 5기", "file": "kdt-aiplus_nlp-5th_지원서_2026_06_15_09_00_09.csv", "total_rows": 389, "시작": 352, "지원중": 250, "완료": 97, "유효취소": 5, "conv": 27.6, "cancel_rate": 1.4, "nbc_tot": 191, "nbc_yes": 87, "nbc_rate": 45.5, "daily": {"2026-05-18": 14, "2026-05-19": 17, "2026-05-20": 12, "2026-05-21": 16, "2026-05-22": 10, "2026-05-23": 11, "2026-05-24": 5, "2026-05-25": 10, "2026-05-26": 18, "2026-05-27": 9, "2026-05-28": 8, "2026-05-29": 7, "2026-05-30": 15, "2026-05-31": 2, "2026-06-01": 13, "2026-06-02": 17, "2026-06-03": 15, "2026-06-04": 10, "2026-06-05": 13, "2026-06-06": 9, "2026-06-07": 10, "2026-06-08": 15, "2026-06-09": 15, "2026-06-10": 18, "2026-06-11": 17, "2026-06-12": 15, "2026-06-13": 12, "2026-06-14": 15, "2026-06-15": 4}, "comp_daily": {"2026-05-19": 2, "2026-05-20": 1, "2026-05-21": 3, "2026-05-22": 3, "2026-05-23": 5, "2026-05-24": 1, "2026-05-25": 3, "2026-05-26": 5, "2026-05-27": 1, "2026-05-28": 3, "2026-05-30": 4, "2026-05-31": 1, "2026-06-01": 4, "2026-06-02": 5, "2026-06-03": 2, "2026-06-04": 1, "2026-06-05": 9, "2026-06-06": 1, "2026-06-07": 4, "2026-06-08": 3, "2026-06-09": 5, "2026-06-10": 6, "2026-06-11": 7, "2026-06-12": 7, "2026-06-13": 3, "2026-06-14": 6, "2026-06-15": 2}, "age": {"median": 24.0, "q1": 22.0, "q3": 26.0, "min": 17.0, "max": 71.0, "mean": 25.4, "n": 251}, "age_band": {"~19": 4, "20-24": 139, "25-29": 77, "30-34": 23, "35-39": 2, "40+": 6}, "gender_pool": {"남성": 129, "여성": 118}, "by_age": [{"key": "~19", "yes": 1, "no": 3, "tot": 4, "yes_rate": 25.0}, {"key": "20-24", "yes": 29, "no": 73, "tot": 102, "yes_rate": 28.4}, {"key": "25-29", "yes": 38, "no": 24, "tot": 62, "yes_rate": 61.3}, {"key": "30-34", "yes": 14, "no": 4, "tot": 18, "yes_rate": 77.8}, {"key": "35-39", "yes": 1, "no": 0, "tot": 1, "yes_rate": 100.0}, {"key": "40+", "yes": 4, "no": 0, "tot": 4, "yes_rate": 100.0}], "by_gender": [{"key": "남성", "yes": 42, "no": 59, "tot": 101, "yes_rate": 41.6}, {"key": "여성", "yes": 45, "no": 45, "tot": 90, "yes_rate": 50.0}], "by_status": [{"key": "대학(원)생", "yes": 33, "no": 77, "tot": 110, "yes_rate": 30.0}, {"key": "취업준비생", "yes": 39, "no": 17, "tot": 56, "yes_rate": 69.6}, {"key": "직장인/프리랜서", "yes": 7, "no": 2, "tot": 9, "yes_rate": 77.8}, {"key": "기타", "yes": 5, "no": 2, "tot": 7, "yes_rate": 71.4}, {"key": "알 수 없음", "yes": 3, "no": 6, "tot": 9, "yes_rate": 33.3}], "age_by_day": {"2026-05-18": [20, 22, 27, 24, 26, 26, 25, 25, 23, 23], "2026-05-19": [24, 20, 22, 25, 28, 25, 20, 25, 20, 22, 28, 23, 29], "2026-05-20": [22, 22, 20, 22, 22, 22, 32, 26, 27, 24, 25], "2026-05-21": [23, 21, 21, 23, 33, 24, 21, 22, 22], "2026-05-22": [22, 26, 24, 34, 22, 24, 21], "2026-05-23": [21, 31, 28, 22], "2026-05-24": [24, 24, 23, 23], "2026-05-25": [27, 27, 31, 25, 23, 29, 21], "2026-05-26": [25, 26, 25, 24, 29, 27, 24, 25, 23, 29, 29], "2026-05-27": [25, 21, 31, 23, 23, 24, 36, 34], "2026-05-28": [22, 30, 32, 22], "2026-05-29": [22, 62, 69, 71, 30, 28, 23], "2026-05-30": [28, 34, 22, 18, 27, 22, 67, 20, 22], "2026-05-31": [22], "2026-06-01": [25, 22, 28, 25, 24, 24, 31, 31, 25], "2026-06-02": [23, 24, 20, 28, 22, 22, 24, 31, 23, 26, 27, 31, 31, 22], "2026-06-03": [26, 25, 25, 22, 23, 22, 23, 23, 28], "2026-06-04": [23, 23, 22, 24, 33, 27, 24, 22], "2026-06-05": [24, 41, 21, 26, 26, 27], "2026-06-06": [32, 26, 25, 17, 25, 29, 25], "2026-06-07": [21, 21, 22, 26, 23, 29, 20], "2026-06-08": [28, 23, 22, 23, 22, 25, 23, 27, 21, 27, 32, 23, 23], "2026-06-09": [19, 23, 22, 27, 24, 24, 25, 26, 23, 33, 22], "2026-06-10": [24, 22, 26, 22, 22, 25, 23, 23, 19, 45, 24, 23], "2026-06-11": [25, 26, 24, 26, 23, 22, 23, 23, 31, 22, 24, 22], "2026-06-12": [23, 21, 23, 22, 25, 23, 39, 25, 24, 20, 25, 22, 27], "2026-06-13": [34, 25, 23, 22, 25, 20, 24, 23, 23, 24], "2026-06-14": [23, 24, 20, 21, 22, 26, 24, 22, 25, 23, 32, 27], "2026-06-15": [25, 26, 20]}, "age_all": [25, 26, 20, 23, 24, 20, 21, 22, 26, 24, 22, 25, 23, 32, 27, 34, 25, 23, 22, 25, 20, 24, 23, 23, 24, 23, 21, 23, 22, 25, 23, 39, 25, 24, 20, 25, 22, 27, 25, 26, 24, 26, 23, 22, 23, 23, 31, 22, 24, 22, 24, 22, 26, 22, 22, 25, 23, 23, 19, 45, 24, 23, 19, 23, 22, 27, 24, 24, 25, 26, 23, 33, 22, 28, 23, 22, 23, 22, 25, 23, 27, 21, 27, 32, 23, 23, 21, 21, 22, 26, 23, 29, 20, 32, 26, 25, 17, 25, 29, 25, 24, 41, 21, 26, 26, 27, 23, 23, 22, 24, 33, 27, 24, 22, 26, 25, 25, 22, 23, 22, 23, 23, 28, 23, 24, 20, 28, 22, 22, 24, 31, 23, 26, 27, 31, 31, 22, 25, 22, 28, 25, 24, 24, 31, 31, 25, 22, 28, 34, 22, 18, 27, 22, 67, 20, 22, 22, 62, 69, 71, 30, 28, 23, 22, 30, 32, 22, 25, 21, 31, 23, 23, 24, 36, 34, 25, 26, 25, 24, 29, 27, 24, 25, 23, 29, 29, 27, 27, 31, 25, 23, 29, 21, 24, 24, 23, 23, 21, 31, 28, 22, 22, 26, 24, 34, 22, 24, 21, 23, 21, 21, 23, 33, 24, 21, 22, 22, 22, 22, 20, 22, 22, 22, 32, 26, 27, 24, 25, 24, 20, 22, 25, 28, 25, 20, 25, 20, 22, 28, 23, 29, 20, 22, 27, 24, 26, 26, 25, 25, 23, 23], "box_daily": [{"q1": 23.0, "median": 24.5, "q3": 25.8, "min": 20.0, "max": 27.0, "n": 10}, {"q1": 22.0, "median": 24.0, "q3": 25.0, "min": 20.0, "max": 29.0, "n": 13}, {"q1": 22.0, "median": 22.0, "q3": 25.5, "min": 20.0, "max": 32.0, "n": 11}, {"q1": 21.0, "median": 22.0, "q3": 23.0, "min": 21.0, "max": 33.0, "n": 9}, {"q1": 22.0, "median": 24.0, "q3": 25.0, "min": 21.0, "max": 34.0, "n": 7}, {"q1": 21.8, "median": 25.0, "q3": 28.8, "min": 21.0, "max": 31.0, "n": 4}, {"q1": 23.0, "median": 23.5, "q3": 24.0, "min": 23.0, "max": 24.0, "n": 4}, {"q1": 24.0, "median": 27.0, "q3": 28.0, "min": 21.0, "max": 31.0, "n": 7}, {"q1": 24.5, "median": 25.0, "q3": 28.0, "min": 23.0, "max": 29.0, "n": 11}, {"q1": 23.0, "median": 24.5, "q3": 31.8, "min": 21.0, "max": 36.0, "n": 8}, {"q1": 22.0, "median": 26.0, "q3": 30.5, "min": 22.0, "max": 32.0, "n": 4}, {"q1": 25.5, "median": 30.0, "q3": 65.5, "min": 22.0, "max": 71.0, "n": 7}, {"q1": 22.0, "median": 22.0, "q3": 28.0, "min": 18.0, "max": 67.0, "n": 9}, {"q1": 22.0, "median": 22.0, "q3": 22.0, "min": 22.0, "max": 22.0, "n": 1}, {"q1": 24.0, "median": 25.0, "q3": 28.0, "min": 22.0, "max": 31.0, "n": 9}, {"q1": 22.2, "median": 24.0, "q3": 27.8, "min": 20.0, "max": 31.0, "n": 14}, {"q1": 23.0, "median": 23.0, "q3": 25.0, "min": 22.0, "max": 28.0, "n": 9}, {"q1": 22.8, "median": 23.5, "q3": 24.8, "min": 22.0, "max": 33.0, "n": 8}, {"q1": 24.5, "median": 26.0, "q3": 26.8, "min": 21.0, "max": 41.0, "n": 6}, {"q1": 25.0, "median": 25.0, "q3": 27.5, "min": 17.0, "max": 32.0, "n": 7}, {"q1": 21.0, "median": 22.0, "q3": 24.5, "min": 20.0, "max": 29.0, "n": 7}, {"q1": 23.0, "median": 23.0, "q3": 27.0, "min": 21.0, "max": 32.0, "n": 13}, {"q1": 22.5, "median": 24.0, "q3": 25.5, "min": 19.0, "max": 33.0, "n": 11}, {"q1": 22.0, "median": 23.0, "q3": 24.2, "min": 19.0, "max": 45.0, "n": 12}, {"q1": 22.8, "median": 23.5, "q3": 25.2, "min": 22.0, "max": 31.0, "n": 12}, {"q1": 22.0, "median": 23.0, "q3": 25.0, "min": 20.0, "max": 39.0, "n": 13}, {"q1": 23.0, "median": 23.5, "q3": 24.8, "min": 20.0, "max": 34.0, "n": 10}, {"q1": 22.0, "median": 23.5, "q3": 25.2, "min": 20.0, "max": 32.0, "n": 12}, {"q1": 22.5, "median": 25.0, "q3": 25.5, "min": 20.0, "max": 26.0, "n": 3}], "target": 120, "ach_vs_start": 27.6, "ach_vs_target": 80.8}, {"name": "백엔드 자바 26기", "file": "kdt-backendj-26th_지원서_2026_06_15_08_59_51.csv", "total_rows": 171, "시작": 157, "지원중": 106, "완료": 46, "유효취소": 5, "conv": 29.3, "cancel_rate": 3.2, "nbc_tot": 71, "nbc_yes": 38, "nbc_rate": 53.5, "daily": {"2026-05-27": 11, "2026-05-28": 14, "2026-05-29": 8, "2026-05-30": 5, "2026-05-31": 3, "2026-06-01": 17, "2026-06-02": 12, "2026-06-03": 7, "2026-06-04": 14, "2026-06-05": 8, "2026-06-06": 7, "2026-06-07": 10, "2026-06-08": 9, "2026-06-09": 9, "2026-06-10": 4, "2026-06-11": 9, "2026-06-12": 7, "2026-06-13": 2, "2026-06-15": 1}, "comp_daily": {"2026-05-27": 3, "2026-05-28": 3, "2026-05-29": 3, "2026-05-30": 1, "2026-05-31": 1, "2026-06-01": 7, "2026-06-02": 5, "2026-06-03": 1, "2026-06-04": 6, "2026-06-05": 2, "2026-06-07": 1, "2026-06-08": 3, "2026-06-09": 2, "2026-06-11": 4, "2026-06-12": 3, "2026-06-13": 1}, "age": {"median": 25.0, "q1": 23.0, "q3": 29.0, "min": 18.0, "max": 70.0, "mean": 27.8, "n": 115}, "age_band": {"~19": 3, "20-24": 47, "25-29": 37, "30-34": 18, "35-39": 3, "40+": 7}, "gender_pool": {"남성": 73, "여성": 42}, "by_age": [{"key": "~19", "yes": 0, "no": 1, "tot": 1, "yes_rate": 0.0}, {"key": "20-24", "yes": 11, "no": 8, "tot": 19, "yes_rate": 57.9}, {"key": "25-29", "yes": 19, "no": 19, "tot": 38, "yes_rate": 50.0}, {"key": "30-34", "yes": 6, "no": 2, "tot": 8, "yes_rate": 75.0}, {"key": "35-39", "yes": 1, "no": 1, "tot": 2, "yes_rate": 50.0}, {"key": "40+", "yes": 1, "no": 2, "tot": 3, "yes_rate": 33.3}], "by_gender": [{"key": "남성", "yes": 23, "no": 25, "tot": 48, "yes_rate": 47.9}, {"key": "여성", "yes": 15, "no": 8, "tot": 23, "yes_rate": 65.2}], "by_status": [{"key": "대학(원)생", "yes": 5, "no": 11, "tot": 16, "yes_rate": 31.2}, {"key": "취업준비생", "yes": 25, "no": 14, "tot": 39, "yes_rate": 64.1}, {"key": "직장인/프리랜서", "yes": 4, "no": 3, "tot": 7, "yes_rate": 57.1}, {"key": "기타", "yes": 3, "no": 4, "tot": 7, "yes_rate": 42.9}, {"key": "알 수 없음", "yes": 1, "no": 1, "tot": 2, "yes_rate": 50.0}], "age_by_day": {"2026-05-27": [27, 29, 24, 21, 25, 33], "2026-05-28": [21, 26, 23, 22, 27, 22, 26, 20, 31, 23, 21], "2026-05-29": [25, 32, 23], "2026-05-30": [26, 58, 25, 29], "2026-05-31": [33, 24], "2026-06-01": [24, 23, 27, 56, 23, 23, 54, 23, 28], "2026-06-02": [26, 23, 21, 25, 22, 19, 33, 21], "2026-06-03": [29, 21, 20, 23, 29, 24, 23], "2026-06-04": [20, 26, 66, 70, 65, 62, 26, 26], "2026-06-05": [23, 25, 37, 30, 27, 24], "2026-06-06": [25, 30, 31, 23, 26, 21, 18], "2026-06-07": [31, 31, 26, 24, 23, 35, 22, 26, 21], "2026-06-08": [29, 28, 25, 21, 23, 31, 38], "2026-06-09": [19, 33, 33, 22, 24, 31, 32, 23], "2026-06-10": [23, 22, 24, 26], "2026-06-11": [26, 24, 26, 28, 21, 30], "2026-06-12": [25, 26, 25, 22, 32, 28, 23], "2026-06-13": [32, 27], "2026-06-15": [20]}, "age_all": [20, 32, 27, 25, 26, 25, 22, 32, 28, 23, 26, 24, 26, 28, 21, 30, 23, 22, 24, 26, 19, 33, 33, 22, 24, 31, 32, 23, 29, 28, 25, 21, 23, 31, 38, 31, 31, 26, 24, 23, 35, 22, 26, 21, 25, 30, 31, 23, 26, 21, 18, 23, 25, 37, 30, 27, 24, 20, 26, 66, 70, 65, 62, 26, 26, 29, 21, 20, 23, 29, 24, 23, 26, 23, 21, 25, 22, 19, 33, 21, 24, 23, 27, 56, 23, 23, 54, 23, 28, 33, 24, 26, 58, 25, 29, 25, 32, 23, 21, 26, 23, 22, 27, 22, 26, 20, 31, 23, 21, 27, 29, 24, 21, 25, 33], "box_daily": [{"q1": 24.2, "median": 26.0, "q3": 28.5, "min": 21.0, "max": 33.0, "n": 6}, {"q1": 21.5, "median": 23.0, "q3": 26.0, "min": 20.0, "max": 31.0, "n": 11}, {"q1": 24.0, "median": 25.0, "q3": 28.5, "min": 23.0, "max": 32.0, "n": 3}, {"q1": 25.8, "median": 27.5, "q3": 36.2, "min": 25.0, "max": 58.0, "n": 4}, {"q1": 26.2, "median": 28.5, "q3": 30.8, "min": 24.0, "max": 33.0, "n": 2}, {"q1": 23.0, "median": 24.0, "q3": 28.0, "min": 23.0, "max": 56.0, "n": 9}, {"q1": 21.0, "median": 22.5, "q3": 25.2, "min": 19.0, "max": 33.0, "n": 8}, {"q1": 22.0, "median": 23.0, "q3": 26.5, "min": 20.0, "max": 29.0, "n": 7}, {"q1": 26.0, "median": 44.0, "q3": 65.2, "min": 20.0, "max": 70.0, "n": 8}, {"q1": 24.2, "median": 26.0, "q3": 29.2, "min": 23.0, "max": 37.0, "n": 6}, {"q1": 22.0, "median": 25.0, "q3": 28.0, "min": 18.0, "max": 31.0, "n": 7}, {"q1": 23.0, "median": 26.0, "q3": 31.0, "min": 21.0, "max": 35.0, "n": 9}, {"q1": 24.0, "median": 28.0, "q3": 30.0, "min": 21.0, "max": 38.0, "n": 7}, {"q1": 22.8, "median": 27.5, "q3": 32.2, "min": 19.0, "max": 33.0, "n": 8}, {"q1": 22.8, "median": 23.5, "q3": 24.5, "min": 22.0, "max": 26.0, "n": 4}, {"q1": 24.5, "median": 26.0, "q3": 27.5, "min": 21.0, "max": 30.0, "n": 6}, {"q1": 24.0, "median": 25.0, "q3": 27.0, "min": 22.0, "max": 32.0, "n": 7}, {"q1": 28.2, "median": 29.5, "q3": 30.8, "min": 27.0, "max": 32.0, "n": 2}, {"q1": 20.0, "median": 20.0, "q3": 20.0, "min": 20.0, "max": 20.0, "n": 1}], "target": 105, "ach_vs_start": 29.3, "ach_vs_target": 43.8}]};
+Chart.register(ChartDataLabels);
+const C={txt:'#e6e8ec',sub:'#9aa3b2',acc:'#ff7a45',blue:'#4dabf7',green:'#51cf66',red:'#ff6b6b',yellow:'#ffd43b',purple:'#b197fc',line:'#2a2f3a'};
+function baseOpt(){return{responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{display:false}},scales:{x:{ticks:{color:C.sub,maxRotation:60,font:{size:9}},grid:{color:C.line}},y:{ticks:{color:C.sub},grid:{color:C.line},beginAtZero:true}}};}
+function cum(o){let k=Object.keys(o).sort(),s=0,r=[];for(const x of k){s+=o[x];r.push(s);}return {k,r};}
+
+// 탭
+const tabs=document.getElementById('tabs');
+const names=['Summary',...DATA.camps.map(c=>c.name)];
+names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.textContent=n;b.onclick=()=>sel(i);tabs.appendChild(b);});
+function sel(i){document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',j===i));}
+
+const charts=[];
+function mkLine(id,startO,compO){
+  const s=cum(startO),c=cum(compO);
+  const cData=s.k.map(d=>c.k.includes(d)?c.r[c.k.indexOf(d)]:null);
+  charts.push(new Chart(document.getElementById(id),{type:'line',data:{labels:s.k,datasets:[
+    {label:'누적 지원시작',data:s.r,borderColor:C.acc,backgroundColor:'transparent',tension:.25,pointRadius:2,pointBackgroundColor:C.acc,
+     datalabels:{display:true,align:'top',anchor:'end',color:C.acc,font:{weight:'bold',size:8},formatter:v=>v}},
+    {label:'누적 지원완료',data:cData,borderColor:C.blue,backgroundColor:'transparent',tension:.25,pointRadius:2,pointBackgroundColor:C.blue,spanGaps:true,
+     datalabels:{display:ctx=>ctx.dataValue!=null,align:'bottom',anchor:'start',color:C.blue,font:{weight:'bold',size:8},formatter:v=>v}}]},
+    options:baseOpt()}));
+}
+function mkDailyBar(id,startO){
+  const k=Object.keys(startO).sort();
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:k,datasets:[
+    {label:'일별 신규 지원시작',data:k.map(d=>startO[d]),backgroundColor:C.acc,
+     datalabels:{display:true,anchor:'end',align:'end',color:C.sub,font:{size:9},formatter:v=>v}}]},options:baseOpt()}));
+}
+function mkNbcCross(id,rows,labelKey){
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:rows.map(r=>r.key),datasets:[
+    {label:'내배카 YES',data:rows.map(r=>r.yes),backgroundColor:C.green,stack:'s',
+     datalabels:{display:true,color:'#0f1115',font:{weight:'bold',size:11},formatter:v=>v>0?v:''}},
+    {label:'내배카 NO',data:rows.map(r=>r.no),backgroundColor:C.red,stack:'s',
+     datalabels:{display:true,color:'#0f1115',font:{weight:'bold',size:11},formatter:v=>v>0?v:''}},
+    {type:'line',label:'YES 비율(%)',data:rows.map(r=>r.yes_rate),borderColor:C.yellow,backgroundColor:'transparent',yAxisID:'y2',tension:.2,pointRadius:3,pointBackgroundColor:C.yellow,
+     datalabels:{display:true,align:'top',color:C.yellow,font:{weight:'bold',size:11},formatter:v=>v.toFixed(0)+'%'}}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{}},scales:{
+      x:{stacked:true,ticks:{color:C.sub,font:{size:11}},grid:{color:C.line}},
+      y:{stacked:true,ticks:{color:C.sub},grid:{color:C.line},beginAtZero:true,title:{display:true,text:'명',color:C.sub}},
+      y2:{position:'right',min:0,max:100,ticks:{color:C.yellow,callback:v=>v+'%'},grid:{drawOnChartArea:false},title:{display:true,text:'YES 비율',color:C.yellow}}}}}));
+}
+// 박스플롯 통계 레이블 플러그인 (q1/median/q3/min/max) — 박스 우측에 배경 픽셀과 함께 표기
+function boxStatLabels(stats,keys,fs){return {id:'boxlbl'+Math.random(),afterDatasetsDraw(c){
+  const meta=c.getDatasetMeta(0), y=c.scales.y, ctx=c.ctx; if(!y)return;
+  const F=fs||11; ctx.save();ctx.font='bold '+F+'px sans-serif';ctx.textBaseline='middle';ctx.textAlign='left';
+  const cfg={max:['max ',C.sub],q3:['Q3 ',C.red],median:['중앙 ',C.acc],q1:['Q1 ',C.blue],min:['min ',C.sub]};
+  stats.forEach((s,i)=>{const el=meta.data[i]; if(!el)return;
+    const hw=(el.width||el.getProps?(el.getProps(['width']).width||40):40)/2;
+    const x=el.x+hw+8;
+    keys.forEach(k=>{ if(s[k]==null)return; const o=cfg[k]; const yy=y.getPixelForValue(s[k]);
+      const txt=o[0]+s[k], w=ctx.measureText(txt).width;
+      ctx.fillStyle='rgba(15,17,21,.78)';
+      ctx.fillRect(x-3, yy-F/2-2, w+6, F+4);
+      ctx.fillStyle=o[1]; ctx.fillText(txt, x, yy);});});
+  ctx.restore();}};}
+function mkBoxCompare(id){
+  const labels=DATA.camps.map(c=>c.name), data=DATA.camps.map(c=>c.age_all);
+  const stats=DATA.camps.map(c=>c.age);
+  charts.push(new Chart(document.getElementById(id),{type:'boxplot',data:{labels,datasets:[
+    {label:'만나이 분포',data,backgroundColor:'rgba(77,171,247,.35)',borderColor:C.blue,borderWidth:2,
+     itemRadius:2,itemStyle:'circle',itemBackgroundColor:'rgba(255,122,69,.5)',outlierBackgroundColor:C.red,medianColor:C.acc,
+     datalabels:{display:false}}]},
+    options:{responsive:true,layout:{padding:{right:80}},plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}},y:{ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'만나이',color:C.sub}}}},
+    plugins:[boxStatLabels(stats,['max','q3','median','q1','min'],11)]}));
+}
+const medLine=(yval)=>({id:'medLine'+Math.random(),afterDatasetsDraw(c){
+  const {ctx,chartArea:{left,right},scales:{y}}=c; if(!y)return; const yy=y.getPixelForValue(yval);
+  ctx.save();ctx.strokeStyle=C.sub;ctx.setLineDash([5,4]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();
+  ctx.setLineDash([]);ctx.fillStyle=C.sub;ctx.font='11px sans-serif';ctx.fillText('전체 중앙값 '+yval+'세',left+6,yy-4);ctx.restore();}});
+function mkBoxDaily(id,byDay,overallMedian,boxStats){
+  const labels=Object.keys(byDay).sort(), data=labels.map(d=>byDay[d]);
+  charts.push(new Chart(document.getElementById(id),{type:'boxplot',data:{labels,datasets:[
+    {label:'일별 만나이',data,backgroundColor:'rgba(177,151,252,.3)',borderColor:C.purple,borderWidth:1.5,
+     itemRadius:1.5,itemStyle:'circle',itemBackgroundColor:'rgba(255,122,69,.45)',outlierBackgroundColor:C.red,medianColor:C.acc,
+     datalabels:{display:false}}]},
+    options:{responsive:true,plugins:{legend:{display:false},datalabels:{display:false}},scales:{
+      x:{ticks:{color:C.sub,maxRotation:60,font:{size:8}},grid:{color:C.line}},
+      y:{ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'만나이',color:C.sub}}}},
+    plugins:[medLine(overallMedian),boxDailyLabels(boxStats)]}));
+}
+// 일별 박스 위/아래에 Q3/중앙/Q1 작게 표기
+function boxDailyLabels(stats){return {id:'bdl'+Math.random(),afterDatasetsDraw(c){
+  const meta=c.getDatasetMeta(0), y=c.scales.y, ctx=c.ctx; if(!y)return;
+  ctx.save();ctx.font='7px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  stats.forEach((s,i)=>{const el=meta.data[i]; if(!el)return; const x=el.x;
+    ctx.fillStyle=C.red;  ctx.fillText(s.q3,     x, y.getPixelForValue(s.q3)-6);
+    ctx.fillStyle=C.acc;  ctx.fillText(s.median, x, y.getPixelForValue(s.median)-0.5);
+    ctx.fillStyle=C.blue; ctx.fillText(s.q1,     x, y.getPixelForValue(s.q1)+6);});
+  ctx.restore();}};}
+function mkStatusBar(id,rows){
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:rows.map(r=>r.key+' (n='+r.tot+')'),datasets:[
+    {label:'내배카 보유율(%)',data:rows.map(r=>r.yes_rate),backgroundColor:rows.map(r=>r.key==='알 수 없음'?C.sub:C.purple),
+     datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v.toFixed(1)+'%'}}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},datalabels:{}},scales:{
+      x:{min:0,max:100,ticks:{color:C.sub,callback:v=>v+'%'},grid:{color:C.line}},
+      y:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
+}
+
+// summary charts
+new Chart(document.getElementById('sum_funnel'),{type:'bar',data:{labels:DATA.camps.map(c=>c.name),datasets:[
+  {label:'지원시작',data:DATA.camps.map(c=>c['시작']),backgroundColor:C.acc,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v}},
+  {label:'지원완료',data:DATA.camps.map(c=>c['완료']),backgroundColor:C.blue,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v}}]},options:baseOpt()});
+new Chart(document.getElementById('sum_rate'),{type:'bar',data:{labels:DATA.camps.map(c=>c.name),datasets:[
+  {label:'완료전환율',data:DATA.camps.map(c=>c.conv),backgroundColor:C.green,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v+'%'}},
+  {label:'내배카 보유율',data:DATA.camps.map(c=>c.nbc_rate),backgroundColor:C.purple,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v+'%'}}]},options:baseOpt()});
+mkBoxCompare('sum_box');
+// per-camp
+DATA.camps.forEach((c,i)=>{const p='p'+(i+1);
+  mkDailyBar(p+'_daily',c.daily);
+  mkLine(p+'_cum',c.daily,c.comp_daily);
+  mkBoxDaily(p+'_box',c.age_by_day,c.age.median,c.box_daily);
+  mkNbcCross(p+'_age',c.by_age);
+  mkNbcCross(p+'_gender',c.by_gender);
+  mkStatusBar(p+'_status',c.by_status);
+});
+
+</script></body></html>
