@@ -88,6 +88,30 @@ status: TEST
 | 기타 | 3 | 4 | 7 | 42.9% |
 | 알 수 없음 | 1 | 1 | 2 | 50.0% |
 
+## 🧭 연령대별 합불상태 현황 (연령대 × 합불상태 · cast)
+
+**AI+ NLP 5기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|---|
+| ~19 | 0 | 4 | 1 | 0 | 0 | 1 | 6 |
+| 20-24 | 1 | 138 | 24 | 11 | 12 | 5 | 191 |
+| 25-29 | 1 | 76 | 14 | 4 | 13 | 3 | 111 |
+| 30-34 | 1 | 22 | 6 | 3 | 1 | 0 | 33 |
+| 35-39 | 0 | 2 | 0 | 0 | 1 | 0 | 3 |
+| 40+ | 1 | 5 | 0 | 1 | 2 | 1 | 10 |
+
+**백엔드 자바 26기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|---|
+| ~19 | 0 | 3 | 1 | 0 | 0 | 0 | 4 |
+| 20-24 | 1 | 46 | 0 | 7 | 0 | 2 | 56 |
+| 25-29 | 3 | 34 | 2 | 17 | 4 | 7 | 67 |
+| 30-34 | 4 | 14 | 0 | 1 | 0 | 0 | 19 |
+| 35-39 | 0 | 3 | 0 | 2 | 1 | 0 | 6 |
+| 40+ | 1 | 6 | 1 | 0 | 1 | 0 | 9 |
+
 ## 🧩 만나이 분포 (지원중 유저)
 
 | 캠프 | 중앙값 | 평균 | Q1 | Q3 | min | max | n |
@@ -157,6 +181,8 @@ def age_band(a):
     if a < 40: return "35-39"
     return "40+"
 BANDS = ["~19","20-24","25-29","30-34","35-39","40+"]
+# 합불상태 표시 순서 (심사 파이프라인 순)
+STATUS_ORDER = ["검토전","대상아님","예비합격","합격","불합격","지원취소"]
 
 def disp_name(fname):
     base = os.path.splitext(fname)[0]
@@ -216,6 +242,19 @@ def analyze(f):
             age_by_day[str(dt)] = [int(x) for x in grp['만나이'].tolist()]
     age_all = [int(x) for x in app_age['만나이'].tolist()]
 
+    # === 연령대 × 합불상태 피벗 (전체 비내부 지원자, 만나이 유효) ===
+    prof = d[~is_internal].copy()
+    prof['만나이'] = prof.apply(lambda x: calc_age(x['생년월일'], x['최초작성일']), axis=1)
+    prof['연령대'] = prof['만나이'].apply(age_band)
+    prof = prof[prof['연령대'].notna()]
+    status_present = [s for s in STATUS_ORDER if s in set(prof['합불상태'])]
+    age_status = []
+    for b in BANDS:
+        sub = prof[prof['연령대']==b]
+        if len(sub)==0: continue
+        age_status.append({'band':b,'total':int(len(sub)),
+                           'counts':{s:int((sub['합불상태']==s).sum()) for s in status_present}})
+
     # 일별 박스플롯 통계 (q1/median/q3/min/max) — 정렬된 날짜 순서
     box_daily = []
     for dt in sorted(age_by_day):
@@ -265,6 +304,7 @@ def analyze(f):
         'gender_pool':{'남성':int((app['성별']=='male').sum()),'여성':int((app['성별']=='female').sum())},
         'by_age':by_age,'by_gender':by_gender,'by_status':by_status,
         'age_by_day':age_by_day,'age_all':age_all,'box_daily':box_daily,
+        'age_status':age_status,'status_present':status_present,
         'target':target,'ach_vs_start':ach_vs_start,'ach_vs_target':ach_vs_target,
     }
 
@@ -431,6 +471,17 @@ function boxDailyLabels(stats){return {id:'bdl'+Math.random(),afterDatasetsDraw(
     ctx.fillStyle=C.acc;  ctx.fillText(s.median, x, y.getPixelForValue(s.median)-0.5);
     ctx.fillStyle=C.blue; ctx.fillText(s.q1,     x, y.getPixelForValue(s.q1)+6);});
   ctx.restore();}};}
+// 연령대 × 합불상태 스택 가로막대 (각 세그먼트 명수 표기)
+function mkAgeStatus(id,rows,statuses){
+  const STC={'검토전':C.sub,'대상아님':C.blue,'예비합격':C.yellow,'합격':C.green,'불합격':C.red,'지원취소':'#7a7f8a'};
+  const labels=rows.map(r=>r.band+'세');
+  const ds=statuses.map(s=>({label:s,data:rows.map(r=>r.counts[s]||0),backgroundColor:STC[s]||C.sub,stack:'s',
+    datalabels:{display:true,color:'#0f1115',font:{weight:'bold',size:10},formatter:v=>v>0?v:''}}));
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:ds},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{}},scales:{
+      x:{stacked:true,ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'명',color:C.sub}},
+      y:{stacked:true,ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
+}
 function mkStatusBar(id,rows){
   charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:rows.map(r=>r.key+' (n='+r.tot+')'),datasets:[
     {label:'내배카 보유율(%)',data:rows.map(r=>r.yes_rate),backgroundColor:rows.map(r=>r.key==='알 수 없음'?C.sub:C.purple),
@@ -582,6 +633,16 @@ for i,c in enumerate(camps):
     panels += "</div>\n"
     panels += f"""<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) — 일자별 <span style="color:var(--red)">Q3</span>·<span style="color:var(--accent)">중앙</span>·<span style="color:var(--blue)">Q1</span> 표기 · 전체 중앙값 {c['age'].get('median','-')}세 점선</h3><canvas id="{pid}_box" style="max-height:360px"></canvas></div>\n"""
 
+    # 연령대 × 합불상태 피벗 (차트 + cast 테이블)
+    panels += f"""<div class="card" style="margin-top:14px"><h3>연령대별 현재 합불상태 현황 (연령대 × 합불상태 · cast)</h3><canvas id="{pid}_agestatus" style="max-height:320px"></canvas>"""
+    sp = c['status_present']
+    th = "".join(f"<th>{s}</th>" for s in sp)
+    rows_html = ""
+    for r in c['age_status']:
+        tds = "".join(f"<td>{r['counts'].get(s,0)}</td>" for s in sp)
+        rows_html += f"<tr><td class='name'>{r['band']}세</td>{tds}<td><b class='acc'>{r['total']}</b></td></tr>"
+    panels += f"""<table style="margin-top:12px"><thead><tr><th>연령대</th>{th}<th>합계</th></tr></thead><tbody>{rows_html}</tbody></table></div>\n"""
+
     panels += f"""<h2>내일배움카드 교차분석 (melt · cast)</h2>
 <div class="grid two">
   <div class="card"><h3>① 연령대별 내배카 YES/NO + YES비율</h3><canvas id="{pid}_age"></canvas></div>
@@ -618,6 +679,7 @@ DATA.camps.forEach((c,i)=>{const p='p'+(i+1);
   mkDailyBar(p+'_daily',c.daily);
   mkLine(p+'_cum',c.daily,c.comp_daily);
   mkBoxDaily(p+'_box',c.age_by_day,c.age.median,c.box_daily);
+  mkAgeStatus(p+'_agestatus',c.age_status,c.status_present);
   mkNbcCross(p+'_age',c.by_age);
   mkNbcCross(p+'_gender',c.by_gender);
   mkStatusBar(p+'_status',c.by_status);
@@ -648,6 +710,14 @@ def md_cast(c):
     s += "\n".join(f"| {r['key']} | {r['yes']} | {r['no']} | {r['tot']} | {r['yes_rate']}% |" for r in c['by_status'])
     return s
 cast_blocks = "\n\n".join(md_cast(c) for c in camps)
+
+# 연령대 × 합불상태 피벗 (캠프별)
+def md_agestatus(c):
+    sp = c['status_present']
+    head = "| 연령대 | " + " | ".join(sp) + " | 합계 |\n|" + "---|"*(len(sp)+2) + "\n"
+    body = "\n".join("| " + r['band'] + " | " + " | ".join(str(r['counts'].get(s,0)) for s in sp) + f" | {r['total']} |" for r in c['age_status'])
+    return f"**{c['name']}** — 연령대별 합불상태 현황\n\n{head}{body}"
+agestatus_blocks = "\n\n".join(md_agestatus(c) for c in camps)
 
 def strip_tags(s):
     import re as _re
@@ -699,6 +769,10 @@ status: TEST
 
 {cast_blocks}
 
+## 🧭 연령대별 합불상태 현황 (연령대 × 합불상태 · cast)
+
+{agestatus_blocks}
+
 ## 🧩 만나이 분포 (지원중 유저)
 
 | 캠프 | 중앙값 | 평균 | Q1 | Q3 | min | max | n |
@@ -736,4 +810,4 @@ for d in OUT_DIRS:
 ```
 
 ---
-*생성 2026-06-15 14:04 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리*
+*생성 2026-06-15 14:29 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리*
