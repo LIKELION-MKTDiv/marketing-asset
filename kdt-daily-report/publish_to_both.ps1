@@ -11,9 +11,10 @@ python generate_daily_report.py
 if ($LASTEXITCODE -ne 0) { Write-Host "생성 실패 — CSV 경로/데이터 확인." -ForegroundColor Red; exit 1 }
 
 # 2) 두 레포에 발행
+# URL에 계정명(whisky86) 명시 → GCM이 계정별 자격증명 분리 저장·조회 (whisky1986/mkt-management와 충돌 방지)
 $repos = @(
-    "https://github.com/LIKELION-MKTDiv/marketing-asset.git",
-    "https://github.com/whisky86/marketing-asset.git"
+    "https://whisky86@github.com/LIKELION-MKTDiv/marketing-asset.git",
+    "https://whisky86@github.com/whisky86/marketing-asset.git"
 )
 $src   = $PSScriptRoot
 $today = Get-Date -Format "yyMMdd"
