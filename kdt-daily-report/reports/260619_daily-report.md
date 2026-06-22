@@ -1,3 +1,209 @@
+---
+title: KDT 모객현황 데일리 리포트 260619
+date: 2026-06-19
+type: daily-report
+tags: [kdt, 모객, daily-report]
+source: kdt 모객현황 데이터 추출.ipynb
+status: TEST
+---
+
+# 📊 KDT 모객현황 데일리 리포트 · 2026-06-19
+
+> [!info] 대상 캠프 3종 · 내부직원·테스트 제외 · **TEST 출력본**
+
+## 🔗 리포트 열기 (인터랙티브)
+
+[▶ 260619_daily-report.html 브라우저로 열기](260619_daily-report.html)
+
+<iframe src="260619_daily-report.html" width="100%" height="900" style="border:1px solid #2a2f3a;border-radius:10px;"></iframe>
+
+> [!tip] iframe이 비어 보이면 옵시디언 설정 또는 보안정책 때문일 수 있습니다. 위 링크로 직접 열면 항상 동작합니다.
+
+## 📈 핵심 요약
+
+| 캠프 | 목표모객 | 수강정원 | 지원시작 | 지원중 | 지원완료 | 완료달성율<br>(완료/시작) | 목표달성율<br>(완료/목표) | 경쟁률<br>(지원/정원) | 내배카 보유율 |
+|---|---|---|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | 96 | 40 | 427 | 300 | 121 | 28.3% | 126.0% | 10.7:1 | 46.1% |
+| 백엔드 자바 26기 | 72 | 24 | 187 | 130 | 52 | 27.8% | 72.2% | 7.8:1 | 56.2% |
+| 그로스 마케팅 6기 | 142 | 57 | 87 | 62 | 24 | 27.6% | 16.9% | 1.5:1 | 75.6% |
+
+- **총 지원시작** 701 · **완료** 197 (평균 전환 28.1%) · **미완료 적체** 492 (70%)
+- **내배카 보유율** 51.9% (유효응답 362명)
+
+## 📅 모집 마감 전망 (트렌드 × 종결일)
+
+| 캠프 | 모집기간 | 마감 | 경과 | 완료/목표 | 페이스(명/일) | 예상도달(목표대비) | 전망 |
+|---|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | 2026-05-18~2026-06-22 | D-3 | 92% | 121/96 | 5.14 | 136 (142%) | 목표 조기 달성 |
+| 백엔드 자바 26기 | 2026-05-27~2026-06-29 | D-10 | 71% | 52/72 | 1.0 | 62 (86%) | 마감 내 목표 미달 전망 |
+| 그로스 마케팅 6기 | 2026-06-16~2026-07-19 | D-30 | 12% | 24/142 | 6.0 | 204 (144%) ⚠️초기 | 마감 내 목표 달성 전망 |
+
+- **AI+ NLP 5기**: 목표 모객(96명) 초과 달성 · 마감 D-3 — 선발·등록 전환·정원 적합도로 전환.
+- **백엔드 자바 26기**: 최근 1.0명/일 → 마감 예상 62명(목표 72 대비 86%) → **마감 내 목표 미달 전망**.
+- **그로스 마케팅 6기**: 최근 6.0명/일 → 마감 예상 204명(목표 142 대비 144%) → **마감 내 목표 달성 전망** (모집 7일 미만, 신뢰도 낮음).
+
+## 📊 전일 대비 경향성 · 직전 260617 대비 (비판적 분석)
+
+| 캠프 | 지원시작 | 지원완료 | 완료전환율 | 내배카 | 목표달성율 | 심사진행(합/불/예비) |
+|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | ▲44 | ▲16 | ▲0.9pp | ▲0.6pp | ▲16.6pp | 합+9 불+13 예-16 |
+| 백엔드 자바 26기 | ▲13 | ▲2 | ▼0.9pp | ▲0.8pp | ▲2.8pp | 합+1 불+1 예+1 |
+| 그로스 마케팅 6기 | ▲49 | ▲10 | ▼9.2pp | ▲10.6pp | ▲7.0pp | 합+11 불+0 예+0 |
+
+*Δ = 오늘 − 직전 리포트 · 1일 변동이라 노이즈 가능성 유의*
+
+**AI+ NLP 5기**
+
+1. 지원 +44명 · 전환율 +0.9pp 동반 — 양·질 함께 개선. 단, 1일 변동이라 추세 확정 전 2~3일 더 관찰 필요.
+2. 심사 진행 6건(합격 +9·불합격 +13·예비 -16) vs 지원완료 +16 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.
+3. 목표 도달 유지(달성율 126.0%) — 점검 축을 완료 수 → 등록 전환·적합도로 이동.
+
+**백엔드 자바 26기**
+
+1. 신규 지원 +13명인데 완료전환율 -0.9pp 하락 — 유입은 늘었으나 완료로 이어지지 않음. '숫자 증가'에 안심 말고 유입 채널 품질·지원서 이탈 지점을 의심해야 함.
+2. 심사 진행 3건(합격 +1·불합격 +1·예비 +1) vs 지원완료 +2 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.
+3. 목표 달성율 69.4→72.2% (+2.8pp) — 오늘 +2명 페이스면 잔여 20명에 약 10일. 잔여 모집기간과 대조해 '달성 가능 페이스'인지 판단.
+
+**그로스 마케팅 6기**
+
+1. 신규 지원 +49명인데 완료전환율 -9.2pp 하락 — 유입은 늘었으나 완료로 이어지지 않음. '숫자 증가'에 안심 말고 유입 채널 품질·지원서 이탈 지점을 의심해야 함.
+2. 심사 진행 11건(합격 +11·불합격 +0·예비 +0) vs 지원완료 +10 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.
+3. 목표 달성율 9.9→16.9% (+7.0pp) — 오늘 +10명 페이스면 잔여 118명에 약 12일. 잔여 모집기간과 대조해 '달성 가능 페이스'인지 판단.
+4. 내배카 보유율 +10.6pp 변동 — 신규 유입의 연령·신분 세그먼트가 이동했을 가능성. 연령대×합불상태/내배카 교차표로 어느 층이 늘었는지 확인.
+
+## 🧐 부트캠프별 점검 코멘트 (비판적 점검 포인트)
+
+**AI+ NLP 5기** (목표 96 · 달성율 126.0%)
+
+1. 목표 96명 도달(달성율 126.0%) — 점검 지표를 완료 '수'에서 질(적합도·등록 전환·미수료 리스크)로 전환할 시점.
+2. 완료전환 28.3% vs 미완료 70% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 대학(원)생 내배카 보유율 30.5%(n=131) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.
+
+**백엔드 자바 26기** (목표 72 · 달성율 72.2%)
+
+1. 목표 달성율 72.2%를 절대값으로 판단하지 말 것 — 최근 7일 일평균 완료 1.4명 기준 잔여 20명은 약 14일 소요. 마감 D-10 내 달성 불가 페이스 — 강한 가속/연장 검토.
+2. 완료전환 27.8% vs 미완료 70% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 대학(원)생 내배카 보유율 26.3%(n=19) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.
+
+**그로스 마케팅 6기** (목표 142 · 달성율 16.9%)
+
+1. 목표 달성율 16.9%를 절대값으로 판단하지 말 것 — 최근 7일 일평균 완료 6.0명 기준 잔여 118명은 약 20일 소요. 마감 D-30 대비 여유.
+2. 완료전환 27.6% vs 미완료 71% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 여성 73% 편중 — 유입 채널·크리에이티브가 특정 성별에 쏠렸는지, 의도된 타깃 설계인지 점검.
+
+## 🧮 내일배움카드 교차분석 (melt · cast)
+
+**AI+ NLP 5기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| ~19 | 1 | 3 | 4 | 25.0% |
+| 20-24 | 37 | 87 | 124 | 29.8% |
+| 25-29 | 48 | 28 | 76 | 63.2% |
+| 30-34 | 16 | 6 | 22 | 72.7% |
+| 35-39 | 1 | 0 | 1 | 100.0% |
+| 40+ | 4 | 1 | 5 | 80.0% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 40 | 91 | 131 | 30.5% |
+| 취업준비생 | 51 | 19 | 70 | 72.9% |
+| 직장인/프리랜서 | 8 | 5 | 13 | 61.5% |
+| 기타 | 5 | 2 | 7 | 71.4% |
+| 알 수 없음 | 3 | 8 | 11 | 27.3% |
+
+**백엔드 자바 26기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| ~19 | 0 | 2 | 2 | 0.0% |
+| 20-24 | 13 | 11 | 24 | 54.2% |
+| 25-29 | 27 | 20 | 47 | 57.4% |
+| 30-34 | 8 | 3 | 11 | 72.7% |
+| 35-39 | 1 | 1 | 2 | 50.0% |
+| 40+ | 1 | 2 | 3 | 33.3% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 5 | 14 | 19 | 26.3% |
+| 취업준비생 | 34 | 15 | 49 | 69.4% |
+| 직장인/프리랜서 | 8 | 3 | 11 | 72.7% |
+| 기타 | 2 | 5 | 7 | 28.6% |
+| 알 수 없음 | 1 | 2 | 3 | 33.3% |
+
+**그로스 마케팅 6기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 20-24 | 9 | 4 | 13 | 69.2% |
+| 25-29 | 18 | 5 | 23 | 78.3% |
+| 30-34 | 3 | 1 | 4 | 75.0% |
+| 35-39 | 1 | 0 | 1 | 100.0% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 2 | 2 | 4 | 50.0% |
+| 취업준비생 | 22 | 7 | 29 | 75.9% |
+| 직장인/프리랜서 | 5 | 0 | 5 | 100.0% |
+| 기타 | 2 | 1 | 3 | 66.7% |
+
+## 🧭 연령대별 합불상태 현황 (연령대 × 합불상태 · cast)
+
+**AI+ NLP 5기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|---|
+| ~19 | 0 | 7 | 0 | 0 | 1 | 1 | 9 |
+| 20-24 | 4 | 167 | 11 | 14 | 29 | 6 | 231 |
+| 25-29 | 6 | 85 | 6 | 10 | 21 | 4 | 132 |
+| 30-34 | 0 | 28 | 1 | 6 | 6 | 0 | 41 |
+| 35-39 | 0 | 3 | 0 | 0 | 1 | 0 | 4 |
+| 40+ | 1 | 6 | 0 | 1 | 3 | 1 | 12 |
+
+**백엔드 자바 26기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|---|
+| ~19 | 0 | 4 | 1 | 0 | 0 | 0 | 5 |
+| 20-24 | 1 | 53 | 1 | 6 | 2 | 2 | 65 |
+| 25-29 | 1 | 44 | 2 | 19 | 7 | 7 | 80 |
+| 30-34 | 1 | 19 | 0 | 4 | 1 | 0 | 25 |
+| 35-39 | 0 | 3 | 0 | 2 | 1 | 0 | 6 |
+| 40+ | 1 | 7 | 1 | 0 | 1 | 0 | 10 |
+
+**그로스 마케팅 6기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|
+| ~19 | 0 | 1 | 0 | 0 | 1 |
+| 20-24 | 3 | 25 | 3 | 2 | 33 |
+| 25-29 | 6 | 23 | 8 | 0 | 37 |
+| 30-34 | 3 | 10 | 0 | 0 | 13 |
+| 35-39 | 1 | 2 | 0 | 0 | 3 |
+| 40+ | 0 | 1 | 0 | 0 | 1 |
+
+## 🧩 만나이 분포 (지원중 유저)
+
+| 캠프 | 중앙값 | 평균 | Q1 | Q3 | min | max | n |
+|---|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | 24.0 | 25.4 | 22.0 | 27.0 | 17.0 | 71.0 | 307 |
+| 백엔드 자바 26기 | 25.0 | 27.8 | 23.0 | 29.0 | 18.0 | 70.0 | 134 |
+| 그로스 마케팅 6기 | 26.0 | 26.9 | 23.0 | 29.0 | 19.0 | 50.0 | 75 |
+
+> 일별 박스플롯(노트북 셀2 로직)은 HTML 캠프별 탭 참조.
+
+## 🛠 생성 스크립트 (generate_daily_report.py)
+
+> 아래 코드를 `daily report/generate_daily_report.py`로 두고 `python generate_daily_report.py` 실행 시
+> 실행 시점 날짜로 HTML + 본 MD가 함께 재생성됩니다.
+
+```python
 # -*- coding: utf-8 -*-
 """
 KDT 모객현황 데일리 리포트 생성기
@@ -138,31 +344,6 @@ def analyze(f):
             age_by_day[str(dt)] = [int(x) for x in grp['만나이'].tolist()]
     age_all = [int(x) for x in app_age['만나이'].tolist()]
 
-    # === 일별 내배카 소지율 (지원시작자 = 비내부 + 내배카 yes/no, 최초작성일 기준) ===
-    nd = d[d['내배카 보유'].str.lower().isin(['yes','no']) & (~is_internal)].copy()
-    nd['nbc'] = nd['내배카 보유'].str.lower()
-    nbc_day = {}
-    for dt, grp in nd.groupby(nd['최초작성일'].dt.date):
-        if pd.notna(dt):
-            y = int((grp['nbc']=='yes').sum()); n = int((grp['nbc']=='no').sum())
-            if y+n > 0:
-                nbc_day[str(dt)] = {'rate': round(y/(y+n)*100,1), 'yes':y, 'no':n}
-    # 표본 n(yes+no) < 5인 날은 7일 이동평균(개수 가중)으로 보정
-    NBC_MIN_N = 5
-    for ds in sorted(nbc_day):
-        rec = nbc_day[ds]; rec['n'] = rec['yes'] + rec['no']
-        d0 = datetime.strptime(ds, '%Y-%m-%d').date()
-        wy = wn = 0
-        for i in range(7):
-            di = (d0 - timedelta(days=i)).isoformat()
-            if di in nbc_day:
-                wy += nbc_day[di]['yes']; wn += nbc_day[di]['no']
-        ma = round(wy/(wy+wn)*100,1) if (wy+wn) > 0 else rec['rate']
-        if rec['n'] >= NBC_MIN_N:
-            rec['disp'] = rec['rate']; rec['smoothed'] = False
-        else:
-            rec['disp'] = ma; rec['smoothed'] = True
-
     # === 연령대 × 합불상태 피벗 (전체 비내부 지원자, 만나이 유효) ===
     prof = d[~is_internal].copy()
     prof['만나이'] = prof.apply(lambda x: calc_age(x['생년월일'], x['최초작성일']), axis=1)
@@ -261,7 +442,7 @@ def analyze(f):
         'daily':daily,'comp_daily':comp_daily,'age':age,'age_band':age_band_hist,
         'gender_pool':{'남성':int((app['성별']=='male').sum()),'여성':int((app['성별']=='female').sum())},
         'by_age':by_age,'by_gender':by_gender,'by_status':by_status,
-        'age_by_day':age_by_day,'age_all':age_all,'box_daily':box_daily,'nbc_day':nbc_day,
+        'age_by_day':age_by_day,'age_all':age_all,'box_daily':box_daily,
         'age_status':age_status,'status_present':status_present,
         'target':target,'ach_vs_start':ach_vs_start,'ach_vs_target':ach_vs_target,
         'capacity':capacity,'competition':competition,'fill_vs_capacity':fill_vs_capacity,
@@ -433,7 +614,7 @@ const tabs=document.getElementById('tabs');
 const names=['Summary',...DATA.camps.map(c=>c.name)];
 function slugify(n){return n.toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,'-').replace(/^-+|-+$/g,'');}
 const slugs=names.map((n,i)=>i===0?'summary':slugify(n));
-names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.id='tab-'+slugs[i];b.textContent=n;b.onclick=()=>{const cur=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();if(cur===slugs[i])sel(i);else location.hash=slugs[i];};tabs.appendChild(b);});
+names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.id='tab-'+slugs[i];b.textContent=n;b.onclick=()=>{if(location.hash.slice(1)!==slugs[i])location.hash=slugs[i];else sel(i);};tabs.appendChild(b);});
 function sel(i){if(i<0||i>=names.length)i=0;document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',j===i));}
 function selFromHash(){let h=decodeURIComponent((location.hash||'').replace(/^#/,'')).toLowerCase();let i=slugs.indexOf(h);if(i<0){const m=h.match(/^tab-?(\\d+)$/);if(m)i=Number(m[1]);else if(/^\\d+$/.test(h))i=Number(h);}sel(i<0?0:i);}
 window.addEventListener('hashchange',selFromHash);
@@ -521,33 +702,15 @@ const medLine=(yval)=>({id:'medLine'+Math.random(),afterDatasetsDraw(c){
   ctx.save();ctx.strokeStyle=C.sub;ctx.setLineDash([5,4]);ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();
   ctx.setLineDash([]);ctx.fillStyle=C.sub;ctx.font='11px sans-serif';ctx.fillText('전체 중앙값 '+yval+'세',left+6,yy-4);ctx.restore();}});
-function mkBoxDaily(id,byDay,overallMedian,boxStats,nbcDay){
+function mkBoxDaily(id,byDay,overallMedian,boxStats){
   const labels=Object.keys(byDay).sort(), data=labels.map(d=>byDay[d]);
-  const nbcData = nbcDay ? labels.map(d=> (nbcDay[d]? nbcDay[d].disp : null)) : null;
-  const nbcSm   = nbcDay ? labels.map(d=> (nbcDay[d]? !!nbcDay[d].smoothed : false)) : null;
-  const ds=[{label:'일별 만나이',data,backgroundColor:'rgba(177,151,252,.3)',borderColor:C.purple,borderWidth:1.5,
+  charts.push(new Chart(document.getElementById(id),{type:'boxplot',data:{labels,datasets:[
+    {label:'일별 만나이',data,backgroundColor:'rgba(177,151,252,.3)',borderColor:C.purple,borderWidth:1.5,
      itemRadius:1.5,itemStyle:'circle',itemBackgroundColor:'rgba(255,122,69,.45)',outlierBackgroundColor:C.red,medianColor:C.acc,
-     datalabels:{display:false},yAxisID:'y'}];
-  let lineShow=new Set();
-  if(nbcData){
-    const idx=nbcData.map((v,i)=>v!=null?i:-1).filter(i=>i>=0);
-    const step=Math.max(1,Math.ceil(idx.length/8));
-    idx.forEach((ix,k)=>{ if(k%step===0) lineShow.add(ix); });
-    if(idx.length) lineShow.add(idx[idx.length-1]);
-    ds.push({type:'line',label:'내배카 소지율(% · n<5일은 ~7일 이동평균)',data:nbcData,yAxisID:'y2',borderColor:C.yellow,backgroundColor:'transparent',borderWidth:2,tension:.25,spanGaps:true,
-      pointRadius:ctx=> nbcData[ctx.dataIndex]==null?0:(nbcSm[ctx.dataIndex]?1.5:2.8),
-      pointStyle:ctx=> nbcSm[ctx.dataIndex]?'rectRot':'circle',
-      pointBackgroundColor:ctx=> nbcSm[ctx.dataIndex]?'rgba(255,212,59,.35)':C.yellow,
-      pointBorderColor:C.yellow,
-      datalabels:{display:ctx=>lineShow.has(ctx.dataIndex),align:'top',anchor:'end',color:C.yellow,font:{weight:'bold',size:8},formatter:(v,ctx)=>(nbcSm[ctx.dataIndex]?'~':'')+v+'%'}});
-  }
-  const scales={
-    x:{ticks:{color:C.sub,maxRotation:60,font:{size:8}},grid:{color:C.line}},
-    y:{ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'만나이',color:C.sub}}
-  };
-  if(nbcData) scales.y2={position:'right',min:0,max:100,ticks:{color:C.yellow,callback:v=>v+'%'},grid:{drawOnChartArea:false},title:{display:true,text:'내배카 소지율',color:C.yellow}};
-  charts.push(new Chart(document.getElementById(id),{type:'boxplot',data:{labels,datasets:ds},
-    options:{responsive:true,plugins:{legend:{display:!!nbcData,labels:{color:C.sub,font:{size:11}}},datalabels:{display:false}},scales},
+     datalabels:{display:false}}]},
+    options:{responsive:true,plugins:{legend:{display:false},datalabels:{display:false}},scales:{
+      x:{ticks:{color:C.sub,maxRotation:60,font:{size:8}},grid:{color:C.line}},
+      y:{ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'만나이',color:C.sub}}}},
     plugins:[medLine(overallMedian),boxDailyLabels(boxStats)]}));
 }
 // 일별 박스 위/아래에 Q3/중앙/Q1 작게 표기
@@ -809,7 +972,7 @@ for i,c in enumerate(camps):
         v=c['age_band'][b]; w=round(v/mx*100)
         panels += f"<div class='barmini'><span class='t'>{b}세</span><span class='bar'><span style='width:{w}%;background:var(--blue)'></span></span><span class='v'>{v}명</span></div>"
     panels += "</div>\n"
-    panels += f"""<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) + <span style="color:var(--yellow)">내배카 소지율(%) 선그래프</span> — 우측 축=내배카 yes/(yes+no) · <b>표본 n&lt;5인 날은 7일 이동평균(◇·~) 보정</b></h3><canvas id="{pid}_box" style="max-height:380px"></canvas></div>\n"""
+    panels += f"""<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) — 일자별 <span style="color:var(--red)">Q3</span>·<span style="color:var(--accent)">중앙</span>·<span style="color:var(--blue)">Q1</span> 표기 · 전체 중앙값 {c['age'].get('median','-')}세 점선</h3><canvas id="{pid}_box" style="max-height:360px"></canvas></div>\n"""
 
     # 연령대 × 합불상태 피벗 (차트 + cast 테이블)
     panels += f"""<div class="card" style="margin-top:14px"><h3>연령대별 현재 합불상태 현황 (연령대 × 합불상태 · cast)</h3><canvas id="{pid}_agestatus" style="max-height:320px"></canvas>"""
@@ -856,7 +1019,7 @@ mkBoxCompare('sum_box');
 DATA.camps.forEach((c,i)=>{const p='p'+(i+1);
   mkDailyBar(p+'_daily',c.daily);
   mkLine(p+'_cum',c.daily,c.comp_daily,c.proj);
-  mkBoxDaily(p+'_box',c.age_by_day,c.age.median,c.box_daily,c.nbc_day);
+  mkBoxDaily(p+'_box',c.age_by_day,c.age.median,c.box_daily);
   mkAgeStatus(p+'_agestatus',c.age_status,c.status_present);
   mkNbcCross(p+'_age',c.by_age);
   mkNbcCross(p+'_gender',c.by_gender);
@@ -1032,3 +1195,8 @@ for d in OUT_DIRS:
     with open(mp, 'w', encoding='utf-8') as fp:
         fp.write(md)
     print("WROTE", mp)
+
+```
+
+---
+*생성 2026-06-19 11:26 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리*
