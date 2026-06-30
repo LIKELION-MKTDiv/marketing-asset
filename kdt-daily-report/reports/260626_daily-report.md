@@ -1,3 +1,248 @@
+---
+title: KDT 모객현황 데일리 리포트 260626
+date: 2026-06-26
+type: daily-report
+tags: [kdt, 모객, daily-report]
+source: kdt 모객현황 데이터 추출.ipynb
+status: TEST
+---
+
+# 📊 KDT 모객현황 데일리 리포트 · 2026-06-26
+
+> [!info] 대상 캠프 4종 · 내부직원·테스트 제외 · **TEST 출력본**
+
+## 🔗 리포트 열기 (인터랙티브)
+
+[▶ 260626_daily-report.html 브라우저로 열기](260626_daily-report.html)
+
+<iframe src="260626_daily-report.html" width="100%" height="900" style="border:1px solid #2a2f3a;border-radius:10px;"></iframe>
+
+> [!tip] iframe이 비어 보이면 옵시디언 설정 또는 보안정책 때문일 수 있습니다. 위 링크로 직접 열면 항상 동작합니다.
+
+## 📈 핵심 요약
+
+| 캠프 | 목표모객 | 수강정원 | 지원시작 | 지원중 | 지원완료 | 완료달성율<br>(완료/시작) | 목표달성율<br>(완료/목표) | 경쟁률<br>(지원/정원) | 내배카 보유율 |
+|---|---|---|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | 96 | 40 | 432 | 298 | 128 | 29.6% | 133.3% | 10.8:1 | 47.5% |
+| 백엔드 자바 26기 | 72 | 24 | 253 | 164 | 84 | 33.2% | 116.7% | 10.5:1 | 55.3% |
+| 클라우드 8기 | 60 | 30 | 24 | 18 | 6 | 25.0% | 10.0% | 0.8:1 | 69.2% |
+| 그로스 마케팅 6기 | 142 | 57 | 227 | 165 | 61 | 26.9% | 43.0% | 4.0:1 | 65.3% |
+
+- **총 지원시작** 936 · **완료** 279 (평균 전환 29.8%) · **미완료 적체** 645 (69%)
+- **내배카 보유율** 53.9% (유효응답 473명)
+
+## 📅 모집 마감 전망 (트렌드 × 종결일)
+
+| 캠프 | 모집기간 | 마감 | 경과 | 완료/목표 | 페이스(명/일) | 예상도달(목표대비) | 전망 |
+|---|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | 2026-05-18~2026-06-22 | D-0 | 100% | 128/96 | 1.29 | 128 (133%) | 목표 조기 달성 |
+| 백엔드 자바 26기 | 2026-05-27~2026-06-29 | D-3 | 91% | 84/72 | 3.57 | 95 (132%) | 목표 조기 달성 |
+| 클라우드 8기 | 2026-06-23~2026-07-27 | D-31 | 11% | 6/60 | 1.5 | 52 (87%) ⚠️초기 | 마감 내 목표 미달 전망 |
+| 그로스 마케팅 6기 | 2026-06-16~2026-07-19 | D-23 | 32% | 61/142 | 5.0 | 176 (124%) | 마감 내 목표 달성 전망 |
+
+- **AI+ NLP 5기**: 목표 모객(96명) 초과 달성 · 마감 D-0 — 선발·등록 전환·정원 적합도로 전환.
+- **백엔드 자바 26기**: 목표 모객(72명) 초과 달성 · 마감 D-3 — 선발·등록 전환·정원 적합도로 전환.
+- **클라우드 8기**: 최근 1.5명/일 → 마감 예상 52명(목표 60 대비 87%) → **마감 내 목표 미달 전망** (모집 7일 미만, 신뢰도 낮음).
+- **그로스 마케팅 6기**: 최근 5.0명/일 → 마감 예상 176명(목표 142 대비 124%) → **마감 내 목표 달성 전망**.
+
+## 📊 전일 대비 경향성 · 직전 260622 대비 (비판적 분석)
+
+| 캠프 | 지원시작 | 지원완료 | 완료전환율 | 내배카 | 목표달성율 | 심사진행(합/불/예비) |
+|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | ▲1 | ±0 | ▼0.1pp | ▼0.2pp | ±0pp | 합+10 불+6 예-14 |
+| 백엔드 자바 26기 | ▲39 | ▲18 | ▲2.4pp | ▼1.0pp | ▲25.0pp | 합+0 불+16 예+8 |
+| 그로스 마케팅 6기 | ▲79 | ▲23 | ▲1.2pp | ▼6.6pp | ▲16.2pp | 합+8 불+3 예+18 |
+
+*Δ = 오늘 − 직전 리포트 · 1일 변동이라 노이즈 가능성 유의*
+
+**AI+ NLP 5기**
+
+1. 신규 지원 +1명인데 완료전환율 -0.1pp 하락 — 유입은 늘었으나 완료로 이어지지 않음. '숫자 증가'에 안심 말고 유입 채널 품질·지원서 이탈 지점을 의심해야 함.
+2. 심사 진행 2건(합격 +10·불합격 +6·예비 -14) vs 지원완료 +0 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.
+3. 목표 도달 유지(달성율 133.3%) — 점검 축을 완료 수 → 등록 전환·적합도로 이동.
+
+**백엔드 자바 26기**
+
+1. 지원 +39명 · 전환율 +2.4pp 동반 — 양·질 함께 개선. 단, 1일 변동이라 추세 확정 전 2~3일 더 관찰 필요.
+2. 심사 진행 24건(합격 +0·불합격 +16·예비 +8) vs 지원완료 +18 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.
+3. 목표 도달 유지(달성율 116.7%) — 점검 축을 완료 수 → 등록 전환·적합도로 이동.
+
+**그로스 마케팅 6기**
+
+1. 지원 +79명 · 전환율 +1.2pp 동반 — 양·질 함께 개선. 단, 1일 변동이라 추세 확정 전 2~3일 더 관찰 필요.
+2. 심사 진행 29건(합격 +8·불합격 +3·예비 +18) vs 지원완료 +23 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.
+3. 목표 달성율 26.8→43.0% (+16.2pp) — 오늘 +23명 페이스면 잔여 81명에 약 4일. 잔여 모집기간과 대조해 '달성 가능 페이스'인지 판단.
+4. 내배카 보유율 -6.6pp 변동 — 신규 유입의 연령·신분 세그먼트가 이동했을 가능성. 연령대×합불상태/내배카 교차표로 어느 층이 늘었는지 확인.
+
+## 🧐 부트캠프별 점검 코멘트 (비판적 점검 포인트)
+
+**AI+ NLP 5기** (목표 96 · 달성율 133.3%)
+
+1. 목표 96명 도달(달성율 133.3%) — 점검 지표를 완료 '수'에서 질(적합도·등록 전환·미수료 리스크)로 전환할 시점.
+2. 완료전환 29.6% vs 미완료 69% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 최근 3일 신규 지원 급감(일평균 12→2명) — 매체 예산 소진·타깃 피로 가능성. 채널별 잔여 예산·CPA를 우선 점검.
+
+**백엔드 자바 26기** (목표 72 · 달성율 116.7%)
+
+1. 목표 72명 도달(달성율 116.7%) — 점검 지표를 완료 '수'에서 질(적합도·등록 전환·미수료 리스크)로 전환할 시점.
+2. 완료전환 33.2% vs 미완료 65% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 대학(원)생 내배카 보유율 30.8%(n=26) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.
+
+**클라우드 8기** (목표 60 · 달성율 10.0%)
+
+1. 목표 달성율 10.0%를 절대값으로 판단하지 말 것 — 최근 7일 일평균 완료 2.0명 기준 잔여 54명은 약 27일 소요. 마감 D-31로 빠듯 — 가속 필요.
+2. 완료전환 25.0% vs 미완료 75% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 대학(원)생 내배카 보유율 0.0%(n=2) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.
+
+**그로스 마케팅 6기** (목표 142 · 달성율 43.0%)
+
+1. 목표 달성율 43.0%를 절대값으로 판단하지 말 것 — 최근 7일 일평균 완료 5.0명 기준 잔여 81명은 약 16일 소요. 마감 D-23 대비 여유.
+2. 완료전환 26.9% vs 미완료 73% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 여성 72% 편중 — 유입 채널·크리에이티브가 특정 성별에 쏠렸는지, 의도된 타깃 설계인지 점검.
+
+## 🧮 내일배움카드 교차분석 (melt · cast)
+
+**AI+ NLP 5기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| ~19 | 1 | 3 | 4 | 25.0% |
+| 20-24 | 40 | 86 | 126 | 31.7% |
+| 25-29 | 49 | 28 | 77 | 63.6% |
+| 30-34 | 17 | 6 | 23 | 73.9% |
+| 35-39 | 1 | 0 | 1 | 100.0% |
+| 40+ | 4 | 1 | 5 | 80.0% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 45 | 90 | 135 | 33.3% |
+| 취업준비생 | 51 | 19 | 70 | 72.9% |
+| 직장인/프리랜서 | 8 | 5 | 13 | 61.5% |
+| 기타 | 5 | 2 | 7 | 71.4% |
+| 알 수 없음 | 3 | 8 | 11 | 27.3% |
+
+**백엔드 자바 26기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| ~19 | 1 | 2 | 3 | 33.3% |
+| 20-24 | 17 | 18 | 35 | 48.6% |
+| 25-29 | 36 | 28 | 64 | 56.2% |
+| 30-34 | 11 | 4 | 15 | 73.3% |
+| 35-39 | 2 | 1 | 3 | 66.7% |
+| 40+ | 1 | 2 | 3 | 33.3% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 8 | 18 | 26 | 30.8% |
+| 취업준비생 | 47 | 25 | 72 | 65.3% |
+| 직장인/프리랜서 | 9 | 3 | 12 | 75.0% |
+| 기타 | 3 | 6 | 9 | 33.3% |
+| 알 수 없음 | 1 | 3 | 4 | 25.0% |
+
+**클라우드 8기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 20-24 | 1 | 2 | 3 | 33.3% |
+| 25-29 | 5 | 2 | 7 | 71.4% |
+| 30-34 | 2 | 0 | 2 | 100.0% |
+| 40+ | 1 | 0 | 1 | 100.0% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 0 | 2 | 2 | 0.0% |
+| 취업준비생 | 4 | 2 | 6 | 66.7% |
+| 직장인/프리랜서 | 3 | 0 | 3 | 100.0% |
+| 알 수 없음 | 2 | 0 | 2 | 100.0% |
+
+**그로스 마케팅 6기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| ~19 | 0 | 1 | 1 | 0.0% |
+| 20-24 | 22 | 24 | 46 | 47.8% |
+| 25-29 | 31 | 7 | 38 | 81.6% |
+| 30-34 | 12 | 2 | 14 | 85.7% |
+| 35-39 | 1 | 1 | 2 | 50.0% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 5 | 6 | 11 | 45.5% |
+| 취업준비생 | 49 | 21 | 70 | 70.0% |
+| 직장인/프리랜서 | 7 | 3 | 10 | 70.0% |
+| 기타 | 4 | 4 | 8 | 50.0% |
+| 알 수 없음 | 1 | 1 | 2 | 50.0% |
+
+## 🧭 연령대별 합불상태 현황 (연령대 × 합불상태 · cast)
+
+**AI+ NLP 5기** — 연령대별 합불상태 현황
+
+| 연령대 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|
+| ~19 | 7 | 0 | 0 | 1 | 1 | 9 |
+| 20-24 | 166 | 6 | 27 | 29 | 7 | 235 |
+| 25-29 | 85 | 5 | 15 | 24 | 4 | 133 |
+| 30-34 | 27 | 1 | 4 | 10 | 2 | 44 |
+| 35-39 | 3 | 0 | 0 | 1 | 0 | 4 |
+| 40+ | 6 | 1 | 0 | 4 | 1 | 12 |
+
+**백엔드 자바 26기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|---|
+| ~19 | 0 | 6 | 2 | 0 | 1 | 1 | 10 |
+| 20-24 | 4 | 66 | 3 | 6 | 6 | 2 | 87 |
+| 25-29 | 7 | 56 | 3 | 19 | 14 | 9 | 108 |
+| 30-34 | 1 | 22 | 3 | 4 | 5 | 1 | 36 |
+| 35-39 | 0 | 5 | 0 | 2 | 1 | 0 | 8 |
+| 40+ | 0 | 9 | 2 | 0 | 1 | 0 | 12 |
+
+**클라우드 8기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 합격 | 합계 |
+|---|---|---|---|---|
+| 20-24 | 1 | 4 | 1 | 6 |
+| 25-29 | 0 | 11 | 2 | 13 |
+| 30-34 | 0 | 2 | 1 | 3 |
+| 40+ | 1 | 1 | 0 | 2 |
+
+**그로스 마케팅 6기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|---|
+| ~19 | 0 | 4 | 0 | 0 | 0 | 0 | 4 |
+| 20-24 | 7 | 73 | 6 | 9 | 1 | 2 | 98 |
+| 25-29 | 3 | 55 | 8 | 12 | 2 | 0 | 80 |
+| 30-34 | 2 | 25 | 10 | 0 | 0 | 0 | 37 |
+| 35-39 | 0 | 4 | 0 | 1 | 0 | 0 | 5 |
+| 40+ | 0 | 4 | 0 | 0 | 0 | 0 | 4 |
+
+## 🧩 만나이 분포 (지원중 유저)
+
+| 캠프 | 중앙값 | 평균 | Q1 | Q3 | min | max | n |
+|---|---|---|---|---|---|---|---|
+| AI+ NLP 5기 | 24.0 | 25.3 | 22.0 | 26.0 | 17.0 | 71.0 | 294 |
+| 백엔드 자바 26기 | 25.0 | 27.6 | 23.0 | 29.0 | 18.0 | 77.0 | 176 |
+| 클라우드 8기 | 26.0 | 28.3 | 24.75 | 28.25 | 20.0 | 58.0 | 20 |
+| 그로스 마케팅 6기 | 25.0 | 26.2 | 23.0 | 29.0 | 18.0 | 60.0 | 177 |
+
+> 일별 박스플롯(노트북 셀2 로직)은 HTML 캠프별 탭 참조.
+
+## 🛠 생성 스크립트 (generate_daily_report.py)
+
+> 아래 코드를 `daily report/generate_daily_report.py`로 두고 `python generate_daily_report.py` 실행 시
+> 실행 시점 날짜로 HTML + 본 MD가 함께 재생성됩니다.
+
+```python
 # -*- coding: utf-8 -*-
 """
 KDT 모객현황 데일리 리포트 생성기
@@ -61,79 +306,6 @@ PERIODS = {
     "그로스 마케팅 6기": ("2026-06-16", "2026-07-19"),
     "클라우드 8기": ("2026-06-23", "2026-07-27"),
 }
-
-# 표시명 → 모객 현황표의 (스쿨명, 기수) 매핑 — 풀 퍼널·기수 벤치마크 연동용
-STATUS_KEY = {
-    "AI+ NLP 5기": ("AIP NLP", 5),
-    "백엔드 자바 26기": ("백엔드자바", 26),
-    "그로스 마케팅 6기": ("그로스마케팅", 6),
-    "클라우드 8기": ("클라우드", 8),
-}
-
-import re as _re_mod
-def _statnum(x):
-    if x is None: return None
-    s = str(x).strip()
-    if s in ('', '-', 'nan', '#DIV/0!'): return None
-    s = _re_mod.sub(r'[₩,%\s]', '', s)
-    try: return float(s) if '.' in s else int(s)
-    except: return None
-
-def load_status_table(folder):
-    """모객 현황표 CSV(KDT모객 현황 테이블*.csv)를 찾아 기수별 풀 퍼널 데이터로 파싱.
-    반환: {(school,gisu): rec}, 파일명 or None."""
-    fpath = None
-    for f in os.listdir(folder):
-        if f.endswith('.csv') and ('현황' in f or f.startswith('KDT모객')):
-            fpath = os.path.join(folder, f); break
-    if not fpath: return {}, None
-    try:
-        raw = pd.read_csv(fpath, encoding='utf-8-sig', header=None, dtype=str)
-    except Exception:
-        return {}, os.path.basename(fpath)
-    hdr_i = None
-    for i in range(len(raw)):
-        joined = ''.join(str(x) for x in raw.iloc[i].tolist()).replace(' ', '')
-        if '스쿨명' in joined and '교육시작수' in joined:
-            hdr_i = i; break
-    if hdr_i is None: return {}, os.path.basename(fpath)
-    hdr = [(str(x).replace(' ', '') if pd.notna(x) else '') for x in raw.iloc[hdr_i].tolist()]
-    def col(name):
-        for j, h in enumerate(hdr):
-            if h == name: return j
-        return None
-    ci = {k: col(k) for k in ['스쿨명','기수','수강정원','목표모객','조회수','지원시작수','지원완료수','고용24등록수','교육시작수','상태','내배카Yes']}
-    out = {}
-    for i in range(hdr_i+1, len(raw)):
-        r = raw.iloc[i].tolist()
-        school = r[ci['스쿨명']] if ci['스쿨명'] is not None else None
-        gisu = _statnum(r[ci['기수']]) if ci['기수'] is not None else None
-        if not school or (isinstance(school, float) and pd.isna(school)) or gisu is None:
-            continue
-        out[(str(school).strip(), int(gisu))] = {
-            'status': str(r[ci['상태']]).strip() if ci['상태'] is not None else '',
-            'capacity': _statnum(r[ci['수강정원']]), 'target': _statnum(r[ci['목표모객']]),
-            'views': _statnum(r[ci['조회수']]), 'start': _statnum(r[ci['지원시작수']]),
-            'complete': _statnum(r[ci['지원완료수']]), 'gov24': _statnum(r[ci['고용24등록수']]),
-            'edustart': _statnum(r[ci['교육시작수']]), 'nbcyes': _statnum(r[ci['내배카Yes']]),
-        }
-    return out, os.path.basename(fpath)
-
-def status_benchmark(table, school):
-    """같은 스쿨 모객완료 기수 평균(완료율/교육시작전환율/정원달성율) + 기수 리스트."""
-    crs, e2c, fill, gisus = [], [], [], []
-    for (sch, g), r in table.items():
-        if sch != school or '완료' not in r.get('status',''): continue
-        if r['start'] and r['complete'] is not None:
-            crs.append(r['complete']/r['start']*100); gisus.append(g)
-            if r['complete'] and r['edustart'] is not None:
-                e2c.append(r['edustart']/r['complete']*100)
-            if r['capacity'] and r['edustart'] is not None:
-                fill.append(r['edustart']/r['capacity']*100)
-    avg = lambda L: round(sum(L)/len(L),1) if L else None
-    if not crs: return None
-    return {'n':len(crs), 'gisus':sorted(gisus),
-            'complete_rate':avg(crs), 'edu_conv':avg(e2c), 'fill':avg(fill)}
 
 def load(path):
     try: df = pd.read_csv(path, encoding='utf-8')
@@ -345,30 +517,7 @@ def analyze(f):
         'proj':proj,
     }
 
-# 지원서 CSV만 분석 (현황표 등 다른 CSV는 제외)
-_apply_csvs = [f for f in sorted(os.listdir(FOLDER)) if f.endswith('.csv') and '지원서' in f]
-camps = [analyze(f) for f in _apply_csvs]
-
-# === 모객 현황표 연동: 풀 퍼널(고용24·교육시작) + 기수 벤치마크 ===
-STATUS_TABLE, STATUS_FILE = load_status_table(FOLDER)
-for c in camps:
-    key = STATUS_KEY.get(c['name'])
-    rec = STATUS_TABLE.get(key) if key else None
-    if rec:
-        st, cp = rec['start'], rec['complete']
-        c['funnel'] = {
-            'views':rec['views'], 'start':st, 'complete':cp,
-            'gov24':rec['gov24'], 'edustart':rec['edustart'],
-            'capacity':rec['capacity'], 'target':rec['target'],
-            'cr':   round(cp/st*100,1) if (st and cp is not None) else None,                 # 완료/시작
-            'g_conv':round(rec['gov24']/cp*100,1) if (cp and rec['gov24'] is not None) else None,   # 고용24/완료
-            'e_conv':round(rec['edustart']/cp*100,1) if (cp and rec['edustart'] is not None) else None, # 교육시작/완료
-            'fill': round(rec['edustart']/rec['capacity']*100,1) if (rec['capacity'] and rec['edustart'] is not None) else None, # 교육시작/정원
-        }
-        c['bench'] = status_benchmark(STATUS_TABLE, key[0])
-    else:
-        c['funnel'] = None; c['bench'] = None
-
+camps = [analyze(f) for f in sorted(os.listdir(FOLDER)) if f.endswith('.csv')]
 DATA = {'generated': datetime.now().strftime('%Y-%m-%d %H:%M'), 'camps': camps}
 
 # ---------- HTML 생성 ----------
@@ -670,31 +819,6 @@ function mkAgeStatus(id,rows,statuses){
       x:{stacked:true,ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'명',color:C.sub}},
       y:{stacked:true,ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
 }
-// 전환 퍼널 (지원시작→완료→고용24등록→교육시작) 가로막대 + 단계 전환율
-function mkFunnel(id,f){
-  if(!f) return;
-  const stages=[['지원시작',f.start],['지원완료',f.complete],['고용24등록',f.gov24],['교육시작',f.edustart]];
-  const labels=stages.map(s=>s[0]); const data=stages.map(s=>s[1]==null?0:s[1]);
-  const cols=[C.acc,C.blue,C.purple,C.green];
-  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[
-    {label:'인원',data,backgroundColor:cols,
-     datalabels:{display:true,anchor:'end',align:'right',color:C.txt,font:{weight:'bold',size:12},
-       formatter:(v,ctx)=>{const i=ctx.dataIndex;let conv='';if(i>0&&data[i-1]>0)conv=' ('+Math.round(v/data[i-1]*100)+'%)';return v+conv;}}}]},
-    options:{indexAxis:'y',responsive:true,layout:{padding:{right:60}},plugins:{legend:{display:false},datalabels:{}},
-      scales:{x:{ticks:{color:C.sub},grid:{color:C.line},beginAtZero:true,title:{display:true,text:'명',color:C.sub}},
-        y:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
-}
-// 기수 벤치마크 (현재 vs 같은 스쿨 모객완료 평균) 그룹 막대
-function mkBench(id,f,bm){
-  if(!f||!bm) return;
-  const labels=['완료율','교육시작전환','정원달성율'];
-  const cur=[f.cr,f.e_conv,f.fill]; const avg=[bm.complete_rate,bm.edu_conv,bm.fill];
-  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[
-    {label:'현재 기수',data:cur,backgroundColor:C.acc,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:11},formatter:v=>v==null?'-':v+'%'}},
-    {label:'기수 평균',data:avg,backgroundColor:C.sub,datalabels:{display:true,anchor:'end',align:'end',color:C.sub,font:{size:11},formatter:v=>v==null?'-':v+'%'}}]},
-    options:{responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{}},
-      scales:{x:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}},y:{ticks:{color:C.sub,callback:v=>v+'%'},grid:{color:C.line},beginAtZero:true}}}}));
-}
 function mkStatusBar(id,rows){
   charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:rows.map(r=>r.key+' (n='+r.tot+')'),datasets:[
     {label:'내배카 보유율(%)',data:rows.map(r=>r.yes_rate),backgroundColor:rows.map(r=>r.key==='알 수 없음'?C.sub:C.purple),
@@ -898,36 +1022,6 @@ for i,c in enumerate(camps):
                      f"{pj['start']} ~ {pj['end']} · 마감 D-{pj['days_left']} (기간 {pj['days_total']}일 중 {pj['days_elapsed']}일 · {pj['time_pct']}% 경과)</span>\n{diag}{early_note}</div>")
     else:
         proj_html = ""
-    # === P1 전환 퍼널 + P2 기수 벤치마크 (모객 현황표 연동) ===
-    fnl = c.get('funnel'); bm = c.get('bench')
-    if fnl:
-        fill = fnl['fill']; avs = c['ach_vs_target']
-        if fill is not None and avs is not None:
-            gap_cls = 'alert' if fill < 70 else ('warn' if fill < 100 else '')
-            p1note = (f"목표 모객 달성율 <b>{avs}%</b>(완료/목표)이지만 실제 <b>수강정원 달성율은 {fill}%</b>(교육시작/정원) — "
-                      f"지원완료 이후(고용24등록·교육시작) 단계의 누수를 함께 봐야 실제 성과가 보임.")
-        else:
-            gap_cls = ''; p1note = "교육시작 단계는 선발·등록 진행 중이라 일부 집계가 지연될 수 있음 (현황표 기준 현재 누적치)."
-        conv_html = (f'<h2>전환 퍼널 & 기수 벤치마크 <span style="font-size:12px;color:var(--sub)">· 모객 현황표 연동</span></h2>\n'
-                     f'<div class="card"><h3>① 전환 퍼널 (지원시작 → 완료 → 고용24등록 → 교육시작) · 조회수 {fnl["views"] if fnl["views"] is not None else "-"} (조회→시작 전환 {round(fnl["start"]/fnl["views"]*100,2) if (fnl["views"] and fnl["start"]) else "-"}%)</h3>'
-                     f'<canvas id="{pid}_funnel" style="max-height:240px"></canvas>'
-                     f'<div class="insight {gap_cls}" style="margin-top:10px">{p1note}</div></div>\n')
-        if bm:
-            def _bd(cur, avg):
-                if cur is None or avg is None: return '—'
-                dd = round(cur-avg,1); return f"<span class='{'up' if dd>=0 else 'down'}'>{'+' if dd>=0 else ''}{dd}pp</span>"
-            mets = [('지원완료율 (완료/시작)', fnl['cr'], bm['complete_rate']),
-                    ('교육시작 전환율 (교육시작/완료)', fnl['e_conv'], bm['edu_conv']),
-                    ('수강정원 달성율 (교육시작/정원)', fnl['fill'], bm['fill'])]
-            brows = ''.join(f"<tr><td class='name'>{m}</td><td><b class='acc'>{cur if cur is not None else '—'}%</b></td><td>{avg if avg is not None else '—'}%</td><td>{_bd(cur,avg)}</td></tr>" for m,cur,avg in mets)
-            sch = STATUS_KEY.get(c['name'],('',))[0]
-            conv_html += (f'<div class="card" style="margin-top:14px"><h3>② 기수 벤치마크 — {sch} 모객완료 {bm["n"]}개 기수({", ".join(str(g)+"기" for g in bm["gisus"])}) 평균 대비</h3>'
-                          f'<canvas id="{pid}_bench" style="max-height:230px"></canvas>'
-                          f'<table style="margin-top:10px"><thead><tr><th>지표</th><th>현재 {c["name"]}</th><th>기수 평균</th><th>차이</th></tr></thead><tbody>{brows}</tbody></table>'
-                          f'<p style="font-size:12px;color:var(--sub);margin-top:6px">모객중 기수는 교육시작·정원달성율이 진행 중이라 낮게 보일 수 있음(완료율 위주로 비교).</p></div>\n')
-    else:
-        conv_html = ('<h2>전환 퍼널 & 기수 벤치마크</h2>'
-                     '<div class="insight">모객 현황표에서 이 캠프를 찾지 못해 풀 퍼널·벤치마크를 생략합니다.</div>')
     panels += f"""<div class="panel" id="{pid}">
 <h2>현황 점검 (인사이트)</h2>
 <div class="insight {insight_cls}"><span class="h">{emoji} {c['name']} — {stxt}</span>
@@ -944,7 +1038,6 @@ for i,c in enumerate(camps):
 <ul class="comments">
 {''.join(f'<li>{x}</li>' for x in build_comments(c))}
 </ul></div>
-{conv_html}
 <h2>{c['name']} — 퍼널 요약</h2>
 <div class="grid kpi-grid">
   <div class="card kpi"><div class="label">지원시작</div><div class="val">{c['시작']}</div><div class="sub">원본 {c['total_rows']}행</div></div>
@@ -1017,7 +1110,6 @@ DATA.camps.forEach((c,i)=>{const p='p'+(i+1);
   mkNbcCross(p+'_age',c.by_age);
   mkNbcCross(p+'_gender',c.by_gender);
   mkStatusBar(p+'_status',c.by_status);
-  if(c.funnel){ mkFunnel(p+'_funnel',c.funnel); if(c.bench) mkBench(p+'_bench',c.funnel,c.bench); }
 });
 // 초기 로드 시 URL 해시에 해당하는 탭 활성화 (공유 링크 지원)
 selFromHash();
@@ -1105,32 +1197,6 @@ proj_md = ("## 📅 모집 마감 전망 (트렌드 × 종결일)\n\n"
            "| 캠프 | 모집기간 | 마감 | 경과 | 완료/목표 | 페이스(명/일) | 예상도달(목표대비) | 전망 |\n"
            "|---|---|---|---|---|---|---|---|\n" + "\n".join(_pmrows) + "\n\n" + "\n".join(_pmdiag) + "\n")
 
-# 전환 퍼널 & 기수 벤치마크 (MD)
-_fn_camps = [c for c in camps if c.get('funnel')]
-if _fn_camps:
-    def _fb(cur, avg):
-        if cur is None or avg is None: return ''
-        dd = round(cur-avg,1); return f" ({'+' if dd>=0 else ''}{dd}pp)"
-    _frows = []
-    for c in _fn_camps:
-        f = c['funnel']
-        _frows.append(f"| {c['name']} | {f['views']} | {f['start']} | {f['complete']} | {f['gov24']} | {f['edustart']} | {f['cr']}% | {f['e_conv']}% | {f['fill']}% |")
-    _fbench = []
-    for c in _fn_camps:
-        f, bm = c['funnel'], c.get('bench')
-        if not bm: continue
-        _fbench.append(f"- **{c['name']}** vs {STATUS_KEY.get(c['name'],('',))[0]} {bm['n']}개기수 평균 — "
-                       f"완료율 {f['cr']}% vs {bm['complete_rate']}%{_fb(f['cr'],bm['complete_rate'])} · "
-                       f"교육시작전환 {f['e_conv']}% vs {bm['edu_conv']}%{_fb(f['e_conv'],bm['edu_conv'])} · "
-                       f"정원달성 {f['fill']}% vs {bm['fill']}%{_fb(f['fill'],bm['fill'])}")
-    funnel_md = ("## 🔻 전환 퍼널 & 기수 벤치마크 (모객 현황표 연동)\n\n"
-                 "| 캠프 | 조회수 | 지원시작 | 지원완료 | 고용24등록 | 교육시작 | 완료율 | 교육시작전환 | 정원달성율 |\n"
-                 "|---|---|---|---|---|---|---|---|---|\n" + "\n".join(_frows) +
-                 "\n\n**기수 벤치마크**\n\n" + "\n".join(_fbench) +
-                 "\n\n> 지원완료는 중간 지표 — 실제 성과는 교육시작/정원(정원달성율). 모객중 기수는 교육시작·정원달성이 진행 중.\n")
-else:
-    funnel_md = ""
-
 with open(__file__, 'r', encoding='utf-8') as fp:
     py_src = fp.read()
 
@@ -1168,7 +1234,6 @@ status: TEST
 - **내배카 보유율** {nbc_rate_all}% (유효응답 {tot_nbc_t}명)
 
 {proj_md}
-{funnel_md}
 {trend_md}
 ## 🧐 부트캠프별 점검 코멘트 (비판적 점검 포인트)
 
@@ -1216,3 +1281,8 @@ for d in OUT_DIRS:
     with open(mp, 'w', encoding='utf-8') as fp:
         fp.write(md)
     print("WROTE", mp)
+
+```
+
+---
+*생성 2026-06-26 10:05 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리*
