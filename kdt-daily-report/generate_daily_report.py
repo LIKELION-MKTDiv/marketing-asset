@@ -66,6 +66,9 @@ PERIODS = {
     "클라우드 8기": ("2026-06-23", "2026-07-27"),
 }
 
+# 대조군(완료 기수 · 참고 비교용) — 표시명 기준. 리포트에 '대조군' 마커 표기.
+CONTROL = {"백엔드 자바 26기"}
+
 # 표시명 → 모객 현황표의 (스쿨명, 기수) 매핑 — 풀 퍼널·기수 벤치마크 연동용
 STATUS_KEY = {
     "AI+ NLP 5기": ("AIP NLP", 5),
@@ -424,6 +427,7 @@ camps = [analyze(f) for f in _apply_csvs]
 # === 모객 현황표 연동: 풀 퍼널(고용24·교육시작) + 기수 벤치마크 + 단위경제 + 연간누적 ===
 STATUS_TABLE, STATUS_FILE, STATUS_ANNUAL = load_status_table(FOLDER)
 for c in camps:
+    c['control'] = c['name'] in CONTROL
     key = STATUS_KEY.get(c['name'])
     rec = STATUS_TABLE.get(key) if key else None
     if rec:
@@ -562,6 +566,8 @@ h1{font-size:23px;font-weight:800;letter-spacing:-.5px}
 .tab{background:var(--card);border:1px solid var(--line);color:var(--sub);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;transition:.15s}
 .tab:hover{color:var(--txt)}
 .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tab.ctl{border-style:dashed;border-color:var(--sub)}
+.ctl-badge{display:inline-block;background:rgba(154,163,178,.18);color:var(--sub);border:1px dashed var(--sub);font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;margin-left:6px}
 .panel{display:none}.panel.active{display:block}
 h2{font-size:17px;margin:30px 0 12px;padding-left:10px;border-left:4px solid var(--accent)}
 h3{font-size:13.5px;color:var(--sub);margin:0 0 8px;font-weight:600}
@@ -610,9 +616,10 @@ function cum(o){let k=Object.keys(o).sort(),s=0,r=[];for(const x of k){s+=o[x];r
 // 탭 — URL 해시(#slug)로 탭별 공유/특정 가능
 const tabs=document.getElementById('tabs');
 const names=['Summary',...DATA.camps.map(c=>c.name)];
+const isCtl=[false,...DATA.camps.map(c=>!!c.control)];
 function slugify(n){return n.toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,'-').replace(/^-+|-+$/g,'');}
 const slugs=names.map((n,i)=>i===0?'summary':slugify(n));
-names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.id='tab-'+slugs[i];b.textContent=n;b.onclick=()=>{const cur=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();if(cur===slugs[i])sel(i);else location.hash=slugs[i];};tabs.appendChild(b);});
+names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'')+(isCtl[i]?' ctl':'');b.id='tab-'+slugs[i];b.textContent=n+(isCtl[i]?' · 대조군':'');b.onclick=()=>{const cur=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();if(cur===slugs[i])sel(i);else location.hash=slugs[i];};tabs.appendChild(b);});
 function sel(i){if(i<0||i>=names.length)i=0;document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',j===i));}
 function selFromHash(){let h=decodeURIComponent((location.hash||'').replace(/^#/,'')).toLowerCase();let i=slugs.indexOf(h);if(i<0){const m=h.match(/^tab-?(\\d+)$/);if(m)i=Number(m[1]);else if(/^\\d+$/.test(h))i=Number(h);}sel(i<0?0:i);}
 window.addEventListener('hashchange',selFromHash);
@@ -1164,8 +1171,11 @@ for i,c in enumerate(camps):
                     f'<div class="card kpi"><div class="label">검토전</div><div class="val">{sl["pending"]}</div><div class="sub">심사 적체</div></div>'
                     f'<div class="card kpi"><div class="label">지원취소</div><div class="val">{sl["cancel"]}</div><div class="sub">이탈</div></div>'
                     f'</div></div>\n')
+    ctl_badge = '<span class="ctl-badge">📎 대조군 · 모집 완료 기수</span>' if c.get('control') else ''
+    ctl_note = ('<div class="insight" style="border-left-color:var(--sub)"><b>📎 대조군</b> — 이미 모집 완료된 기수로, 활성 캠프의 성과를 비교·해석하기 위한 참고 기준입니다. (진행 전망·전일 비교는 의미 제한적)</div>' if c.get('control') else '')
     panels += f"""<div class="panel" id="{pid}">
-<h2>현황 점검 (인사이트)</h2>
+<h2>현황 점검 (인사이트){ctl_badge}</h2>
+{ctl_note}
 <div class="insight {insight_cls}"><span class="h">{emoji} {c['name']} — {stxt}</span>
 {body}</div>
 <div class="grid kpi-grid">

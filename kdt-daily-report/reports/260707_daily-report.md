@@ -9,7 +9,7 @@ status: TEST
 
 # 📊 KDT 모객현황 데일리 리포트 · 2026-07-07
 
-> [!info] 대상 캠프 3종 · 내부직원·테스트 제외 · **TEST 출력본**
+> [!info] 대상 캠프 4종 · 내부직원·테스트 제외 · **TEST 출력본**
 
 ## 🔗 리포트 열기 (인터랙티브)
 
@@ -23,12 +23,13 @@ status: TEST
 
 | 캠프 | 목표모객 | 수강정원 | 지원시작 | 지원중 | 지원완료 | 완료달성율<br>(완료/시작) | 목표달성율<br>(완료/목표) | 경쟁률<br>(지원/정원) | 내배카 보유율 |
 |---|---|---|---|---|---|---|---|---|---|
+| 백엔드 자바 26기 | 72 | 24 | 285 | 180 | 99 | 34.7% | 137.5% | 11.9:1 | 56.5% |
 | 백엔드 자바 27기 | 70 | 35 | 25 | 21 | 4 | 16.0% | 5.7% | 0.7:1 | 45.5% |
 | 클라우드 8기 | 60 | 30 | 101 | 67 | 33 | 32.7% | 55.0% | 3.4:1 | 53.7% |
 | 그로스 마케팅 6기 | 142 | 57 | 397 | 278 | 114 | 28.7% | 80.3% | 7.0:1 | 61.3% |
 
-- **총 지원시작** 523 · **완료** 151 (평균 전환 28.9%) · **미완료 적체** 366 (70%)
-- **내배카 보유율** 58.9% (유효응답 246명)
+- **총 지원시작** 808 · **완료** 250 (평균 전환 30.9%) · **미완료 적체** 546 (68%)
+- **내배카 보유율** 58.1% (유효응답 384명)
 
 ## 📅 KDT 2026 연간 누적 (모객 현황표 전체)
 
@@ -39,10 +40,12 @@ status: TEST
 
 | 캠프 | 모집기간 | 마감 | 경과 | 완료/목표 | 페이스(명/일) | 예상도달(목표대비) | 전망 |
 |---|---|---|---|---|---|---|---|
+| 백엔드 자바 26기 | 2026-05-27~2026-06-29 | D-0 | 100% | 99/72 | 0.0 | 99 (138%) | 목표 조기 달성 |
 | 백엔드 자바 27기 | 2026-07-01~2026-08-03 | D-27 | 21% | 4/70 | 0.57 | 19 (27%) | 마감 내 목표 미달 전망 |
 | 클라우드 8기 | 2026-06-23~2026-07-27 | D-20 | 43% | 33/60 | 1.86 | 70 (117%) | 마감 내 목표 달성 전망 |
 | 그로스 마케팅 6기 | 2026-06-16~2026-07-19 | D-12 | 65% | 114/142 | 5.29 | 177 (125%) | 마감 내 목표 달성 전망 |
 
+- **백엔드 자바 26기**: 목표 모객(72명) 초과 달성 · 마감 D-0 — 선발·등록 전환·정원 적합도로 전환.
 - **백엔드 자바 27기**: 최근 0.57명/일 → 마감 예상 19명(목표 70 대비 27%) → **마감 내 목표 미달 전망**.
 - **클라우드 8기**: 최근 1.86명/일 → 마감 예상 70명(목표 60 대비 117%) → **마감 내 목표 달성 전망**.
 - **그로스 마케팅 6기**: 최근 5.29명/일 → 마감 예상 177명(목표 142 대비 125%) → **마감 내 목표 달성 전망**.
@@ -51,6 +54,7 @@ status: TEST
 
 | 캠프 | 조회수 | 지원시작 | 지원완료 | 고용24등록 | 교육시작 | 완료율 | 교육시작전환 | 정원달성율 |
 |---|---|---|---|---|---|---|---|---|
+| 백엔드 자바 26기 | 52592 | 285 | 99 | 29 | 25 | 34.7% | 25.3% | 104.2% |
 | 백엔드 자바 27기 | 7692 | 25 | 4 | 0 | 0 | 16.0% | 0.0% | 0.0% |
 | 클라우드 8기 | 16823 | 101 | 33 | 4 | 4 | 32.7% | 12.1% | 13.3% |
 | 그로스 마케팅 6기 | 44298 | 397 | 114 | 17 | 14 | 28.7% | 12.3% | 24.6% |
@@ -59,12 +63,14 @@ status: TEST
 
 | 캠프 | 교육시작/정원 | 정원 달성 진단 | 완료→교육시작 전환 |
 |---|---|---|---|
+| 백엔드 자바 26기 | 교육시작 25/정원 24 | 🎉 정원 초과 104.2% | 25.3% (평균 35.2% 대비 -9.9pp) |
 | 백엔드 자바 27기 | 교육시작 0/정원 35 | 모객중(현재 0.0%, 종료후 확정) | 0.0% (모객중·참고용) |
 | 클라우드 8기 | 교육시작 4/정원 30 | 모객중(현재 13.3%, 종료후 확정) | 12.1% (모객중·참고용) |
 | 그로스 마케팅 6기 | 교육시작 14/정원 57 | 모객중(현재 24.6%, 종료후 확정) | 12.3% (모객중·참고용) |
 
 **기수 벤치마크**
 
+- **백엔드 자바 26기** vs 백엔드자바 4개기수 평균 — 완료율 34.7% vs 30.2% (+4.5pp) · 교육시작전환 25.3% vs 35.2% (-9.9pp) · 정원달성 104.2% vs 83.3% (+20.9pp)
 - **백엔드 자바 27기** vs 백엔드자바 5개기수 평균 — 완료율 16.0% vs 31.1% (-15.1pp) · 교육시작전환 0.0% vs 33.2% (-33.2pp) · 정원달성 0.0% vs 79.1% (-79.1pp)
 - **클라우드 8기** vs 클라우드 3개기수 평균 — 완료율 32.7% vs 26.1% (+6.6pp) · 교육시작전환 12.1% vs 30.5% (-18.4pp) · 정원달성 13.3% vs 85.8% (-72.5pp)
 - **그로스 마케팅 6기** vs 그로스마케팅 2개기수 평균 — 완료율 28.7% vs 24.5% (+4.2pp) · 교육시작전환 12.3% vs 43.0% (-30.7pp) · 정원달성 24.6% vs 101.3% (-76.7pp)
@@ -75,6 +81,7 @@ status: TEST
 
 | 캠프 | 집행예산 | 예산소진율 | CPA(완료당) | CAC(획득당) | 기대매출 | ROAS |
 |---|---|---|---|---|---|---|
+| 백엔드 자바 26기 | 8554만 | 99% | 30만 | 86만 | 4.4억 | 509% |
 | 백엔드 자바 27기 | 918만 | 9% | 37만 | 230만 | ₩0 | 0% |
 | 클라우드 8기 | 2668만 | 27% | 26만 | 81만 | 5808만 | 218% |
 | 그로스 마케팅 6기 | 5322만 | 67% | 13만 | 47만 | 1.5억 | 290% |
@@ -83,6 +90,7 @@ status: TEST
 
 | 캠프 | 제출완료 | 검토전(적체) | 예비합격 | 합격 | 불합격 | 합격률 | 불합격률 |
 |---|---|---|---|---|---|---|---|
+| 백엔드 자바 26기 | 99 | 3 | 15 | 41 | 40 | 50.6% | 49.4% |
 | 백엔드 자바 27기 | 4 | 4 | 0 | 0 | 0 | —% | —% |
 | 클라우드 8기 | 33 | 2 | 9 | 17 | 5 | 77.3% | 22.7% |
 | 그로스 마케팅 6기 | 114 | 21 | 3 | 37 | 53 | 41.1% | 58.9% |
@@ -118,6 +126,12 @@ status: TEST
 
 ## 🧐 부트캠프별 점검 코멘트 (비판적 점검 포인트)
 
+**백엔드 자바 26기** (목표 72 · 달성율 137.5%)
+
+1. 목표 72명 도달(달성율 137.5%) — 점검 지표를 완료 '수'에서 질(적합도·등록 전환·미수료 리스크)로 전환할 시점.
+2. 완료전환 34.7% vs 미완료 63% — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.
+3. 대학(원)생 내배카 보유율 32.3%(n=31) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.
+
 **백엔드 자바 27기** (목표 70 · 달성율 5.7%)
 
 1. 목표 달성율 5.7%를 절대값으로 판단하지 말 것 — 최근 7일 일평균 완료 1.3명 기준 잔여 66명은 약 51일 소요. 마감 D-27 내 달성 불가 페이스 — 강한 가속/연장 검토.
@@ -137,6 +151,27 @@ status: TEST
 3. 대학(원)생 내배카 보유율 36.4%(n=33) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.
 
 ## 🧮 내일배움카드 교차분석 (melt · cast)
+
+**백엔드 자바 26기** — 연령대별 내배카 보유율
+
+| 연령대 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| ~19 | 1 | 2 | 3 | 33.3% |
+| 20-24 | 20 | 19 | 39 | 51.3% |
+| 25-29 | 42 | 32 | 74 | 56.8% |
+| 30-34 | 12 | 4 | 16 | 75.0% |
+| 35-39 | 2 | 1 | 3 | 66.7% |
+| 40+ | 1 | 2 | 3 | 33.3% |
+
+신분(상태1)별 내배카 보유율
+
+| 신분 | YES | NO | 합계 | YES 비율 |
+|---|---|---|---|---|
+| 대학(원)생 | 10 | 21 | 31 | 32.3% |
+| 취업준비생 | 52 | 28 | 80 | 65.0% |
+| 직장인/프리랜서 | 10 | 3 | 13 | 76.9% |
+| 기타 | 5 | 6 | 11 | 45.5% |
+| 알 수 없음 | 1 | 2 | 3 | 33.3% |
 
 **백엔드 자바 27기** — 연령대별 내배카 보유율
 
@@ -198,6 +233,17 @@ status: TEST
 
 ## 🧭 연령대별 합불상태 현황 (연령대 × 합불상태 · cast)
 
+**백엔드 자바 26기** — 연령대별 합불상태 현황
+
+| 연령대 | 검토전 | 대상아님 | 예비합격 | 합격 | 불합격 | 지원취소 | 합계 |
+|---|---|---|---|---|---|---|---|
+| ~19 | 0 | 7 | 2 | 0 | 1 | 1 | 11 |
+| 20-24 | 0 | 78 | 4 | 9 | 10 | 2 | 103 |
+| 25-29 | 2 | 57 | 4 | 26 | 21 | 9 | 119 |
+| 30-34 | 1 | 23 | 3 | 4 | 6 | 2 | 39 |
+| 35-39 | 0 | 6 | 0 | 2 | 1 | 0 | 9 |
+| 40+ | 0 | 9 | 2 | 0 | 1 | 0 | 12 |
+
 **백엔드 자바 27기** — 연령대별 합불상태 현황
 
 | 연령대 | 검토전 | 대상아님 | 지원취소 | 합계 |
@@ -234,6 +280,7 @@ status: TEST
 
 | 캠프 | 중앙값 | 평균 | Q1 | Q3 | min | max | n |
 |---|---|---|---|---|---|---|---|
+| 백엔드 자바 26기 | 25.0 | 27.4 | 23.0 | 29.0 | 18.0 | 77.0 | 183 |
 | 백엔드 자바 27기 | 26.0 | 27.1 | 23.0 | 30.0 | 19.0 | 54.0 | 25 |
 | 클라우드 8기 | 25.0 | 27.4 | 23.0 | 29.0 | 15.0 | 58.0 | 69 |
 | 그로스 마케팅 6기 | 25.0 | 25.9 | 23.0 | 28.0 | 18.0 | 60.0 | 299 |
@@ -313,6 +360,9 @@ PERIODS = {
     "그로스 마케팅 6기": ("2026-06-16", "2026-07-19"),
     "클라우드 8기": ("2026-06-23", "2026-07-27"),
 }
+
+# 대조군(완료 기수 · 참고 비교용) — 표시명 기준. 리포트에 '대조군' 마커 표기.
+CONTROL = {"백엔드 자바 26기"}
 
 # 표시명 → 모객 현황표의 (스쿨명, 기수) 매핑 — 풀 퍼널·기수 벤치마크 연동용
 STATUS_KEY = {
@@ -672,6 +722,7 @@ camps = [analyze(f) for f in _apply_csvs]
 # === 모객 현황표 연동: 풀 퍼널(고용24·교육시작) + 기수 벤치마크 + 단위경제 + 연간누적 ===
 STATUS_TABLE, STATUS_FILE, STATUS_ANNUAL = load_status_table(FOLDER)
 for c in camps:
+    c['control'] = c['name'] in CONTROL
     key = STATUS_KEY.get(c['name'])
     rec = STATUS_TABLE.get(key) if key else None
     if rec:
@@ -810,6 +861,8 @@ h1{font-size:23px;font-weight:800;letter-spacing:-.5px}
 .tab{background:var(--card);border:1px solid var(--line);color:var(--sub);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;transition:.15s}
 .tab:hover{color:var(--txt)}
 .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tab.ctl{border-style:dashed;border-color:var(--sub)}
+.ctl-badge{display:inline-block;background:rgba(154,163,178,.18);color:var(--sub);border:1px dashed var(--sub);font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;margin-left:6px}
 .panel{display:none}.panel.active{display:block}
 h2{font-size:17px;margin:30px 0 12px;padding-left:10px;border-left:4px solid var(--accent)}
 h3{font-size:13.5px;color:var(--sub);margin:0 0 8px;font-weight:600}
@@ -858,9 +911,10 @@ function cum(o){let k=Object.keys(o).sort(),s=0,r=[];for(const x of k){s+=o[x];r
 // 탭 — URL 해시(#slug)로 탭별 공유/특정 가능
 const tabs=document.getElementById('tabs');
 const names=['Summary',...DATA.camps.map(c=>c.name)];
+const isCtl=[false,...DATA.camps.map(c=>!!c.control)];
 function slugify(n){return n.toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,'-').replace(/^-+|-+$/g,'');}
 const slugs=names.map((n,i)=>i===0?'summary':slugify(n));
-names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.id='tab-'+slugs[i];b.textContent=n;b.onclick=()=>{const cur=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();if(cur===slugs[i])sel(i);else location.hash=slugs[i];};tabs.appendChild(b);});
+names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'')+(isCtl[i]?' ctl':'');b.id='tab-'+slugs[i];b.textContent=n+(isCtl[i]?' · 대조군':'');b.onclick=()=>{const cur=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();if(cur===slugs[i])sel(i);else location.hash=slugs[i];};tabs.appendChild(b);});
 function sel(i){if(i<0||i>=names.length)i=0;document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',j===i));}
 function selFromHash(){let h=decodeURIComponent((location.hash||'').replace(/^#/,'')).toLowerCase();let i=slugs.indexOf(h);if(i<0){const m=h.match(/^tab-?(\\d+)$/);if(m)i=Number(m[1]);else if(/^\\d+$/.test(h))i=Number(h);}sel(i<0?0:i);}
 window.addEventListener('hashchange',selFromHash);
@@ -1412,8 +1466,11 @@ for i,c in enumerate(camps):
                     f'<div class="card kpi"><div class="label">검토전</div><div class="val">{sl["pending"]}</div><div class="sub">심사 적체</div></div>'
                     f'<div class="card kpi"><div class="label">지원취소</div><div class="val">{sl["cancel"]}</div><div class="sub">이탈</div></div>'
                     f'</div></div>\n')
+    ctl_badge = '<span class="ctl-badge">📎 대조군 · 모집 완료 기수</span>' if c.get('control') else ''
+    ctl_note = ('<div class="insight" style="border-left-color:var(--sub)"><b>📎 대조군</b> — 이미 모집 완료된 기수로, 활성 캠프의 성과를 비교·해석하기 위한 참고 기준입니다. (진행 전망·전일 비교는 의미 제한적)</div>' if c.get('control') else '')
     panels += f"""<div class="panel" id="{pid}">
-<h2>현황 점검 (인사이트)</h2>
+<h2>현황 점검 (인사이트){ctl_badge}</h2>
+{ctl_note}
 <div class="insight {insight_cls}"><span class="h">{emoji} {c['name']} — {stxt}</span>
 {body}</div>
 <div class="grid kpi-grid">
@@ -1770,4 +1827,4 @@ for d in OUT_DIRS:
 ```
 
 ---
-*생성 2026-07-07 09:37 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리*
+*생성 2026-07-07 14:26 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리*
