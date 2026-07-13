@@ -1,0 +1,500 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KDT 모객현황 데일리 리포트 · 260713</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
+<style>
+:root{--bg:#0f1115;--card:#181b22;--card2:#1f232c;--line:#2a2f3a;--txt:#e6e8ec;--sub:#9aa3b2;--accent:#ff7a45;--blue:#4dabf7;--green:#51cf66;--red:#ff6b6b;--yellow:#ffd43b;--purple:#b197fc}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;line-height:1.5;padding:28px 20px;max-width:1180px;margin:0 auto}
+header{border-bottom:2px solid var(--accent);padding-bottom:14px}
+h1{font-size:23px;font-weight:800;letter-spacing:-.5px}
+.meta{color:var(--sub);font-size:13px;margin-top:6px}
+.tag{display:inline-block;background:var(--card2);color:var(--sub);font-size:11px;padding:2px 8px;border-radius:10px;margin-right:6px}
+.tabs{display:flex;gap:6px;margin:18px 0 22px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:10;border-bottom:1px solid var(--line)}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--sub);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;transition:.15s}
+.tab:hover{color:var(--txt)}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tab.ctl{border-style:dashed;border-color:var(--sub)}
+.ctl-badge{display:inline-block;background:rgba(154,163,178,.18);color:var(--sub);border:1px dashed var(--sub);font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;margin-left:6px}
+.panel{display:none}.panel.active{display:block}
+h2{font-size:17px;margin:30px 0 12px;padding-left:10px;border-left:4px solid var(--accent)}
+h3{font-size:13.5px;color:var(--sub);margin:0 0 8px;font-weight:600}
+.grid{display:grid;gap:14px}
+.kpi-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi .label{font-size:12px;color:var(--sub)}.kpi .val{font-size:26px;font-weight:800;margin-top:4px}.kpi .sub{font-size:12px;color:var(--sub);margin-top:2px}
+.acc{color:var(--accent)}.up{color:var(--green)}.down{color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+th,td{padding:9px 11px;text-align:center;border-bottom:1px solid var(--line)}
+th{background:var(--card2);color:var(--sub);font-weight:600;font-size:12px}
+td.name{text-align:left;font-weight:700}
+.two{grid-template-columns:1fr 1fr}@media(max-width:760px){.two{grid-template-columns:1fr}}
+canvas{max-height:300px}
+.pill{font-size:11px;padding:2px 7px;border-radius:8px;font-weight:700}
+.pill.g{background:rgba(81,207,102,.15);color:var(--green)}.pill.r{background:rgba(255,107,107,.15);color:var(--red)}
+.insight{background:var(--card2);border-left:3px solid var(--blue);padding:11px 15px;border-radius:8px;margin-bottom:10px;font-size:13.5px}
+.insight.warn{border-left-color:var(--yellow)}.insight.alert{border-left-color:var(--red)}
+.insight b{color:var(--accent)}.insight .h{font-weight:800;display:block;margin-bottom:3px;color:var(--txt)}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--sub);font-size:12px}
+.barmini{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+.barmini .t{width:78px;color:var(--sub);text-align:right;flex-shrink:0}
+.barmini .bar{flex:1;height:18px;background:var(--card2);border-radius:5px;overflow:hidden;position:relative}
+.barmini .bar>span{display:block;height:100%}
+.barmini .v{width:96px;flex-shrink:0;font-size:11px;color:var(--sub)}
+.comment-card{border-left:3px solid var(--yellow);background:rgba(255,212,59,.05)}
+.comments{margin:4px 0 0;padding-left:0;list-style:none}
+.comments li{position:relative;padding:8px 10px 8px 26px;font-size:13.5px;border-bottom:1px solid var(--line);line-height:1.55}
+.comments li:last-child{border-bottom:none}
+.comments li::before{content:'▹';position:absolute;left:6px;top:8px;color:var(--yellow);font-weight:700}
+.comments b{color:var(--accent)}
+</style></head><body>
+<header><h1>📊 KDT 모객현황 데일리 리포트</h1>
+<div class="meta"><span class="tag">기준일 2026-07-13</span><span class="tag">소스: kdt 지원서 CSV 3종</span><span class="tag">내부직원·테스트 제외</span><span class="tag">TEST 출력본</span></div>
+</header>
+<div class="tabs" id="tabs"></div>
+<div class="panel active" id="p0">
+<h2>KDT 2026 연간 누적 <span style="font-size:12px;color:var(--sub)">· 모객 현황표 전체</span></h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">지원시작</div><div class="val">5,319</div><div class="sub">연간 누적</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">1,481</div><div class="sub">완료율 27.84%</div></div>
+  <div class="card kpi"><div class="label">교육시작</div><div class="val up">481</div><div class="sub">교육시작전환 32.48%</div></div>
+  <div class="card kpi"><div class="label">집행비용</div><div class="val">11.7억</div><div class="sub">예상매출 63.7억</div></div>
+  <div class="card kpi"><div class="label">ROAS(전체)</div><div class="val">542.48%</div><div class="sub">매출달성 32.66%</div></div>
+</div>
+<h2>전체 요약</h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">총 지원시작</div><div class="val">691</div><div class="sub">백엔드 자바 27기 49 · 클라우드 8기 145 · 그로스 마케팅 6기 497</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">202</div><div class="sub">완료전환 29.2%</div></div>
+  <div class="card kpi"><div class="label">미완료(지원중)</div><div class="val down">479</div><div class="sub">전체의 69% 적체</div></div>
+  <div class="card kpi"><div class="label">내배카 보유율</div><div class="val">56.6%</div><div class="sub">유효응답 325명</div></div>
+  <div class="card kpi"><div class="label">대상 캠프</div><div class="val">3</div><div class="sub">개</div></div>
+</div>
+<h2>모집 마감 전망 (트렌드 × 종결일)</h2>
+<div class="card"><table>
+<thead><tr><th>캠프</th><th>모집기간</th><th>마감</th><th>경과</th><th>완료/목표</th><th>페이스<br>(명/일)</th><th>예상 도달<br>(목표대비)</th><th>전망</th></tr></thead>
+<tbody><tr><td class='name'>백엔드 자바 27기</td><td>2026-07-01~2026-08-03</td><td><b>D-21</b></td><td>38%</td><td>13/70</td><td>1.29</td><td>40 (57%)</td><td><span class='pill r'>마감 내 목표 미달 전망</span></td></tr><tr><td class='name'>클라우드 8기</td><td>2026-06-23~2026-07-27</td><td><b>D-14</b></td><td>60%</td><td>44/60</td><td>1.71</td><td>68 (113%)</td><td><span class='pill g'>마감 내 목표 달성 전망</span></td></tr><tr><td class='name'>그로스 마케팅 6기</td><td>2026-06-16~2026-07-19</td><td><b>D-6</b></td><td>82%</td><td>145/142</td><td>5.0</td><td>175 (123%)</td><td><span class='pill g'>목표 조기 달성</span></td></tr></tbody></table>
+<p style="font-size:12px;color:var(--sub);margin-top:8px">예상 도달 = 현재 완료 + 잔여일 × 최근 완료 페이스(7일↑은 최근 7일 평균, 미만은 경과 전체 평균). ⚠️초기 = 모집 7일 미만, 추정 신뢰도 낮음.</p></div>
+<h2>캠프별 단위경제 <span style="font-size:12px;color:var(--sub)">· 모객 현황표 (비용/매출)</span></h2><div class="card"><table><thead><tr><th>캠프</th><th>집행예산</th><th>예산소진율</th><th>CPA(완료당)</th><th>CAC(획득당)</th><th>기대매출</th><th>ROAS</th></tr></thead><tbody><tr><td class='name'>백엔드 자바 27기</td><td>1753만</td><td>18%</td><td>36만</td><td>135만</td><td>₩0</td><td><b class='acc'>0%</b></td></tr><tr><td class='name'>클라우드 8기</td><td>4387만</td><td>44%</td><td>30만</td><td>100만</td><td>5808만</td><td><b class='acc'>132%</b></td></tr><tr><td class='name'>그로스 마케팅 6기</td><td>6712만</td><td>84%</td><td>14만</td><td>46만</td><td>2.1억</td><td><b class='acc'>312%</b></td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:8px">CPA=집행예산/지원완료, CAC=집행예산/교육시작(획득). 현황표 기준.</p></div>
+<h2>선발(심사) 현황 <span style="font-size:12px;color:var(--sub)">· 합불상태 (합격/불합격/예비/검토전)</span></h2><div class="card"><table><thead><tr><th>캠프</th><th>제출완료</th><th>검토전<br>(적체)</th><th>예비합격</th><th>합격</th><th>불합격</th><th>합격률</th><th>불합격률</th></tr></thead><tbody><tr><td class='name'>백엔드 자바 27기</td><td>13</td><td>5</td><td style='color:var(--yellow)'>0</td><td class='up'>8</td><td class='down'>0</td><td>100.0%</td><td class=''>0.0%</td></tr><tr><td class='name'>클라우드 8기</td><td>44</td><td>5</td><td style='color:var(--yellow)'>14</td><td class='up'>20</td><td class='down'>5</td><td>80.0%</td><td class=''>20.0%</td></tr><tr><td class='name'>그로스 마케팅 6기</td><td>145</td><td>18</td><td style='color:var(--yellow)'>9</td><td class='up'>52</td><td class='down'>66</td><td>44.1%</td><td class='down'>55.9%</td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:8px">합격률=합격/(합격+불합격). 불합격률↑ = 지원자 퀄리티 관리 시그널. 검토전=심사 적체(ITLAB 선발 대기).</p></div>
+<h2>전일 대비 경향성 · 직전 260707 대비 (비판적 분석)</h2>
+<div class="card"><h3>핵심 지표 전일 대비 변화 (Δ)</h3>
+<table><thead><tr><th>캠프</th><th>지원시작</th><th>지원완료</th><th>완료전환율</th><th>내배카</th><th>목표달성율</th><th>심사진행<br>(합/불/예비)</th></tr></thead><tbody><tr><td class='name'>백엔드 자바 27기</td><td><span class='up'>▲24</span></td><td><span class='up'>▲9</span></td><td><span class='up'>▲10.5pp</span></td><td><span class='up'>▲8.7pp</span></td><td><span class='up'>▲12.9pp</span></td><td style='font-size:12px'>합+8 불+0 예+0</td></tr><tr><td class='name'>클라우드 8기</td><td><span class='up'>▲44</span></td><td><span class='up'>▲11</span></td><td><span class='down'>▼2.4pp</span></td><td><span class='down'>▼0.8pp</span></td><td><span class='up'>▲18.3pp</span></td><td style='font-size:12px'>합+3 불+0 예+5</td></tr><tr><td class='name'>그로스 마케팅 6기</td><td><span class='up'>▲100</span></td><td><span class='up'>▲31</span></td><td><span class='up'>▲0.5pp</span></td><td><span class='down'>▼3.3pp</span></td><td><span class='up'>▲21.8pp</span></td><td style='font-size:12px'>합+15 불+13 예+6</td></tr></tbody></table>
+<p style="font-size:12px;color:var(--sub);margin-top:8px">Δ = 오늘 − 직전 리포트. pp = 퍼센트포인트. ▲ 증가 / ▼ 감소. 1일 변동이므로 추세 확정 전 노이즈 가능성 유의.</p></div>
+<div class='card comment-card' style='margin-top:10px'><h3>📊 백엔드 자바 27기 — 전일 대비 경향성</h3><ul class='comments'><li><b>지원 +24명 · 전환율 +10.5pp 동반</b> — 양·질 함께 개선. 단, 1일 변동이라 추세 확정 전 2~3일 더 관찰 필요.</li><li><b>심사 진행 8건</b>(합격 +8·불합격 +0·예비 +0) vs 지원완료 +9 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.</li><li><b>목표 달성율 5.7→18.6% (+12.9pp)</b> — 오늘 +9명 페이스면 잔여 57명에 약 6일. 잔여 모집기간과 대조해 '달성 가능 페이스'인지 판단.</li><li><b>내배카 보유율 +8.7pp 변동</b> — 신규 유입의 연령·신분 세그먼트가 이동했을 가능성. 연령대×합불상태/내배카 교차표로 어느 층이 늘었는지 확인.</li></ul></div><div class='card comment-card' style='margin-top:10px'><h3>📊 클라우드 8기 — 전일 대비 경향성</h3><ul class='comments'><li><b>신규 지원 +44명인데 완료전환율 -2.4pp 하락</b> — 유입은 늘었으나 완료로 이어지지 않음. '숫자 증가'에 안심 말고 유입 채널 품질·지원서 이탈 지점을 의심해야 함.</li><li><b>심사 진행 8건</b>(합격 +3·불합격 +0·예비 +5) vs 지원완료 +11 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.</li><li><b>목표 달성율 55.0→73.3% (+18.3pp)</b> — 오늘 +11명 페이스면 잔여 16명에 약 1일. 잔여 모집기간과 대조해 '달성 가능 페이스'인지 판단.</li></ul></div><div class='card comment-card' style='margin-top:10px'><h3>📊 그로스 마케팅 6기 — 전일 대비 경향성</h3><ul class='comments'><li><b>지원 +100명 · 전환율 +0.5pp 동반</b> — 양·질 함께 개선. 단, 1일 변동이라 추세 확정 전 2~3일 더 관찰 필요.</li><li><b>심사 진행 34건</b>(합격 +15·불합격 +13·예비 +6) vs 지원완료 +31 — 완료수 증가가 '신규 완료'인지 '심사 결과 반영'인지 구분해야 전환율 해석이 정확.</li><li>목표 도달 유지(달성율 102.1%) — 점검 축을 완료 수 → 등록 전환·적합도로 이동.</li><li><b>내배카 보유율 -3.3pp 변동</b> — 신규 유입의 연령·신분 세그먼트가 이동했을 가능성. 연령대×합불상태/내배카 교차표로 어느 층이 늘었는지 확인.</li></ul></div>
+<h2>캠프별 퍼널 비교</h2>
+<div class="card"><table>
+<thead><tr><th>캠프</th><th>지원시작</th><th>지원중</th><th>지원완료</th><th>완료전환율</th><th>유효취소</th><th>내배카 보유율</th></tr></thead><tbody>
+<tr><td class='name'>백엔드 자바 27기</td><td>49</td><td>35</td><td><b class='acc'>13</b></td><td><span class='pill r'>26.5%</span></td><td>1 (2.0%)</td><td>54.2%</td></tr>
+<tr><td class='name'>클라우드 8기</td><td>145</td><td>98</td><td><b class='acc'>44</b></td><td><span class='pill g'>30.3%</span></td><td>3 (2.1%)</td><td>52.9%</td></tr>
+<tr><td class='name'>그로스 마케팅 6기</td><td>497</td><td>346</td><td><b class='acc'>145</b></td><td><span class='pill r'>29.2%</span></td><td>6 (1.2%)</td><td>58.0%</td></tr>
+</tbody></table></div>
+<h2>캠프별 비교 차트</h2>
+<div class="grid two">
+  <div class="card"><h3>지원시작 vs 완료 (명)</h3><canvas id="sum_funnel"></canvas></div>
+  <div class="card"><h3>완료전환율 · 내배카 보유율 (%)</h3><canvas id="sum_rate"></canvas></div>
+</div>
+<h2>전체 지원자 만나이 분포 — 캠프 비교 (박스플롯) · 점 색상 = 합불상태</h2>
+<div class="card"><h3>박스 = 전체 지원자 Q1~Q3 · 중앙선 = 중앙값 · 수염 = min~max &nbsp;|&nbsp; 점: <span style="color:var(--green)">● 합격</span> · <span style="color:var(--red)">● 불합격</span> · <span style="color:var(--sub)">● 그 외(예비·검토전·지원중·취소)</span></h3><canvas id="sum_box" style="max-height:360px"></canvas>
+<table style="margin-top:12px"><thead><tr><th>캠프</th><th>중앙값</th><th>평균</th><th>Q1</th><th>Q3</th><th>min</th><th>max</th><th>n</th></tr></thead><tbody>
+<tr><td class='name'>백엔드 자바 27기</td><td><b class='acc'>26.0</b></td><td>26.2</td><td>23.0</td><td>27.0</td><td>19.0</td><td>54.0</td><td>53</td></tr><tr><td class='name'>클라우드 8기</td><td><b class='acc'>26.0</b></td><td>28.4</td><td>23.0</td><td>30.0</td><td>15.0</td><td>76.0</td><td>154</td></tr><tr><td class='name'>그로스 마케팅 6기</td><td><b class='acc'>25.0</b></td><td>25.8</td><td>23.0</td><td>28.0</td><td>15.0</td><td>60.0</td><td>502</td></tr>
+</tbody></table></div>
+<h2>핵심 인사이트</h2>
+<div class="insight alert"><span class="h">🚨 미완료 적체가 최대 누수 — 전체 시작자의 69%가 지원중에서 멈춤</span>완료전환율 평균 29.2%. 트래픽은 유입되나 <b>지원서 완료</b> 단계 대규모 이탈. 완료유도 넛지 ROI 최상위 구간.</div>
+<div class="insight warn"><span class="h">⚠️ 내배카(국비) 의존도 캠프별 격차 — 최고 그로스 마케팅 6기 58.0%</span>국비 지원 메시지 민감도가 캠프마다 다름 → 소구 메시지 분리 검토.</div>
+<div class="insight"><span class="h">💡 전환율 격차 — 클라우드 8기 30.3% vs 백엔드 자바 27기 26.5%</span>탭에서 캠프별 연령·성별·신분 교차분석으로 차이 원인 추적.</div>
+</div><div class="panel" id="p1">
+<h2>현황 점검 (인사이트)</h2>
+
+<div class="insight alert"><span class="h">🔴 백엔드 자바 27기 — 목표 미달 — 가속 필요</span>
+목표 모객 <b>70명</b> 중 <b>13명</b> 달성 · 목표 달성율 <b>18.6%</b> · 목표까지 <b>57명</b> 남음. 지원완료 달성율(시작 대비) 26.5% · 수강정원 35명 · 경쟁률 1.4:1(지원/정원).</div>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">목표 모객수</div><div class="val">70</div><div class="sub">목표 지원완료</div></div>
+  <div class="card kpi"><div class="label">수강정원</div><div class="val">35명</div><div class="sub">최종 정원</div></div>
+  <div class="card kpi"><div class="label">지원완료수</div><div class="val acc">13</div><div class="sub">현재 모객</div></div>
+  <div class="card kpi"><div class="label">목표 달성율</div><div class="val down">18.6%</div><div class="sub">= 완료/목표</div></div>
+  <div class="card kpi"><div class="label">경쟁률</div><div class="val">1.4:1</div><div class="sub">지원시작/정원</div></div>
+  <div class="card kpi"><div class="label">정원달성율 ⭐CDC</div><div class="val ">0.0%</div><div class="sub">교육시작 0/35명</div></div>
+  <div class="card kpi"><div class="label">완료→교육시작 ⭐CDC</div><div class="val">0.0%</div><div class="sub">교육시작 0/완료 13</div></div>
+</div>
+<div class="insight alert" style="margin-top:12px"><span class="h">🚨 모집 마감 전망 — 2026-07-01 ~ 2026-08-03 · 마감 D-21 (기간 34일 중 13일 · 38% 경과)</span>
+최근 완료 페이스 <b>1.29명/일</b> → 마감(2026-08-03) 예상 누적 <b>40명</b> (목표 70 대비 <b>57%</b>) → <b>마감 내 목표 미달 전망</b>.</div>
+<div class="insight " style="margin-top:12px"><span class="h">🎯 CDC KPI 진단 — 정원 대비 교육시작 · 완료→교육시작 전환</span>① <b>정원 대비 교육시작 달성</b> (교육시작 0/정원 35): ⏳ 모객 진행중 — 교육시작은 모객 종료 후 확정(현재 0.0%, 참고용)<br>② <b>지원완료→교육시작 전환율</b> 0.0% (교육시작 0/완료 13): 모객 진행중 — 교육시작 집계 전이라 조기 수치(참고용)</div>
+<div class="card comment-card" style="margin-top:14px"><h3>🧐 점검 코멘트 (비판적 점검 포인트)</h3>
+<ul class="comments">
+<li><b>목표 달성율 18.6%를 절대값으로 판단하지 말 것</b> — 최근 7일 일평균 완료 1.4명 기준 잔여 57명은 약 <b>41일</b> 소요. 마감 D-21 내 <b>달성 불가 페이스</b> — 강한 가속/연장 검토.</li><li><b>완료전환 26.5% vs 미완료 71%</b> — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.</li><li><b>최근 3일 신규 지원 급감</b>(일평균 4→2명) — 매체 예산 소진·타깃 피로 가능성. 채널별 잔여 예산·CPA를 우선 점검.</li>
+</ul></div>
+<h2>전환 퍼널 & 기수 벤치마크 <span style="font-size:12px;color:var(--sub)">· 모객 현황표 연동</span></h2>
+<div class="card"><h3>① 전환 퍼널 (지원시작 → 완료 → 고용24등록 → 교육시작) · 조회수 12403 (조회→시작 전환 0.4%)</h3><canvas id="p1_funnel" style="max-height:240px"></canvas><div class="insight alert" style="margin-top:10px">목표 모객 달성율 <b>18.6%</b>(완료/목표)이지만 실제 <b>수강정원 달성율은 0.0%</b>(교육시작/정원) — 지원완료 이후(고용24등록·교육시작) 단계의 누수를 함께 봐야 실제 성과가 보임.</div></div>
+<div class="card" style="margin-top:14px"><h3>② 기수 벤치마크 — 백엔드자바 모객완료 5개 기수(21기, 23기, 24기, 25기, 26기) 평균 대비</h3><canvas id="p1_bench" style="max-height:230px"></canvas><table style="margin-top:10px"><thead><tr><th>지표</th><th>현재 백엔드 자바 27기</th><th>기수 평균</th><th>차이</th></tr></thead><tbody><tr><td class='name'>지원완료율 (완료/시작)</td><td><b class='acc'>26.5%</b></td><td>31.1%</td><td><span class='down'>-4.6pp</span></td></tr><tr><td class='name'>교육시작 전환율 (교육시작/완료)</td><td><b class='acc'>0.0%</b></td><td>33.2%</td><td><span class='down'>-33.2pp</span></td></tr><tr><td class='name'>수강정원 달성율 (교육시작/정원)</td><td><b class='acc'>0.0%</b></td><td>79.1%</td><td><span class='down'>-79.1pp</span></td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:6px">모객중 기수는 교육시작·정원달성율이 진행 중이라 낮게 보일 수 있음(완료율 위주로 비교).</p></div>
+<div class="card" style="margin-top:14px"><h3>③ 단위경제 (모객 현황표 · 비용/매출)</h3><table><thead><tr><th>집행예산</th><th>예산소진율</th><th>CPA<br>(완료당)</th><th>CAC<br>(획득당)</th><th>기대매출</th><th>ROAS</th></tr></thead><tbody><tr><td>1753만</td><td>18%</td><td>36만</td><td>135만</td><td>₩0</td><td><b class="acc">0%</b></td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:6px">현황표 기준. CPA=집행예산/지원완료, CAC=집행예산/교육시작(획득) 추정치.</p></div>
+
+<h2>🧑‍⚖️ 선발(심사) 현황 <span style="font-size:12px;color:var(--sub)">· 합불상태 모니터링 (ITLAB 선발 → 전환 영향)</span></h2>
+<div class="card"><h3>제출완료 13건 중 심사 상태 (검토전·예비·합격·불합격) · 지원취소 5</h3><canvas id="p1_selection" style="max-height:220px"></canvas><div class="insight " style="margin-top:10px">판정완료 <b>8</b>건(합격 8·불합격 0·예비 0) · 합격률 100.0% · 불합격률 <b>0.0%</b> — 🟢 양호 · 검토전 <b>5명</b> 심사 적체(38.5%).</div><div class="grid kpi-grid" style="margin-top:12px"><div class="card kpi"><div class="label">합격</div><div class="val up">8</div><div class="sub">합격률 100.0%</div></div><div class="card kpi"><div class="label">불합격</div><div class="val down">0</div><div class="sub">불합격률 0.0%</div></div><div class="card kpi"><div class="label">예비합격</div><div class="val" style="color:var(--yellow)">0</div><div class="sub">대기</div></div><div class="card kpi"><div class="label">검토전</div><div class="val">5</div><div class="sub">심사 적체</div></div><div class="card kpi"><div class="label">지원취소</div><div class="val">5</div><div class="sub">이탈</div></div></div></div>
+
+<h2>백엔드 자바 27기 — 퍼널 요약</h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">지원시작</div><div class="val">49</div><div class="sub">원본 60행</div></div>
+  <div class="card kpi"><div class="label">지원중</div><div class="val down">35</div><div class="sub">미완료</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">13</div><div class="sub">전환 26.5%</div></div>
+  <div class="card kpi"><div class="label">유효취소</div><div class="val">1</div><div class="sub">2.0%</div></div>
+  <div class="card kpi"><div class="label">내배카 보유율</div><div class="val">54.2%</div><div class="sub">유효 24명</div></div>
+</div>
+<h2>일별 추이</h2>
+<div class="card"><h3>일별 신규 지원시작 (명)</h3><canvas id="p1_daily" style="max-height:240px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>누적 지원시작 vs 완료 (일자별 수치) + <span style="color:var(--green)">예상 완료 시뮬레이션(점선)</span> — 마감일까지 최근 페이스 외삽</h3><canvas id="p1_cum" style="max-height:340px"></canvas></div>
+<h2>지원자 프로필</h2>
+<div class="card"><h3>연령대 분포 (지원중, 만나이) — 중앙값 26.0세 · 평균 26.6 · Q1~Q3 23.0~27.25 · 범위 19.0~54.0</h3>
+<div class='barmini'><span class='t'>~19세</span><span class='bar'><span style='width:11%;background:var(--blue)'></span></span><span class='v'>2명</span></div><div class='barmini'><span class='t'>20-24세</span><span class='bar'><span style='width:67%;background:var(--blue)'></span></span><span class='v'>12명</span></div><div class='barmini'><span class='t'>25-29세</span><span class='bar'><span style='width:100%;background:var(--blue)'></span></span><span class='v'>18명</span></div><div class='barmini'><span class='t'>30-34세</span><span class='bar'><span style='width:39%;background:var(--blue)'></span></span><span class='v'>7명</span></div><div class='barmini'><span class='t'>35-39세</span><span class='bar'><span style='width:0%;background:var(--blue)'></span></span><span class='v'>0명</span></div><div class='barmini'><span class='t'>40+세</span><span class='bar'><span style='width:6%;background:var(--blue)'></span></span><span class='v'>1명</span></div></div>
+<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) + <span style="color:var(--yellow)">내배카 소지율(%) 선그래프</span> — 우측 축=내배카 yes/(yes+no) · <b>표본 n&lt;5인 날은 7일 이동평균(◇·~) 보정</b></h3><canvas id="p1_box" style="max-height:380px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>연령대별 현재 합불상태 현황 (연령대 × 합불상태 · cast)</h3><canvas id="p1_agestatus" style="max-height:320px"></canvas><table style="margin-top:12px"><thead><tr><th>연령대</th><th>검토전</th><th>대상아님</th><th>합격</th><th>지원취소</th><th>합계</th></tr></thead><tbody><tr><td class='name'>~19세</td><td>0</td><td>2</td><td>0</td><td>0</td><td><b class='acc'>2</b></td></tr><tr><td class='name'>20-24세</td><td>1</td><td>11</td><td>3</td><td>3</td><td><b class='acc'>18</b></td></tr><tr><td class='name'>25-29세</td><td>4</td><td>14</td><td>4</td><td>2</td><td><b class='acc'>24</b></td></tr><tr><td class='name'>30-34세</td><td>0</td><td>7</td><td>1</td><td>0</td><td><b class='acc'>8</b></td></tr><tr><td class='name'>40+세</td><td>0</td><td>1</td><td>0</td><td>0</td><td><b class='acc'>1</b></td></tr></tbody></table></div>
+<h2>내일배움카드 교차분석 (melt · cast)</h2>
+<div class="grid two">
+  <div class="card"><h3>① 연령대별 내배카 YES/NO + YES비율</h3><canvas id="p1_age"></canvas></div>
+  <div class="card"><h3>② 성별 내배카 YES/NO + YES비율</h3><canvas id="p1_gender"></canvas></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>③ 상태1(신분)별 내배카 보유율 — 공란은 '알 수 없음'</h3><canvas id="p1_status" style="max-height:260px"></canvas></div>
+<div class='grid two' style='margin-top:14px'><div class='card'><h3>연령대 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>20-24</td><td>3</td><td>6</td><td>9</td><td><b class='acc'>33.3%</b></td></tr><tr><td class='name'>25-29</td><td>8</td><td>4</td><td>12</td><td><b class='acc'>66.7%</b></td></tr><tr><td class='name'>30-34</td><td>2</td><td>1</td><td>3</td><td><b class='acc'>66.7%</b></td></tr></tbody></table></div><div class='card'><h3>성별 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>남성</td><td>9</td><td>5</td><td>14</td><td><b class='acc'>64.3%</b></td></tr><tr><td class='name'>여성</td><td>4</td><td>6</td><td>10</td><td><b class='acc'>40.0%</b></td></tr></tbody></table></div></div><div style='margin-top:14px'><div class='card'><h3>상태1(신분) × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>대학(원)생</td><td>1</td><td>3</td><td>4</td><td><b class='acc'>25.0%</b></td></tr><tr><td class='name'>취업준비생</td><td>6</td><td>7</td><td>13</td><td><b class='acc'>46.2%</b></td></tr><tr><td class='name'>직장인/프리랜서</td><td>3</td><td>1</td><td>4</td><td><b class='acc'>75.0%</b></td></tr><tr><td class='name'>기타</td><td>2</td><td>0</td><td>2</td><td><b class='acc'>100.0%</b></td></tr><tr><td class='name'>알 수 없음</td><td>1</td><td>0</td><td>1</td><td><b class='acc'>100.0%</b></td></tr></tbody></table></div></div></div>
+<div class="panel" id="p2">
+<h2>현황 점검 (인사이트)</h2>
+
+<div class="insight warn"><span class="h">🟡 클라우드 8기 — 목표 절반 이상</span>
+목표 모객 <b>60명</b> 중 <b>44명</b> 달성 · 목표 달성율 <b>73.3%</b> · 목표까지 <b>16명</b> 남음. 지원완료 달성율(시작 대비) 30.3% · 수강정원 30명 · 경쟁률 4.8:1(지원/정원).</div>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">목표 모객수</div><div class="val">60</div><div class="sub">목표 지원완료</div></div>
+  <div class="card kpi"><div class="label">수강정원</div><div class="val">30명</div><div class="sub">최종 정원</div></div>
+  <div class="card kpi"><div class="label">지원완료수</div><div class="val acc">44</div><div class="sub">현재 모객</div></div>
+  <div class="card kpi"><div class="label">목표 달성율</div><div class="val ">73.3%</div><div class="sub">= 완료/목표</div></div>
+  <div class="card kpi"><div class="label">경쟁률</div><div class="val">4.8:1</div><div class="sub">지원시작/정원</div></div>
+  <div class="card kpi"><div class="label">정원달성율 ⭐CDC</div><div class="val ">13.3%</div><div class="sub">교육시작 4/30명</div></div>
+  <div class="card kpi"><div class="label">완료→교육시작 ⭐CDC</div><div class="val">9.1%</div><div class="sub">교육시작 4/완료 44</div></div>
+</div>
+<div class="insight " style="margin-top:12px"><span class="h">✅ 모집 마감 전망 — 2026-06-23 ~ 2026-07-27 · 마감 D-14 (기간 35일 중 21일 · 60% 경과)</span>
+최근 완료 페이스 <b>1.71명/일</b> → 마감(2026-07-27) 예상 누적 <b>68명</b> (목표 60 대비 <b>113%</b>) → <b>마감 내 목표 달성 전망</b>.</div>
+<div class="insight " style="margin-top:12px"><span class="h">🎯 CDC KPI 진단 — 정원 대비 교육시작 · 완료→교육시작 전환</span>① <b>정원 대비 교육시작 달성</b> (교육시작 4/정원 30): ⏳ 모객 진행중 — 교육시작은 모객 종료 후 확정(현재 13.3%, 참고용)<br>② <b>지원완료→교육시작 전환율</b> 9.1% (교육시작 4/완료 44): 모객 진행중 — 교육시작 집계 전이라 조기 수치(참고용)</div>
+<div class="card comment-card" style="margin-top:14px"><h3>🧐 점검 코멘트 (비판적 점검 포인트)</h3>
+<ul class="comments">
+<li><b>목표 달성율 73.3%를 절대값으로 판단하지 말 것</b> — 최근 7일 일평균 완료 1.7명 기준 잔여 16명은 약 <b>9일</b> 소요. 마감 D-14 대비 <b>여유</b>.</li><li><b>완료전환 30.3% vs 미완료 68%</b> — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.</li><li><b>대학(원)생 내배카 보유율 28.6%</b>(n=14) — 비용 민감 세그먼트. 이 그룹이 완료전환에서 더 이탈하는지 교차 점검하고 자비·국비 메시지 분기 검토.</li>
+</ul></div>
+<h2>전환 퍼널 & 기수 벤치마크 <span style="font-size:12px;color:var(--sub)">· 모객 현황표 연동</span></h2>
+<div class="card"><h3>① 전환 퍼널 (지원시작 → 완료 → 고용24등록 → 교육시작) · 조회수 26070 (조회→시작 전환 0.56%)</h3><canvas id="p2_funnel" style="max-height:240px"></canvas><div class="insight alert" style="margin-top:10px">목표 모객 달성율 <b>73.3%</b>(완료/목표)이지만 실제 <b>수강정원 달성율은 13.3%</b>(교육시작/정원) — 지원완료 이후(고용24등록·교육시작) 단계의 누수를 함께 봐야 실제 성과가 보임.</div></div>
+<div class="card" style="margin-top:14px"><h3>② 기수 벤치마크 — 클라우드 모객완료 3개 기수(5기, 6기, 7기) 평균 대비</h3><canvas id="p2_bench" style="max-height:230px"></canvas><table style="margin-top:10px"><thead><tr><th>지표</th><th>현재 클라우드 8기</th><th>기수 평균</th><th>차이</th></tr></thead><tbody><tr><td class='name'>지원완료율 (완료/시작)</td><td><b class='acc'>30.3%</b></td><td>26.1%</td><td><span class='up'>+4.2pp</span></td></tr><tr><td class='name'>교육시작 전환율 (교육시작/완료)</td><td><b class='acc'>9.1%</b></td><td>30.5%</td><td><span class='down'>-21.4pp</span></td></tr><tr><td class='name'>수강정원 달성율 (교육시작/정원)</td><td><b class='acc'>13.3%</b></td><td>85.8%</td><td><span class='down'>-72.5pp</span></td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:6px">모객중 기수는 교육시작·정원달성율이 진행 중이라 낮게 보일 수 있음(완료율 위주로 비교).</p></div>
+<div class="card" style="margin-top:14px"><h3>③ 단위경제 (모객 현황표 · 비용/매출)</h3><table><thead><tr><th>집행예산</th><th>예산소진율</th><th>CPA<br>(완료당)</th><th>CAC<br>(획득당)</th><th>기대매출</th><th>ROAS</th></tr></thead><tbody><tr><td>4387만</td><td>44%</td><td>30만</td><td>100만</td><td>5808만</td><td><b class="acc">132%</b></td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:6px">현황표 기준. CPA=집행예산/지원완료, CAC=집행예산/교육시작(획득) 추정치.</p></div>
+
+<h2>🧑‍⚖️ 선발(심사) 현황 <span style="font-size:12px;color:var(--sub)">· 합불상태 모니터링 (ITLAB 선발 → 전환 영향)</span></h2>
+<div class="card"><h3>제출완료 44건 중 심사 상태 (검토전·예비·합격·불합격) · 지원취소 12</h3><canvas id="p2_selection" style="max-height:220px"></canvas><div class="insight " style="margin-top:10px">판정완료 <b>39</b>건(합격 20·불합격 5·예비 14) · 합격률 80.0% · 불합격률 <b>20.0%</b> — 🟢 양호 · 검토전 <b>5명</b> 심사 적체(11.4%).</div><div class="grid kpi-grid" style="margin-top:12px"><div class="card kpi"><div class="label">합격</div><div class="val up">20</div><div class="sub">합격률 80.0%</div></div><div class="card kpi"><div class="label">불합격</div><div class="val down">5</div><div class="sub">불합격률 20.0%</div></div><div class="card kpi"><div class="label">예비합격</div><div class="val" style="color:var(--yellow)">14</div><div class="sub">대기</div></div><div class="card kpi"><div class="label">검토전</div><div class="val">5</div><div class="sub">심사 적체</div></div><div class="card kpi"><div class="label">지원취소</div><div class="val">12</div><div class="sub">이탈</div></div></div></div>
+
+<h2>클라우드 8기 — 퍼널 요약</h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">지원시작</div><div class="val">145</div><div class="sub">원본 162행</div></div>
+  <div class="card kpi"><div class="label">지원중</div><div class="val down">98</div><div class="sub">미완료</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">44</div><div class="sub">전환 30.3%</div></div>
+  <div class="card kpi"><div class="label">유효취소</div><div class="val">3</div><div class="sub">2.1%</div></div>
+  <div class="card kpi"><div class="label">내배카 보유율</div><div class="val">52.9%</div><div class="sub">유효 70명</div></div>
+</div>
+<h2>일별 추이</h2>
+<div class="card"><h3>일별 신규 지원시작 (명)</h3><canvas id="p2_daily" style="max-height:240px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>누적 지원시작 vs 완료 (일자별 수치) + <span style="color:var(--green)">예상 완료 시뮬레이션(점선)</span> — 마감일까지 최근 페이스 외삽</h3><canvas id="p2_cum" style="max-height:340px"></canvas></div>
+<h2>지원자 프로필</h2>
+<div class="card"><h3>연령대 분포 (지원중, 만나이) — 중앙값 26.0세 · 평균 28.1 · Q1~Q3 23.0~30.0 · 범위 15.0~76.0</h3>
+<div class='barmini'><span class='t'>~19세</span><span class='bar'><span style='width:17%;background:var(--blue)'></span></span><span class='v'>6명</span></div><div class='barmini'><span class='t'>20-24세</span><span class='bar'><span style='width:100%;background:var(--blue)'></span></span><span class='v'>36명</span></div><div class='barmini'><span class='t'>25-29세</span><span class='bar'><span style='width:92%;background:var(--blue)'></span></span><span class='v'>33명</span></div><div class='barmini'><span class='t'>30-34세</span><span class='bar'><span style='width:44%;background:var(--blue)'></span></span><span class='v'>16명</span></div><div class='barmini'><span class='t'>35-39세</span><span class='bar'><span style='width:6%;background:var(--blue)'></span></span><span class='v'>2명</span></div><div class='barmini'><span class='t'>40+세</span><span class='bar'><span style='width:28%;background:var(--blue)'></span></span><span class='v'>10명</span></div></div>
+<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) + <span style="color:var(--yellow)">내배카 소지율(%) 선그래프</span> — 우측 축=내배카 yes/(yes+no) · <b>표본 n&lt;5인 날은 7일 이동평균(◇·~) 보정</b></h3><canvas id="p2_box" style="max-height:380px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>연령대별 현재 합불상태 현황 (연령대 × 합불상태 · cast)</h3><canvas id="p2_agestatus" style="max-height:320px"></canvas><table style="margin-top:12px"><thead><tr><th>연령대</th><th>검토전</th><th>대상아님</th><th>예비합격</th><th>합격</th><th>불합격</th><th>지원취소</th><th>합계</th></tr></thead><tbody><tr><td class='name'>~19세</td><td>1</td><td>5</td><td>0</td><td>0</td><td>0</td><td>0</td><td><b class='acc'>6</b></td></tr><tr><td class='name'>20-24세</td><td>0</td><td>36</td><td>2</td><td>3</td><td>2</td><td>2</td><td><b class='acc'>45</b></td></tr><tr><td class='name'>25-29세</td><td>1</td><td>32</td><td>6</td><td>10</td><td>1</td><td>10</td><td><b class='acc'>60</b></td></tr><tr><td class='name'>30-34세</td><td>3</td><td>13</td><td>2</td><td>7</td><td>1</td><td>0</td><td><b class='acc'>26</b></td></tr><tr><td class='name'>35-39세</td><td>0</td><td>2</td><td>1</td><td>0</td><td>0</td><td>0</td><td><b class='acc'>3</b></td></tr><tr><td class='name'>40+세</td><td>0</td><td>10</td><td>3</td><td>0</td><td>1</td><td>0</td><td><b class='acc'>14</b></td></tr></tbody></table></div>
+<h2>내일배움카드 교차분석 (melt · cast)</h2>
+<div class="grid two">
+  <div class="card"><h3>① 연령대별 내배카 YES/NO + YES비율</h3><canvas id="p2_age"></canvas></div>
+  <div class="card"><h3>② 성별 내배카 YES/NO + YES비율</h3><canvas id="p2_gender"></canvas></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>③ 상태1(신분)별 내배카 보유율 — 공란은 '알 수 없음'</h3><canvas id="p2_status" style="max-height:260px"></canvas></div>
+<div class='grid two' style='margin-top:14px'><div class='card'><h3>연령대 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>~19</td><td>1</td><td>0</td><td>1</td><td><b class='acc'>100.0%</b></td></tr><tr><td class='name'>20-24</td><td>4</td><td>11</td><td>15</td><td><b class='acc'>26.7%</b></td></tr><tr><td class='name'>25-29</td><td>17</td><td>17</td><td>34</td><td><b class='acc'>50.0%</b></td></tr><tr><td class='name'>30-34</td><td>9</td><td>4</td><td>13</td><td><b class='acc'>69.2%</b></td></tr><tr><td class='name'>35-39</td><td>1</td><td>0</td><td>1</td><td><b class='acc'>100.0%</b></td></tr><tr><td class='name'>40+</td><td>5</td><td>1</td><td>6</td><td><b class='acc'>83.3%</b></td></tr></tbody></table></div><div class='card'><h3>성별 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>남성</td><td>20</td><td>29</td><td>49</td><td><b class='acc'>40.8%</b></td></tr><tr><td class='name'>여성</td><td>17</td><td>4</td><td>21</td><td><b class='acc'>81.0%</b></td></tr></tbody></table></div></div><div style='margin-top:14px'><div class='card'><h3>상태1(신분) × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>대학(원)생</td><td>4</td><td>10</td><td>14</td><td><b class='acc'>28.6%</b></td></tr><tr><td class='name'>취업준비생</td><td>18</td><td>15</td><td>33</td><td><b class='acc'>54.5%</b></td></tr><tr><td class='name'>직장인/프리랜서</td><td>9</td><td>5</td><td>14</td><td><b class='acc'>64.3%</b></td></tr><tr><td class='name'>기타</td><td>4</td><td>2</td><td>6</td><td><b class='acc'>66.7%</b></td></tr><tr><td class='name'>알 수 없음</td><td>2</td><td>1</td><td>3</td><td><b class='acc'>66.7%</b></td></tr></tbody></table></div></div></div>
+<div class="panel" id="p3">
+<h2>현황 점검 (인사이트)</h2>
+
+<div class="insight "><span class="h">🎉 그로스 마케팅 6기 — 목표 달성·초과</span>
+목표 모객 <b>142명</b> 중 <b>145명</b> 달성 · 목표 달성율 <b>102.1%</b> · 목표 달성. 지원완료 달성율(시작 대비) 29.2% · 수강정원 57명 · 경쟁률 8.7:1(지원/정원).</div>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">목표 모객수</div><div class="val">142</div><div class="sub">목표 지원완료</div></div>
+  <div class="card kpi"><div class="label">수강정원</div><div class="val">57명</div><div class="sub">최종 정원</div></div>
+  <div class="card kpi"><div class="label">지원완료수</div><div class="val acc">145</div><div class="sub">현재 모객</div></div>
+  <div class="card kpi"><div class="label">목표 달성율</div><div class="val up">102.1%</div><div class="sub">= 완료/목표</div></div>
+  <div class="card kpi"><div class="label">경쟁률</div><div class="val">8.7:1</div><div class="sub">지원시작/정원</div></div>
+  <div class="card kpi"><div class="label">정원달성율 ⭐CDC</div><div class="val ">33.3%</div><div class="sub">교육시작 19/57명</div></div>
+  <div class="card kpi"><div class="label">완료→교육시작 ⭐CDC</div><div class="val">13.1%</div><div class="sub">교육시작 19/완료 145</div></div>
+</div>
+<div class="insight " style="margin-top:12px"><span class="h">🎉 모집 마감 전망 — 2026-06-16 ~ 2026-07-19 · 마감 D-6 (기간 34일 중 28일 · 82% 경과)</span>
+이미 목표 모객(<b>142명</b>) 초과 달성 — 마감까지 D-6. 잔여 기간은 선발·등록 전환·정원(57명) 적합도에 집중.</div>
+<div class="insight " style="margin-top:12px"><span class="h">🎯 CDC KPI 진단 — 정원 대비 교육시작 · 완료→교육시작 전환</span>① <b>정원 대비 교육시작 달성</b> (교육시작 19/정원 57): ⏳ 모객 진행중 — 교육시작은 모객 종료 후 확정(현재 33.3%, 참고용)<br>② <b>지원완료→교육시작 전환율</b> 13.1% (교육시작 19/완료 145): 모객 진행중 — 교육시작 집계 전이라 조기 수치(참고용)</div>
+<div class="card comment-card" style="margin-top:14px"><h3>🧐 점검 코멘트 (비판적 점검 포인트)</h3>
+<ul class="comments">
+<li>목표 142명 도달(달성율 102.1%) — 점검 지표를 완료 '수'에서 <b>질</b>(적합도·등록 전환·미수료 리스크)로 전환할 시점.</li><li><b>완료전환 29.2% vs 미완료 70%</b> — '지원시작' 분모에 유령·중복·단순열람이 섞였는지, 아니면 지원서 문항·자격요건이 이탈 병목인지 분해해야 실제 전환율이 드러남.</li><li><b>최근 3일 신규 지원 급감</b>(일평균 18→9명) — 매체 예산 소진·타깃 피로 가능성. 채널별 잔여 예산·CPA를 우선 점검.</li>
+</ul></div>
+<h2>전환 퍼널 & 기수 벤치마크 <span style="font-size:12px;color:var(--sub)">· 모객 현황표 연동</span></h2>
+<div class="card"><h3>① 전환 퍼널 (지원시작 → 완료 → 고용24등록 → 교육시작) · 조회수 51098 (조회→시작 전환 0.97%)</h3><canvas id="p3_funnel" style="max-height:240px"></canvas><div class="insight alert" style="margin-top:10px">목표 모객 달성율 <b>102.1%</b>(완료/목표)이지만 실제 <b>수강정원 달성율은 33.3%</b>(교육시작/정원) — 지원완료 이후(고용24등록·교육시작) 단계의 누수를 함께 봐야 실제 성과가 보임.</div></div>
+<div class="card" style="margin-top:14px"><h3>② 기수 벤치마크 — 그로스마케팅 모객완료 2개 기수(4기, 5기) 평균 대비</h3><canvas id="p3_bench" style="max-height:230px"></canvas><table style="margin-top:10px"><thead><tr><th>지표</th><th>현재 그로스 마케팅 6기</th><th>기수 평균</th><th>차이</th></tr></thead><tbody><tr><td class='name'>지원완료율 (완료/시작)</td><td><b class='acc'>29.2%</b></td><td>24.5%</td><td><span class='up'>+4.7pp</span></td></tr><tr><td class='name'>교육시작 전환율 (교육시작/완료)</td><td><b class='acc'>13.1%</b></td><td>43.0%</td><td><span class='down'>-29.9pp</span></td></tr><tr><td class='name'>수강정원 달성율 (교육시작/정원)</td><td><b class='acc'>33.3%</b></td><td>101.3%</td><td><span class='down'>-68.0pp</span></td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:6px">모객중 기수는 교육시작·정원달성율이 진행 중이라 낮게 보일 수 있음(완료율 위주로 비교).</p></div>
+<div class="card" style="margin-top:14px"><h3>③ 단위경제 (모객 현황표 · 비용/매출)</h3><table><thead><tr><th>집행예산</th><th>예산소진율</th><th>CPA<br>(완료당)</th><th>CAC<br>(획득당)</th><th>기대매출</th><th>ROAS</th></tr></thead><tbody><tr><td>6712만</td><td>84%</td><td>14만</td><td>46만</td><td>2.1억</td><td><b class="acc">312%</b></td></tr></tbody></table><p style="font-size:12px;color:var(--sub);margin-top:6px">현황표 기준. CPA=집행예산/지원완료, CAC=집행예산/교육시작(획득) 추정치.</p></div>
+
+<h2>🧑‍⚖️ 선발(심사) 현황 <span style="font-size:12px;color:var(--sub)">· 합불상태 모니터링 (ITLAB 선발 → 전환 영향)</span></h2>
+<div class="card"><h3>제출완료 145건 중 심사 상태 (검토전·예비·합격·불합격) · 지원취소 12</h3><canvas id="p3_selection" style="max-height:220px"></canvas><div class="insight alert" style="margin-top:10px">판정완료 <b>127</b>건(합격 52·불합격 66·예비 9) · 합격률 44.1% · 불합격률 <b>55.9%</b> — 🔴 지원자 퀄리티 관리 시그널(선발 기준·유입 타깃 점검) · 검토전 <b>18명</b> 심사 적체(12.4%).</div><div class="grid kpi-grid" style="margin-top:12px"><div class="card kpi"><div class="label">합격</div><div class="val up">52</div><div class="sub">합격률 44.1%</div></div><div class="card kpi"><div class="label">불합격</div><div class="val down">66</div><div class="sub">불합격률 55.9%</div></div><div class="card kpi"><div class="label">예비합격</div><div class="val" style="color:var(--yellow)">9</div><div class="sub">대기</div></div><div class="card kpi"><div class="label">검토전</div><div class="val">18</div><div class="sub">심사 적체</div></div><div class="card kpi"><div class="label">지원취소</div><div class="val">12</div><div class="sub">이탈</div></div></div></div>
+
+<h2>그로스 마케팅 6기 — 퍼널 요약</h2>
+<div class="grid kpi-grid">
+  <div class="card kpi"><div class="label">지원시작</div><div class="val">497</div><div class="sub">원본 523행</div></div>
+  <div class="card kpi"><div class="label">지원중</div><div class="val down">346</div><div class="sub">미완료</div></div>
+  <div class="card kpi"><div class="label">지원완료</div><div class="val acc">145</div><div class="sub">전환 29.2%</div></div>
+  <div class="card kpi"><div class="label">유효취소</div><div class="val">6</div><div class="sub">1.2%</div></div>
+  <div class="card kpi"><div class="label">내배카 보유율</div><div class="val">58.0%</div><div class="sub">유효 231명</div></div>
+</div>
+<h2>일별 추이</h2>
+<div class="card"><h3>일별 신규 지원시작 (명)</h3><canvas id="p3_daily" style="max-height:240px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>누적 지원시작 vs 완료 (일자별 수치) + <span style="color:var(--green)">예상 완료 시뮬레이션(점선)</span> — 마감일까지 최근 페이스 외삽</h3><canvas id="p3_cum" style="max-height:340px"></canvas></div>
+<h2>지원자 프로필</h2>
+<div class="card"><h3>연령대 분포 (지원중, 만나이) — 중앙값 25.0세 · 평균 25.6 · Q1~Q3 23.0~28.0 · 범위 15.0~60.0</h3>
+<div class='barmini'><span class='t'>~19세</span><span class='bar'><span style='width:7%;background:var(--blue)'></span></span><span class='v'>12명</span></div><div class='barmini'><span class='t'>20-24세</span><span class='bar'><span style='width:100%;background:var(--blue)'></span></span><span class='v'>167명</span></div><div class='barmini'><span class='t'>25-29세</span><span class='bar'><span style='width:77%;background:var(--blue)'></span></span><span class='v'>128명</span></div><div class='barmini'><span class='t'>30-34세</span><span class='bar'><span style='width:28%;background:var(--blue)'></span></span><span class='v'>46명</span></div><div class='barmini'><span class='t'>35-39세</span><span class='bar'><span style='width:2%;background:var(--blue)'></span></span><span class='v'>4명</span></div><div class='barmini'><span class='t'>40+세</span><span class='bar'><span style='width:4%;background:var(--blue)'></span></span><span class='v'>6명</span></div></div>
+<div class="card" style="margin-top:14px"><h3>일일 지원중 유저 만나이 분포 (박스플롯) + <span style="color:var(--yellow)">내배카 소지율(%) 선그래프</span> — 우측 축=내배카 yes/(yes+no) · <b>표본 n&lt;5인 날은 7일 이동평균(◇·~) 보정</b></h3><canvas id="p3_box" style="max-height:380px"></canvas></div>
+<div class="card" style="margin-top:14px"><h3>연령대별 현재 합불상태 현황 (연령대 × 합불상태 · cast)</h3><canvas id="p3_agestatus" style="max-height:320px"></canvas><table style="margin-top:12px"><thead><tr><th>연령대</th><th>검토전</th><th>대상아님</th><th>예비합격</th><th>합격</th><th>불합격</th><th>지원취소</th><th>합계</th></tr></thead><tbody><tr><td class='name'>~19세</td><td>0</td><td>12</td><td>0</td><td>0</td><td>1</td><td>0</td><td><b class='acc'>13</b></td></tr><tr><td class='name'>20-24세</td><td>5</td><td>162</td><td>4</td><td>22</td><td>26</td><td>7</td><td><b class='acc'>226</b></td></tr><tr><td class='name'>25-29세</td><td>8</td><td>120</td><td>3</td><td>26</td><td>22</td><td>5</td><td><b class='acc'>184</b></td></tr><tr><td class='name'>30-34세</td><td>5</td><td>41</td><td>1</td><td>3</td><td>15</td><td>0</td><td><b class='acc'>65</b></td></tr><tr><td class='name'>35-39세</td><td>0</td><td>4</td><td>0</td><td>1</td><td>0</td><td>0</td><td><b class='acc'>5</b></td></tr><tr><td class='name'>40+세</td><td>0</td><td>6</td><td>1</td><td>0</td><td>2</td><td>0</td><td><b class='acc'>9</b></td></tr></tbody></table></div>
+<h2>내일배움카드 교차분석 (melt · cast)</h2>
+<div class="grid two">
+  <div class="card"><h3>① 연령대별 내배카 YES/NO + YES비율</h3><canvas id="p3_age"></canvas></div>
+  <div class="card"><h3>② 성별 내배카 YES/NO + YES비율</h3><canvas id="p3_gender"></canvas></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>③ 상태1(신분)별 내배카 보유율 — 공란은 '알 수 없음'</h3><canvas id="p3_status" style="max-height:260px"></canvas></div>
+<div class='grid two' style='margin-top:14px'><div class='card'><h3>연령대 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>~19</td><td>2</td><td>2</td><td>4</td><td><b class='acc'>50.0%</b></td></tr><tr><td class='name'>20-24</td><td>42</td><td>57</td><td>99</td><td><b class='acc'>42.4%</b></td></tr><tr><td class='name'>25-29</td><td>62</td><td>26</td><td>88</td><td><b class='acc'>70.5%</b></td></tr><tr><td class='name'>30-34</td><td>26</td><td>8</td><td>34</td><td><b class='acc'>76.5%</b></td></tr><tr><td class='name'>35-39</td><td>1</td><td>2</td><td>3</td><td><b class='acc'>33.3%</b></td></tr><tr><td class='name'>40+</td><td>1</td><td>2</td><td>3</td><td><b class='acc'>33.3%</b></td></tr></tbody></table></div><div class='card'><h3>성별 × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>남성</td><td>32</td><td>32</td><td>64</td><td><b class='acc'>50.0%</b></td></tr><tr><td class='name'>여성</td><td>102</td><td>65</td><td>167</td><td><b class='acc'>61.1%</b></td></tr></tbody></table></div></div><div style='margin-top:14px'><div class='card'><h3>상태1(신분) × 내배카 (cast)</h3><table><thead><tr><th>구분</th><th>YES</th><th>NO</th><th>합계</th><th>YES 비율</th></tr></thead><tbody><tr><td class='name'>대학(원)생</td><td>17</td><td>29</td><td>46</td><td><b class='acc'>37.0%</b></td></tr><tr><td class='name'>취업준비생</td><td>93</td><td>47</td><td>140</td><td><b class='acc'>66.4%</b></td></tr><tr><td class='name'>직장인/프리랜서</td><td>12</td><td>8</td><td>20</td><td><b class='acc'>60.0%</b></td></tr><tr><td class='name'>기타</td><td>9</td><td>9</td><td>18</td><td><b class='acc'>50.0%</b></td></tr><tr><td class='name'>알 수 없음</td><td>3</td><td>4</td><td>7</td><td><b class='acc'>42.9%</b></td></tr></tbody></table></div></div></div>
+
+<footer>생성 2026-07-13 10:15 · 소스 노트북 <code>kdt 모객현황 데이터 추출.ipynb</code> 로직 기반 · 내배카 비율은 yes/no 유효응답(지원완료·지원중) 기준 · 상태1 공란은 '알 수 없음' 처리<br>⚠️ TEST 출력본 — 지표 정의·디밸롭 협의 후 정식화 예정</footer>
+<script>
+const DATA = {"generated": "2026-07-13 10:15", "camps": [{"name": "백엔드 자바 27기", "file": "kdt-backendj-27th_지원서_2026_07_13_09_18_02.csv", "total_rows": 60, "시작": 49, "지원중": 35, "완료": 13, "유효취소": 1, "conv": 26.5, "cancel_rate": 2.0, "nbc_tot": 24, "nbc_yes": 13, "nbc_rate": 54.2, "daily": {"2026-07-01": 3, "2026-07-02": 6, "2026-07-03": 4, "2026-07-04": 3, "2026-07-05": 4, "2026-07-06": 4, "2026-07-07": 5, "2026-07-08": 4, "2026-07-09": 5, "2026-07-10": 6, "2026-07-11": 1, "2026-07-12": 3, "2026-07-13": 1}, "comp_daily": {"2026-07-01": 1, "2026-07-02": 2, "2026-07-04": 1, "2026-07-07": 2, "2026-07-09": 1, "2026-07-10": 3, "2026-07-11": 1, "2026-07-12": 1, "2026-07-13": 1}, "age": {"median": 26.0, "q1": 23.0, "q3": 27.25, "min": 19.0, "max": 54.0, "mean": 26.6, "n": 40}, "age_band": {"~19": 2, "20-24": 12, "25-29": 18, "30-34": 7, "35-39": 0, "40+": 1}, "gender_pool": {"남성": 26, "여성": 13}, "by_age": [{"key": "20-24", "yes": 3, "no": 6, "tot": 9, "yes_rate": 33.3}, {"key": "25-29", "yes": 8, "no": 4, "tot": 12, "yes_rate": 66.7}, {"key": "30-34", "yes": 2, "no": 1, "tot": 3, "yes_rate": 66.7}], "by_gender": [{"key": "남성", "yes": 9, "no": 5, "tot": 14, "yes_rate": 64.3}, {"key": "여성", "yes": 4, "no": 6, "tot": 10, "yes_rate": 40.0}], "by_status": [{"key": "대학(원)생", "yes": 1, "no": 3, "tot": 4, "yes_rate": 25.0}, {"key": "취업준비생", "yes": 6, "no": 7, "tot": 13, "yes_rate": 46.2}, {"key": "직장인/프리랜서", "yes": 3, "no": 1, "tot": 4, "yes_rate": 75.0}, {"key": "기타", "yes": 2, "no": 0, "tot": 2, "yes_rate": 100.0}, {"key": "알 수 없음", "yes": 1, "no": 0, "tot": 1, "yes_rate": 100.0}], "age_by_day": {"2026-07-01": [19, 30], "2026-07-02": [26, 22, 25, 21, 25], "2026-07-03": [26, 27, 22, 33], "2026-07-04": [22], "2026-07-05": [23, 54, 34, 26], "2026-07-06": [26, 32, 23, 26], "2026-07-07": [24, 24, 27, 22], "2026-07-08": [26, 23, 32, 34], "2026-07-09": [27, 19, 21], "2026-07-10": [31, 23, 28, 27], "2026-07-11": [28], "2026-07-12": [27, 26, 26], "2026-07-13": [26]}, "age_all": [26, 27, 26, 26, 28, 31, 23, 28, 27, 27, 19, 21, 26, 23, 32, 34, 24, 24, 27, 22, 26, 32, 23, 26, 23, 54, 34, 26, 22, 26, 27, 22, 33, 26, 22, 25, 21, 25, 19, 30], "box_daily": [{"q1": 21.8, "median": 24.5, "q3": 27.2, "min": 19.0, "max": 30.0, "n": 2}, {"q1": 22.0, "median": 25.0, "q3": 25.0, "min": 21.0, "max": 26.0, "n": 5}, {"q1": 25.0, "median": 26.5, "q3": 28.5, "min": 22.0, "max": 33.0, "n": 4}, {"q1": 22.0, "median": 22.0, "q3": 22.0, "min": 22.0, "max": 22.0, "n": 1}, {"q1": 25.2, "median": 30.0, "q3": 39.0, "min": 23.0, "max": 54.0, "n": 4}, {"q1": 25.2, "median": 26.0, "q3": 27.5, "min": 23.0, "max": 32.0, "n": 4}, {"q1": 23.5, "median": 24.0, "q3": 24.8, "min": 22.0, "max": 27.0, "n": 4}, {"q1": 25.2, "median": 29.0, "q3": 32.5, "min": 23.0, "max": 34.0, "n": 4}, {"q1": 20.0, "median": 21.0, "q3": 24.0, "min": 19.0, "max": 27.0, "n": 3}, {"q1": 26.0, "median": 27.5, "q3": 28.8, "min": 23.0, "max": 31.0, "n": 4}, {"q1": 28.0, "median": 28.0, "q3": 28.0, "min": 28.0, "max": 28.0, "n": 1}, {"q1": 26.0, "median": 26.0, "q3": 26.5, "min": 26.0, "max": 27.0, "n": 3}, {"q1": 26.0, "median": 26.0, "q3": 26.0, "min": 26.0, "max": 26.0, "n": 1}], "nbc_day": {"2026-07-01": {"rate": 100.0, "yes": 1, "no": 0, "n": 1, "disp": 100.0, "smoothed": true}, "2026-07-02": {"rate": 66.7, "yes": 2, "no": 1, "n": 3, "disp": 75.0, "smoothed": true}, "2026-07-03": {"rate": 100.0, "yes": 1, "no": 0, "n": 1, "disp": 80.0, "smoothed": true}, "2026-07-04": {"rate": 33.3, "yes": 1, "no": 2, "n": 3, "disp": 62.5, "smoothed": true}, "2026-07-06": {"rate": 25.0, "yes": 1, "no": 3, "n": 4, "disp": 50.0, "smoothed": true}, "2026-07-07": {"rate": 33.3, "yes": 1, "no": 2, "n": 3, "disp": 46.7, "smoothed": true}, "2026-07-08": {"rate": 100.0, "yes": 2, "no": 0, "n": 2, "disp": 50.0, "smoothed": true}, "2026-07-09": {"rate": 100.0, "yes": 3, "no": 0, "n": 3, "disp": 56.2, "smoothed": true}, "2026-07-10": {"rate": 33.3, "yes": 1, "no": 2, "n": 3, "disp": 50.0, "smoothed": true}, "2026-07-11": {"rate": 100.0, "yes": 1, "no": 0, "n": 1, "disp": 56.2, "smoothed": true}, "2026-07-12": {"rate": 0.0, "yes": 0, "no": 1, "n": 1, "disp": 52.9, "smoothed": true}, "2026-07-13": {"rate": 100.0, "yes": 1, "no": 0, "n": 1, "disp": 64.3, "smoothed": true}}, "age_status": [{"band": "~19", "total": 2, "counts": {"검토전": 0, "대상아님": 2, "합격": 0, "지원취소": 0}}, {"band": "20-24", "total": 18, "counts": {"검토전": 1, "대상아님": 11, "합격": 3, "지원취소": 3}}, {"band": "25-29", "total": 24, "counts": {"검토전": 4, "대상아님": 14, "합격": 4, "지원취소": 2}}, {"band": "30-34", "total": 8, "counts": {"검토전": 0, "대상아님": 7, "합격": 1, "지원취소": 0}}, {"band": "40+", "total": 1, "counts": {"검토전": 0, "대상아님": 1, "합격": 0, "지원취소": 0}}], "status_present": ["검토전", "대상아님", "합격", "지원취소"], "selection": {"counts": {"검토전": 5, "대상아님": 35, "예비합격": 0, "합격": 8, "불합격": 0, "지원취소": 5}, "submitted": 13, "decided": 8, "pass": 8, "fail": 0, "pre": 0, "pending": 5, "cancel": 5, "ing": 35, "pass_rate": 100.0, "fail_rate": 0.0, "pending_rate": 38.5}, "age_all_full": [26, 27, 26, 26, 28, 31, 23, 27, 28, 26, 27, 27, 19, 27, 21, 21, 26, 23, 32, 34, 24, 24, 24, 27, 22, 25, 26, 32, 23, 26, 23, 54, 34, 26, 22, 22, 22, 25, 26, 27, 22, 33, 26, 22, 23, 25, 21, 26, 24, 25, 19, 30, 31], "age_full": {"median": 26.0, "q1": 23.0, "q3": 27.0, "min": 19.0, "max": 54.0, "mean": 26.2, "n": 53}, "scatter": {"pass": [27, 26, 27, 24, 22, 25, 24, 31], "fail": [], "other": [26, 27, 26, 26, 28, 31, 23, 28, 27, 27, 19, 21, 21, 26, 23, 32, 34, 24, 24, 27, 22, 25, 26, 32, 23, 26, 23, 54, 34, 26, 22, 22, 26, 27, 22, 33, 26, 22, 23, 25, 21, 26, 25, 19, 30]}, "target": 70, "ach_vs_start": 26.5, "ach_vs_target": 18.6, "capacity": 35, "competition": 1.4, "fill_vs_capacity": 37.1, "proj": {"start": "2026-07-01", "end": "2026-08-03", "days_total": 34, "days_elapsed": 13, "days_left": 21, "time_pct": 38, "pace": 1.29, "projected": 40, "proj_tpct": 57, "tier": "risk", "label": "마감 내 목표 미달 전망", "early": false}, "control": false, "econ": {"budget": 17527283, "budget_rate": 18, "cpa": 357700, "cac": 1348253, "roas": 0, "exp_rev": 0, "goal_rev": 0}, "funnel": {"views": 12403, "start": 49, "complete": 13, "gov24": 0, "edustart": 0, "capacity": 35, "target": 70, "cr": 26.5, "g_conv": 0.0, "e_conv": 0.0, "fill": 0.0}, "bench": {"n": 5, "gisus": [21, 23, 24, 25, 26], "complete_rate": 31.1, "edu_conv": 33.2, "fill": 79.1}}, {"name": "클라우드 8기", "file": "kdt-cld-8th_지원서_2026_07_13_09_18_22.csv", "total_rows": 162, "시작": 145, "지원중": 98, "완료": 44, "유효취소": 3, "conv": 30.3, "cancel_rate": 2.1, "nbc_tot": 70, "nbc_yes": 37, "nbc_rate": 52.9, "daily": {"2026-06-23": 4, "2026-06-24": 6, "2026-06-25": 10, "2026-06-26": 11, "2026-06-27": 5, "2026-06-28": 7, "2026-06-29": 10, "2026-06-30": 9, "2026-07-01": 6, "2026-07-02": 6, "2026-07-03": 6, "2026-07-04": 4, "2026-07-05": 7, "2026-07-06": 8, "2026-07-07": 6, "2026-07-08": 11, "2026-07-09": 4, "2026-07-10": 5, "2026-07-11": 9, "2026-07-12": 7, "2026-07-13": 4}, "comp_daily": {"2026-06-23": 1, "2026-06-24": 1, "2026-06-25": 4, "2026-06-26": 4, "2026-06-27": 2, "2026-06-28": 2, "2026-06-29": 4, "2026-06-30": 2, "2026-07-01": 1, "2026-07-02": 2, "2026-07-03": 2, "2026-07-04": 2, "2026-07-05": 4, "2026-07-06": 1, "2026-07-07": 2, "2026-07-08": 4, "2026-07-09": 1, "2026-07-10": 1, "2026-07-11": 1, "2026-07-12": 2, "2026-07-13": 1}, "age": {"median": 26.0, "q1": 23.0, "q3": 30.0, "min": 15.0, "max": 76.0, "mean": 28.1, "n": 103}, "age_band": {"~19": 6, "20-24": 36, "25-29": 33, "30-34": 16, "35-39": 2, "40+": 10}, "gender_pool": {"남성": 67, "여성": 36}, "by_age": [{"key": "~19", "yes": 1, "no": 0, "tot": 1, "yes_rate": 100.0}, {"key": "20-24", "yes": 4, "no": 11, "tot": 15, "yes_rate": 26.7}, {"key": "25-29", "yes": 17, "no": 17, "tot": 34, "yes_rate": 50.0}, {"key": "30-34", "yes": 9, "no": 4, "tot": 13, "yes_rate": 69.2}, {"key": "35-39", "yes": 1, "no": 0, "tot": 1, "yes_rate": 100.0}, {"key": "40+", "yes": 5, "no": 1, "tot": 6, "yes_rate": 83.3}], "by_gender": [{"key": "남성", "yes": 20, "no": 29, "tot": 49, "yes_rate": 40.8}, {"key": "여성", "yes": 17, "no": 4, "tot": 21, "yes_rate": 81.0}], "by_status": [{"key": "대학(원)생", "yes": 4, "no": 10, "tot": 14, "yes_rate": 28.6}, {"key": "취업준비생", "yes": 18, "no": 15, "tot": 33, "yes_rate": 54.5}, {"key": "직장인/프리랜서", "yes": 9, "no": 5, "tot": 14, "yes_rate": 64.3}, {"key": "기타", "yes": 4, "no": 2, "tot": 6, "yes_rate": 66.7}, {"key": "알 수 없음", "yes": 2, "no": 1, "tot": 3, "yes_rate": 66.7}], "age_by_day": {"2026-06-23": [58, 25, 23], "2026-06-24": [25, 28, 25], "2026-06-25": [28, 27, 26, 21, 27, 26], "2026-06-26": [23, 16, 26, 24, 28, 21, 22], "2026-06-27": [25, 23, 30], "2026-06-28": [30, 23, 29, 52, 58], "2026-06-29": [24, 32, 28, 25, 26, 25], "2026-06-30": [26, 23, 23, 26, 22, 24, 31], "2026-07-01": [16, 26, 19], "2026-07-02": [23, 20, 20], "2026-07-03": [31, 45, 27, 22, 38, 23], "2026-07-04": [52, 24], "2026-07-05": [15, 23, 37], "2026-07-06": [23, 30, 30, 32, 23, 28, 26], "2026-07-07": [25, 27, 20, 30, 28], "2026-07-08": [34, 20, 28, 40, 31, 22, 20], "2026-07-09": [33, 24, 24], "2026-07-10": [23, 21, 27, 23, 22], "2026-07-11": [32, 34, 22, 24, 76, 62, 23, 19, 29], "2026-07-12": [43, 25, 16, 43, 33, 29], "2026-07-13": [27, 30, 24, 26]}, "age_all": [27, 30, 24, 26, 43, 25, 16, 43, 33, 29, 32, 34, 22, 24, 76, 62, 23, 19, 29, 23, 21, 27, 23, 22, 33, 24, 24, 34, 20, 28, 40, 31, 22, 20, 25, 27, 20, 30, 28, 23, 30, 30, 32, 23, 28, 26, 15, 23, 37, 52, 24, 31, 45, 27, 22, 38, 23, 23, 20, 20, 16, 26, 19, 26, 23, 23, 26, 22, 24, 31, 24, 32, 28, 25, 26, 25, 30, 23, 29, 52, 58, 25, 23, 30, 23, 16, 26, 24, 28, 21, 22, 28, 27, 26, 21, 27, 26, 25, 28, 25, 58, 25, 23], "box_daily": [{"q1": 24.0, "median": 25.0, "q3": 41.5, "min": 23.0, "max": 58.0, "n": 3}, {"q1": 25.0, "median": 25.0, "q3": 26.5, "min": 25.0, "max": 28.0, "n": 3}, {"q1": 26.0, "median": 26.5, "q3": 27.0, "min": 21.0, "max": 28.0, "n": 6}, {"q1": 21.5, "median": 23.0, "q3": 25.0, "min": 16.0, "max": 28.0, "n": 7}, {"q1": 24.0, "median": 25.0, "q3": 27.5, "min": 23.0, "max": 30.0, "n": 3}, {"q1": 29.0, "median": 30.0, "q3": 52.0, "min": 23.0, "max": 58.0, "n": 5}, {"q1": 25.0, "median": 25.5, "q3": 27.5, "min": 24.0, "max": 32.0, "n": 6}, {"q1": 23.0, "median": 24.0, "q3": 26.0, "min": 22.0, "max": 31.0, "n": 7}, {"q1": 17.5, "median": 19.0, "q3": 22.5, "min": 16.0, "max": 26.0, "n": 3}, {"q1": 20.0, "median": 20.0, "q3": 21.5, "min": 20.0, "max": 23.0, "n": 3}, {"q1": 24.0, "median": 29.0, "q3": 36.2, "min": 22.0, "max": 45.0, "n": 6}, {"q1": 31.0, "median": 38.0, "q3": 45.0, "min": 24.0, "max": 52.0, "n": 2}, {"q1": 19.0, "median": 23.0, "q3": 30.0, "min": 15.0, "max": 37.0, "n": 3}, {"q1": 24.5, "median": 28.0, "q3": 30.0, "min": 23.0, "max": 32.0, "n": 7}, {"q1": 25.0, "median": 27.0, "q3": 28.0, "min": 20.0, "max": 30.0, "n": 5}, {"q1": 21.0, "median": 28.0, "q3": 32.5, "min": 20.0, "max": 40.0, "n": 7}, {"q1": 24.0, "median": 24.0, "q3": 28.5, "min": 24.0, "max": 33.0, "n": 3}, {"q1": 22.0, "median": 23.0, "q3": 23.0, "min": 21.0, "max": 27.0, "n": 5}, {"q1": 23.0, "median": 29.0, "q3": 34.0, "min": 19.0, "max": 76.0, "n": 9}, {"q1": 26.0, "median": 31.0, "q3": 40.5, "min": 16.0, "max": 43.0, "n": 6}, {"q1": 25.5, "median": 26.5, "q3": 27.8, "min": 24.0, "max": 30.0, "n": 4}], "nbc_day": {"2026-06-23": {"rate": 0.0, "yes": 0, "no": 3, "n": 3, "disp": 0.0, "smoothed": true}, "2026-06-24": {"rate": 50.0, "yes": 2, "no": 2, "n": 4, "disp": 28.6, "smoothed": true}, "2026-06-25": {"rate": 100.0, "yes": 6, "no": 0, "n": 6, "disp": 100.0, "smoothed": false}, "2026-06-26": {"rate": 66.7, "yes": 4, "no": 2, "n": 6, "disp": 66.7, "smoothed": false}, "2026-06-27": {"rate": 75.0, "yes": 3, "no": 1, "n": 4, "disp": 65.2, "smoothed": true}, "2026-06-28": {"rate": 33.3, "yes": 1, "no": 2, "n": 3, "disp": 61.5, "smoothed": true}, "2026-06-29": {"rate": 100.0, "yes": 7, "no": 0, "n": 7, "disp": 100.0, "smoothed": false}, "2026-06-30": {"rate": 25.0, "yes": 1, "no": 3, "n": 4, "disp": 70.6, "smoothed": true}, "2026-07-01": {"rate": 60.0, "yes": 3, "no": 2, "n": 5, "disp": 60.0, "smoothed": false}, "2026-07-02": {"rate": 50.0, "yes": 2, "no": 2, "n": 4, "disp": 63.6, "smoothed": true}, "2026-07-03": {"rate": 0.0, "yes": 0, "no": 1, "n": 1, "disp": 60.7, "smoothed": true}, "2026-07-04": {"rate": 0.0, "yes": 0, "no": 1, "n": 1, "disp": 56.0, "smoothed": true}, "2026-07-05": {"rate": 0.0, "yes": 0, "no": 5, "n": 5, "disp": 0.0, "smoothed": false}, "2026-07-06": {"rate": 25.0, "yes": 1, "no": 3, "n": 4, "disp": 29.2, "smoothed": true}, "2026-07-07": {"rate": 50.0, "yes": 1, "no": 1, "n": 2, "disp": 31.8, "smoothed": true}, "2026-07-08": {"rate": 80.0, "yes": 4, "no": 1, "n": 5, "disp": 80.0, "smoothed": false}, "2026-07-09": {"rate": 100.0, "yes": 1, "no": 0, "n": 1, "disp": 36.8, "smoothed": true}, "2026-07-10": {"rate": 66.7, "yes": 2, "no": 1, "n": 3, "disp": 42.9, "smoothed": true}, "2026-07-11": {"rate": 0.0, "yes": 0, "no": 3, "n": 3, "disp": 39.1, "smoothed": true}, "2026-07-12": {"rate": 75.0, "yes": 3, "no": 1, "n": 4, "disp": 54.5, "smoothed": true}, "2026-07-13": {"rate": 50.0, "yes": 1, "no": 1, "n": 2, "disp": 60.0, "smoothed": true}}, "age_status": [{"band": "~19", "total": 6, "counts": {"검토전": 1, "대상아님": 5, "예비합격": 0, "합격": 0, "불합격": 0, "지원취소": 0}}, {"band": "20-24", "total": 45, "counts": {"검토전": 0, "대상아님": 36, "예비합격": 2, "합격": 3, "불합격": 2, "지원취소": 2}}, {"band": "25-29", "total": 60, "counts": {"검토전": 1, "대상아님": 32, "예비합격": 6, "합격": 10, "불합격": 1, "지원취소": 10}}, {"band": "30-34", "total": 26, "counts": {"검토전": 3, "대상아님": 13, "예비합격": 2, "합격": 7, "불합격": 1, "지원취소": 0}}, {"band": "35-39", "total": 3, "counts": {"검토전": 0, "대상아님": 2, "예비합격": 1, "합격": 0, "불합격": 0, "지원취소": 0}}, {"band": "40+", "total": 14, "counts": {"검토전": 0, "대상아님": 10, "예비합격": 3, "합격": 0, "불합격": 1, "지원취소": 0}}], "status_present": ["검토전", "대상아님", "예비합격", "합격", "불합격", "지원취소"], "selection": {"counts": {"검토전": 5, "대상아님": 98, "예비합격": 14, "합격": 20, "불합격": 5, "지원취소": 12}, "submitted": 44, "decided": 39, "pass": 20, "fail": 5, "pre": 14, "pending": 5, "cancel": 12, "ing": 98, "pass_rate": 80.0, "fail_rate": 20.0, "pending_rate": 11.4}, "age_all_full": [27, 30, 24, 26, 27, 27, 43, 25, 16, 43, 33, 29, 32, 34, 22, 24, 76, 62, 23, 19, 29, 23, 21, 25, 27, 27, 23, 22, 33, 24, 30, 24, 35, 34, 32, 27, 26, 20, 25, 28, 40, 31, 22, 20, 25, 27, 20, 30, 28, 32, 25, 23, 25, 30, 30, 32, 23, 23, 28, 26, 15, 24, 23, 26, 30, 32, 37, 23, 52, 24, 24, 31, 45, 27, 22, 38, 23, 34, 23, 20, 33, 20, 26, 16, 26, 26, 29, 29, 19, 28, 53, 25, 26, 23, 23, 26, 22, 24, 31, 24, 22, 25, 26, 32, 33, 28, 25, 26, 26, 25, 30, 23, 29, 52, 58, 23, 28, 62, 25, 23, 26, 30, 26, 23, 16, 26, 24, 28, 21, 28, 46, 22, 29, 20, 28, 27, 26, 30, 21, 27, 42, 26, 32, 25, 26, 25, 26, 28, 25, 24, 58, 25, 23, 23], "age_full": {"median": 26.0, "q1": 23.0, "q3": 30.0, "min": 15.0, "max": 76.0, "mean": 28.4, "n": 154}, "scatter": {"pass": [32, 32, 25, 24, 26, 30, 32, 34, 26, 26, 25, 25, 23, 28, 20, 30, 32, 25, 26, 26], "fail": [23, 33, 29, 42, 23], "other": [27, 30, 24, 26, 27, 27, 43, 25, 16, 43, 33, 29, 32, 34, 22, 24, 76, 62, 23, 19, 29, 23, 21, 25, 27, 27, 23, 22, 33, 24, 30, 24, 35, 34, 27, 26, 20, 25, 28, 40, 31, 22, 20, 25, 27, 20, 30, 28, 25, 23, 30, 30, 32, 23, 23, 28, 26, 15, 23, 37, 52, 24, 24, 31, 45, 27, 22, 38, 23, 23, 20, 33, 20, 16, 26, 29, 29, 19, 28, 53, 26, 23, 23, 26, 22, 24, 31, 24, 22, 26, 32, 28, 25, 26, 26, 25, 30, 23, 29, 52, 58, 62, 25, 23, 26, 30, 26, 23, 16, 26, 24, 28, 21, 28, 46, 22, 28, 27, 26, 21, 27, 26, 25, 28, 25, 24, 58, 25, 23]}, "target": 60, "ach_vs_start": 30.3, "ach_vs_target": 73.3, "capacity": 30, "competition": 4.8, "fill_vs_capacity": 146.7, "proj": {"start": "2026-06-23", "end": "2026-07-27", "days_total": 35, "days_elapsed": 21, "days_left": 14, "time_pct": 60, "pace": 1.71, "projected": 68, "proj_tpct": 113, "tier": "safe", "label": "마감 내 목표 달성 전망", "early": false}, "control": false, "econ": {"budget": 43867147, "budget_rate": 44, "cpa": 302532, "cac": 996981, "roas": 132, "exp_rev": 58080000, "goal_rev": 46464000}, "funnel": {"views": 26070, "start": 145, "complete": 44, "gov24": 6, "edustart": 4, "capacity": 30, "target": 60, "cr": 30.3, "g_conv": 13.6, "e_conv": 9.1, "fill": 13.3}, "bench": {"n": 3, "gisus": [5, 6, 7], "complete_rate": 26.1, "edu_conv": 30.5, "fill": 85.8}}, {"name": "그로스 마케팅 6기", "file": "kdt-growth-6th_지원서_2026_07_13_09_18_34.csv", "total_rows": 523, "시작": 497, "지원중": 346, "완료": 145, "유효취소": 6, "conv": 29.2, "cancel_rate": 1.2, "nbc_tot": 231, "nbc_yes": 134, "nbc_rate": 58.0, "daily": {"2026-06-16": 20, "2026-06-17": 34, "2026-06-18": 22, "2026-06-19": 28, "2026-06-20": 17, "2026-06-21": 10, "2026-06-22": 34, "2026-06-23": 20, "2026-06-24": 22, "2026-06-25": 16, "2026-06-26": 15, "2026-06-27": 11, "2026-06-28": 16, "2026-06-29": 18, "2026-06-30": 16, "2026-07-01": 21, "2026-07-02": 13, "2026-07-03": 15, "2026-07-04": 16, "2026-07-05": 16, "2026-07-06": 12, "2026-07-07": 31, "2026-07-08": 21, "2026-07-09": 14, "2026-07-10": 13, "2026-07-11": 10, "2026-07-12": 15, "2026-07-13": 1}, "comp_daily": {"2026-06-16": 9, "2026-06-17": 8, "2026-06-18": 4, "2026-06-19": 5, "2026-06-20": 2, "2026-06-21": 1, "2026-06-22": 15, "2026-06-23": 7, "2026-06-24": 4, "2026-06-25": 4, "2026-06-26": 7, "2026-06-27": 1, "2026-06-28": 3, "2026-06-29": 4, "2026-06-30": 3, "2026-07-01": 9, "2026-07-02": 2, "2026-07-03": 8, "2026-07-04": 5, "2026-07-05": 4, "2026-07-06": 5, "2026-07-07": 10, "2026-07-08": 7, "2026-07-09": 7, "2026-07-10": 2, "2026-07-11": 3, "2026-07-12": 6}, "age": {"median": 25.0, "q1": 23.0, "q3": 28.0, "min": 15.0, "max": 60.0, "mean": 25.6, "n": 363}, "age_band": {"~19": 12, "20-24": 167, "25-29": 128, "30-34": 46, "35-39": 4, "40+": 6}, "gender_pool": {"남성": 103, "여성": 257}, "by_age": [{"key": "~19", "yes": 2, "no": 2, "tot": 4, "yes_rate": 50.0}, {"key": "20-24", "yes": 42, "no": 57, "tot": 99, "yes_rate": 42.4}, {"key": "25-29", "yes": 62, "no": 26, "tot": 88, "yes_rate": 70.5}, {"key": "30-34", "yes": 26, "no": 8, "tot": 34, "yes_rate": 76.5}, {"key": "35-39", "yes": 1, "no": 2, "tot": 3, "yes_rate": 33.3}, {"key": "40+", "yes": 1, "no": 2, "tot": 3, "yes_rate": 33.3}], "by_gender": [{"key": "남성", "yes": 32, "no": 32, "tot": 64, "yes_rate": 50.0}, {"key": "여성", "yes": 102, "no": 65, "tot": 167, "yes_rate": 61.1}], "by_status": [{"key": "대학(원)생", "yes": 17, "no": 29, "tot": 46, "yes_rate": 37.0}, {"key": "취업준비생", "yes": 93, "no": 47, "tot": 140, "yes_rate": 66.4}, {"key": "직장인/프리랜서", "yes": 12, "no": 8, "tot": 20, "yes_rate": 60.0}, {"key": "기타", "yes": 9, "no": 9, "tot": 18, "yes_rate": 50.0}, {"key": "알 수 없음", "yes": 3, "no": 4, "tot": 7, "yes_rate": 42.9}], "age_by_day": {"2026-06-16": [34, 33, 23, 24, 23, 22, 27, 22, 32], "2026-06-17": [27, 22, 24, 32, 25, 25, 29, 24, 29, 22, 28, 29, 28, 25, 24, 30, 50, 22, 23, 25, 31, 23, 28, 28], "2026-06-18": [38, 33, 22, 28, 28, 28, 26, 23, 22, 26, 25, 28, 22, 23, 24, 20], "2026-06-19": [22, 24, 29, 24, 30, 27, 30, 22, 23, 18, 22, 23, 24, 26, 30, 30, 27, 30, 35, 19, 23, 23], "2026-06-20": [22, 25, 26, 23, 22, 25, 33, 26, 33, 32, 25, 33, 29, 22, 23], "2026-06-21": [19, 30, 22, 33, 24, 43, 30], "2026-06-22": [20, 22, 24, 40, 24, 38, 18, 22, 27, 23, 23, 37, 32, 23, 22, 24, 28, 23, 24, 28], "2026-06-23": [27, 27, 23, 29, 25, 24, 25, 29, 33, 30, 22, 28, 27, 26], "2026-06-24": [25, 29, 27, 25, 23, 25, 24, 25, 29, 23, 23, 23, 23, 24, 60, 32, 20, 28, 23, 31], "2026-06-25": [22, 27, 22, 22, 26, 22, 22, 34, 20, 20, 27, 25, 23], "2026-06-26": [23, 28, 27, 25, 28, 29, 22, 24], "2026-06-27": [21, 27, 31, 23, 24, 29, 25, 23, 19], "2026-06-28": [25, 25, 23, 24, 22, 25, 26, 22, 26, 23, 23], "2026-06-29": [24, 23, 23, 26, 32, 23, 21, 21, 24, 20, 22, 21, 33], "2026-06-30": [22, 28, 27, 30, 32, 28, 27, 19, 25, 28, 31, 25, 27], "2026-07-01": [26, 22, 23, 22, 25, 23, 23, 22, 23, 26, 22, 26, 22], "2026-07-02": [22, 24, 22, 25, 18, 26, 25, 25, 26, 25, 27], "2026-07-03": [23, 20, 23, 33, 27, 23], "2026-07-04": [28, 24, 19, 24, 24, 24, 23, 24, 24, 23], "2026-07-05": [23, 23, 23, 23, 29, 26, 21, 49, 25, 33, 23], "2026-07-06": [25, 22, 25, 30, 23, 23, 25, 24, 50], "2026-07-07": [25, 24, 20, 29, 32, 22, 26, 22, 24, 25, 22, 28, 26, 24, 28, 23, 32, 27, 25, 22, 25, 22], "2026-07-08": [18, 27, 25, 22, 23, 28, 33, 25, 21, 23, 27, 21, 29, 25, 24], "2026-07-09": [21, 30, 25, 27, 20, 33, 25, 25, 26, 28, 27, 22, 21], "2026-07-10": [24, 34, 22, 24, 18, 24, 30, 22, 24, 26, 31, 26, 31], "2026-07-11": [28, 22, 28, 30, 22, 34, 22, 15, 29, 23], "2026-07-12": [27, 24, 17, 20, 23, 21, 26, 24, 28, 26, 22, 34, 24, 23, 24], "2026-07-13": [24]}, "age_all": [24, 27, 24, 17, 20, 23, 21, 26, 24, 28, 26, 22, 34, 24, 23, 24, 28, 22, 28, 30, 22, 34, 22, 15, 29, 23, 24, 34, 22, 24, 18, 24, 30, 22, 24, 26, 31, 26, 31, 21, 30, 25, 27, 20, 33, 25, 25, 26, 28, 27, 22, 21, 18, 27, 25, 22, 23, 28, 33, 25, 21, 23, 27, 21, 29, 25, 24, 25, 24, 20, 29, 32, 22, 26, 22, 24, 25, 22, 28, 26, 24, 28, 23, 32, 27, 25, 22, 25, 22, 25, 22, 25, 30, 23, 23, 25, 24, 50, 23, 23, 23, 23, 29, 26, 21, 49, 25, 33, 23, 28, 24, 19, 24, 24, 24, 23, 24, 24, 23, 23, 20, 23, 33, 27, 23, 22, 24, 22, 25, 18, 26, 25, 25, 26, 25, 27, 26, 22, 23, 22, 25, 23, 23, 22, 23, 26, 22, 26, 22, 22, 28, 27, 30, 32, 28, 27, 19, 25, 28, 31, 25, 27, 24, 23, 23, 26, 32, 23, 21, 21, 24, 20, 22, 21, 33, 25, 25, 23, 24, 22, 25, 26, 22, 26, 23, 23, 21, 27, 31, 23, 24, 29, 25, 23, 19, 23, 28, 27, 25, 28, 29, 22, 24, 22, 27, 22, 22, 26, 22, 22, 34, 20, 20, 27, 25, 23, 25, 29, 27, 25, 23, 25, 24, 25, 29, 23, 23, 23, 23, 24, 60, 32, 20, 28, 23, 31, 27, 27, 23, 29, 25, 24, 25, 29, 33, 30, 22, 28, 27, 26, 20, 22, 24, 40, 24, 38, 18, 22, 27, 23, 23, 37, 32, 23, 22, 24, 28, 23, 24, 28, 19, 30, 22, 33, 24, 43, 30, 22, 25, 26, 23, 22, 25, 33, 26, 33, 32, 25, 33, 29, 22, 23, 22, 24, 29, 24, 30, 27, 30, 22, 23, 18, 22, 23, 24, 26, 30, 30, 27, 30, 35, 19, 23, 23, 38, 33, 22, 28, 28, 28, 26, 23, 22, 26, 25, 28, 22, 23, 24, 20, 27, 22, 24, 32, 25, 25, 29, 24, 29, 22, 28, 29, 28, 25, 24, 30, 50, 22, 23, 25, 31, 23, 28, 28, 34, 33, 23, 24, 23, 22, 27, 22, 32], "box_daily": [{"q1": 23.0, "median": 24.0, "q3": 32.0, "min": 22.0, "max": 34.0, "n": 9}, {"q1": 24.0, "median": 26.0, "q3": 29.0, "min": 22.0, "max": 50.0, "n": 24}, {"q1": 22.8, "median": 25.5, "q3": 28.0, "min": 20.0, "max": 38.0, "n": 16}, {"q1": 23.0, "median": 24.0, "q3": 29.8, "min": 18.0, "max": 35.0, "n": 22}, {"q1": 23.0, "median": 25.0, "q3": 30.5, "min": 22.0, "max": 33.0, "n": 15}, {"q1": 23.0, "median": 30.0, "q3": 31.5, "min": 19.0, "max": 43.0, "n": 7}, {"q1": 22.8, "median": 24.0, "q3": 28.0, "min": 18.0, "max": 40.0, "n": 20}, {"q1": 25.0, "median": 27.0, "q3": 28.8, "min": 22.0, "max": 33.0, "n": 14}, {"q1": 23.0, "median": 25.0, "q3": 28.2, "min": 20.0, "max": 60.0, "n": 20}, {"q1": 22.0, "median": 22.0, "q3": 26.0, "min": 20.0, "max": 34.0, "n": 13}, {"q1": 23.8, "median": 26.0, "q3": 28.0, "min": 22.0, "max": 29.0, "n": 8}, {"q1": 23.0, "median": 24.0, "q3": 27.0, "min": 19.0, "max": 31.0, "n": 9}, {"q1": 23.0, "median": 24.0, "q3": 25.0, "min": 22.0, "max": 26.0, "n": 11}, {"q1": 21.0, "median": 23.0, "q3": 24.0, "min": 20.0, "max": 33.0, "n": 13}, {"q1": 25.0, "median": 27.0, "q3": 28.0, "min": 19.0, "max": 32.0, "n": 13}, {"q1": 22.0, "median": 23.0, "q3": 25.0, "min": 22.0, "max": 26.0, "n": 13}, {"q1": 23.0, "median": 25.0, "q3": 25.5, "min": 18.0, "max": 27.0, "n": 11}, {"q1": 23.0, "median": 23.0, "q3": 26.0, "min": 20.0, "max": 33.0, "n": 6}, {"q1": 23.2, "median": 24.0, "q3": 24.0, "min": 19.0, "max": 28.0, "n": 10}, {"q1": 23.0, "median": 23.0, "q3": 27.5, "min": 21.0, "max": 49.0, "n": 11}, {"q1": 23.0, "median": 25.0, "q3": 25.0, "min": 22.0, "max": 50.0, "n": 9}, {"q1": 22.2, "median": 25.0, "q3": 26.8, "min": 20.0, "max": 32.0, "n": 22}, {"q1": 22.5, "median": 25.0, "q3": 27.0, "min": 18.0, "max": 33.0, "n": 15}, {"q1": 22.0, "median": 25.0, "q3": 27.0, "min": 20.0, "max": 33.0, "n": 13}, {"q1": 24.0, "median": 24.0, "q3": 30.0, "min": 18.0, "max": 34.0, "n": 13}, {"q1": 22.0, "median": 25.5, "q3": 28.8, "min": 15.0, "max": 34.0, "n": 10}, {"q1": 22.5, "median": 24.0, "q3": 26.0, "min": 17.0, "max": 34.0, "n": 15}, {"q1": 24.0, "median": 24.0, "q3": 24.0, "min": 24.0, "max": 24.0, "n": 1}], "nbc_day": {"2026-06-16": {"rate": 78.6, "yes": 11, "no": 3, "n": 14, "disp": 78.6, "smoothed": false}, "2026-06-17": {"rate": 46.7, "yes": 7, "no": 8, "n": 15, "disp": 46.7, "smoothed": false}, "2026-06-18": {"rate": 84.6, "yes": 11, "no": 2, "n": 13, "disp": 84.6, "smoothed": false}, "2026-06-19": {"rate": 66.7, "yes": 10, "no": 5, "n": 15, "disp": 66.7, "smoothed": false}, "2026-06-20": {"rate": 66.7, "yes": 2, "no": 1, "n": 3, "disp": 68.3, "smoothed": true}, "2026-06-21": {"rate": 75.0, "yes": 3, "no": 1, "n": 4, "disp": 68.8, "smoothed": true}, "2026-06-22": {"rate": 60.0, "yes": 9, "no": 6, "n": 15, "disp": 60.0, "smoothed": false}, "2026-06-23": {"rate": 72.7, "yes": 8, "no": 3, "n": 11, "disp": 72.7, "smoothed": false}, "2026-06-24": {"rate": 50.0, "yes": 5, "no": 5, "n": 10, "disp": 50.0, "smoothed": false}, "2026-06-25": {"rate": 33.3, "yes": 2, "no": 4, "n": 6, "disp": 33.3, "smoothed": false}, "2026-06-26": {"rate": 44.4, "yes": 4, "no": 5, "n": 9, "disp": 44.4, "smoothed": false}, "2026-06-27": {"rate": 60.0, "yes": 3, "no": 2, "n": 5, "disp": 60.0, "smoothed": false}, "2026-06-28": {"rate": 62.5, "yes": 5, "no": 3, "n": 8, "disp": 62.5, "smoothed": false}, "2026-06-29": {"rate": 45.5, "yes": 5, "no": 6, "n": 11, "disp": 45.5, "smoothed": false}, "2026-06-30": {"rate": 80.0, "yes": 4, "no": 1, "n": 5, "disp": 80.0, "smoothed": false}, "2026-07-01": {"rate": 58.3, "yes": 7, "no": 5, "n": 12, "disp": 58.3, "smoothed": false}, "2026-07-02": {"rate": 50.0, "yes": 2, "no": 2, "n": 4, "disp": 55.6, "smoothed": true}, "2026-07-03": {"rate": 60.0, "yes": 6, "no": 4, "n": 10, "disp": 60.0, "smoothed": false}, "2026-07-04": {"rate": 83.3, "yes": 5, "no": 1, "n": 6, "disp": 83.3, "smoothed": false}, "2026-07-05": {"rate": 37.5, "yes": 3, "no": 5, "n": 8, "disp": 37.5, "smoothed": false}, "2026-07-06": {"rate": 50.0, "yes": 2, "no": 2, "n": 4, "disp": 59.2, "smoothed": true}, "2026-07-07": {"rate": 60.0, "yes": 9, "no": 6, "n": 15, "disp": 60.0, "smoothed": false}, "2026-07-08": {"rate": 36.4, "yes": 4, "no": 7, "n": 11, "disp": 36.4, "smoothed": false}, "2026-07-09": {"rate": 55.6, "yes": 5, "no": 4, "n": 9, "disp": 55.6, "smoothed": false}, "2026-07-10": {"rate": 33.3, "yes": 1, "no": 2, "n": 3, "disp": 51.8, "smoothed": true}, "2026-07-11": {"rate": 42.9, "yes": 3, "no": 4, "n": 7, "disp": 42.9, "smoothed": false}, "2026-07-12": {"rate": 42.9, "yes": 3, "no": 4, "n": 7, "disp": 42.9, "smoothed": false}}, "age_status": [{"band": "~19", "total": 13, "counts": {"검토전": 0, "대상아님": 12, "예비합격": 0, "합격": 0, "불합격": 1, "지원취소": 0}}, {"band": "20-24", "total": 226, "counts": {"검토전": 5, "대상아님": 162, "예비합격": 4, "합격": 22, "불합격": 26, "지원취소": 7}}, {"band": "25-29", "total": 184, "counts": {"검토전": 8, "대상아님": 120, "예비합격": 3, "합격": 26, "불합격": 22, "지원취소": 5}}, {"band": "30-34", "total": 65, "counts": {"검토전": 5, "대상아님": 41, "예비합격": 1, "합격": 3, "불합격": 15, "지원취소": 0}}, {"band": "35-39", "total": 5, "counts": {"검토전": 0, "대상아님": 4, "예비합격": 0, "합격": 1, "불합격": 0, "지원취소": 0}}, {"band": "40+", "total": 9, "counts": {"검토전": 0, "대상아님": 6, "예비합격": 1, "합격": 0, "불합격": 2, "지원취소": 0}}], "status_present": ["검토전", "대상아님", "예비합격", "합격", "불합격", "지원취소"], "selection": {"counts": {"검토전": 18, "대상아님": 346, "예비합격": 9, "합격": 52, "불합격": 66, "지원취소": 12}, "submitted": 145, "decided": 127, "pass": 52, "fail": 66, "pre": 9, "pending": 18, "cancel": 12, "ing": 346, "pass_rate": 44.1, "fail_rate": 55.9, "pending_rate": 12.4}, "age_all_full": [24, 27, 24, 17, 20, 23, 21, 26, 24, 28, 26, 22, 34, 24, 23, 24, 28, 22, 28, 30, 22, 34, 22, 15, 29, 23, 24, 34, 22, 24, 18, 24, 30, 22, 24, 26, 31, 26, 31, 21, 30, 25, 27, 20, 33, 25, 25, 26, 24, 28, 27, 22, 21, 18, 23, 27, 25, 22, 23, 28, 23, 33, 25, 25, 21, 23, 22, 27, 21, 29, 25, 24, 24, 25, 24, 20, 25, 29, 32, 22, 26, 22, 24, 25, 22, 28, 28, 26, 26, 20, 24, 28, 25, 27, 23, 32, 27, 25, 22, 26, 32, 25, 22, 25, 25, 22, 25, 30, 23, 27, 25, 24, 23, 25, 24, 50, 23, 23, 23, 23, 29, 29, 26, 21, 22, 25, 49, 18, 51, 25, 33, 23, 28, 29, 24, 19, 24, 24, 25, 24, 22, 24, 23, 33, 24, 29, 24, 23, 23, 20, 23, 23, 33, 23, 27, 30, 27, 22, 25, 27, 23, 22, 23, 22, 24, 22, 25, 18, 26, 26, 25, 25, 24, 24, 26, 25, 27, 29, 26, 22, 23, 22, 24, 21, 25, 24, 25, 23, 23, 22, 23, 26, 22, 26, 24, 24, 24, 33, 33, 22, 22, 28, 27, 30, 32, 25, 28, 30, 29, 27, 19, 25, 28, 31, 25, 27, 24, 25, 23, 23, 23, 23, 26, 32, 23, 21, 21, 21, 29, 24, 28, 20, 22, 21, 23, 33, 25, 25, 23, 23, 28, 24, 40, 22, 22, 25, 26, 22, 26, 23, 28, 23, 21, 27, 31, 23, 24, 29, 25, 46, 23, 28, 19, 32, 28, 23, 23, 22, 28, 25, 27, 25, 28, 22, 29, 22, 22, 24, 22, 27, 22, 31, 22, 26, 22, 22, 34, 23, 20, 20, 27, 25, 24, 23, 29, 25, 29, 27, 25, 25, 23, 25, 24, 25, 29, 23, 23, 23, 23, 24, 60, 32, 20, 28, 23, 31, 24, 27, 27, 25, 23, 33, 29, 25, 24, 25, 29, 33, 20, 30, 22, 23, 22, 28, 27, 26, 20, 26, 22, 24, 24, 40, 22, 24, 38, 18, 22, 27, 23, 23, 24, 24, 22, 25, 22, 23, 34, 37, 30, 32, 23, 22, 28, 34, 33, 24, 28, 23, 24, 28, 19, 30, 22, 27, 23, 33, 24, 43, 30, 33, 22, 25, 26, 23, 22, 26, 25, 33, 26, 33, 32, 25, 33, 29, 22, 23, 24, 27, 22, 31, 24, 29, 24, 30, 27, 30, 25, 22, 34, 23, 18, 22, 23, 24, 26, 25, 24, 30, 30, 27, 30, 35, 19, 23, 23, 38, 33, 22, 28, 29, 28, 28, 34, 26, 23, 22, 26, 28, 26, 25, 24, 28, 22, 25, 24, 23, 24, 20, 27, 22, 26, 24, 25, 34, 32, 25, 25, 24, 29, 24, 29, 22, 28, 29, 28, 30, 25, 24, 30, 24, 29, 50, 22, 23, 23, 25, 31, 23, 28, 22, 28, 29, 34, 33, 21, 23, 24, 23, 22, 26, 27, 26, 21, 24, 23, 22, 32, 29, 29, 27, 37, 28], "age_full": {"median": 25.0, "q1": 23.0, "q3": 28.0, "min": 15.0, "max": 60.0, "mean": 25.8, "n": 502}, "scatter": {"pass": [24, 23, 23, 28, 26, 20, 27, 32, 25, 27, 24, 22, 25, 29, 24, 27, 30, 27, 24, 21, 24, 29, 25, 28, 23, 22, 25, 31, 29, 25, 20, 24, 22, 28, 24, 27, 25, 29, 24, 25, 25, 24, 23, 26, 21, 24, 23, 29, 29, 27, 37, 28], "fail": [22, 26, 18, 33, 29, 23, 22, 25, 23, 24, 29, 24, 25, 33, 33, 25, 30, 21, 29, 28, 23, 23, 40, 22, 28, 46, 28, 22, 22, 23, 24, 24, 25, 33, 22, 23, 26, 22, 23, 24, 24, 22, 25, 34, 30, 34, 33, 27, 23, 33, 26, 31, 34, 25, 24, 34, 28, 26, 26, 34, 24, 30, 29, 29, 21, 26], "other": [24, 27, 24, 17, 20, 23, 21, 26, 24, 28, 26, 22, 34, 24, 23, 24, 28, 22, 28, 30, 22, 34, 22, 15, 29, 23, 24, 34, 22, 24, 18, 24, 30, 22, 24, 26, 31, 26, 31, 21, 30, 25, 27, 20, 33, 25, 25, 26, 28, 27, 22, 21, 18, 27, 25, 22, 23, 28, 33, 25, 25, 21, 23, 27, 21, 29, 25, 24, 24, 25, 24, 20, 25, 29, 32, 22, 26, 22, 24, 25, 22, 28, 26, 24, 28, 25, 23, 32, 27, 25, 22, 25, 22, 25, 22, 25, 30, 23, 25, 23, 25, 24, 50, 23, 23, 23, 23, 29, 29, 26, 21, 49, 51, 25, 33, 23, 28, 24, 19, 24, 25, 24, 22, 24, 23, 24, 24, 23, 23, 20, 23, 23, 33, 27, 23, 22, 22, 24, 22, 25, 18, 26, 26, 25, 25, 26, 25, 27, 26, 22, 23, 22, 25, 23, 23, 22, 23, 26, 22, 26, 24, 24, 24, 22, 22, 28, 27, 30, 32, 28, 27, 19, 25, 28, 31, 25, 27, 24, 23, 23, 23, 23, 26, 32, 23, 21, 21, 24, 20, 22, 21, 33, 25, 25, 23, 28, 24, 22, 25, 26, 22, 26, 23, 23, 21, 27, 31, 23, 24, 29, 25, 23, 19, 32, 23, 28, 27, 25, 28, 29, 22, 24, 22, 27, 22, 22, 26, 22, 22, 34, 20, 20, 27, 25, 23, 25, 29, 27, 25, 23, 25, 24, 25, 29, 23, 23, 23, 23, 24, 60, 32, 20, 28, 23, 31, 27, 27, 23, 29, 25, 24, 25, 29, 33, 30, 22, 28, 27, 26, 20, 22, 24, 40, 24, 38, 18, 22, 27, 23, 23, 37, 32, 23, 22, 24, 28, 23, 24, 28, 19, 30, 22, 33, 24, 43, 30, 22, 25, 26, 23, 22, 25, 33, 26, 33, 32, 25, 33, 29, 22, 23, 22, 24, 29, 24, 30, 27, 30, 22, 23, 18, 22, 23, 24, 26, 30, 30, 27, 30, 35, 19, 23, 23, 38, 33, 22, 28, 28, 28, 26, 23, 22, 26, 25, 28, 22, 24, 23, 24, 20, 27, 22, 24, 32, 25, 25, 29, 24, 29, 22, 28, 29, 28, 25, 24, 30, 50, 22, 23, 25, 31, 23, 28, 22, 28, 34, 33, 23, 24, 23, 22, 27, 22, 32]}, "target": 142, "ach_vs_start": 29.2, "ach_vs_target": 102.1, "capacity": 57, "competition": 8.7, "fill_vs_capacity": 254.4, "proj": {"start": "2026-06-16", "end": "2026-07-19", "days_total": 34, "days_elapsed": 28, "days_left": 6, "time_pct": 82, "pace": 5.0, "projected": 175, "proj_tpct": 123, "tier": "done", "label": "목표 조기 달성", "early": false}, "control": false, "econ": {"budget": 67115892, "budget_rate": 84, "cpa": 135042, "cac": 462868, "roas": 312, "exp_rev": 209668800, "goal_rev": 167735040}, "funnel": {"views": 51098, "start": 497, "complete": 145, "gov24": 27, "edustart": 19, "capacity": 57, "target": 142, "cr": 29.2, "g_conv": 18.6, "e_conv": 13.1, "fill": 33.3}, "bench": {"n": 2, "gisus": [4, 5], "complete_rate": 24.5, "edu_conv": 43.0, "fill": 101.3}}]};
+Chart.register(ChartDataLabels);
+const C={txt:'#e6e8ec',sub:'#9aa3b2',acc:'#ff7a45',blue:'#4dabf7',green:'#51cf66',red:'#ff6b6b',yellow:'#ffd43b',purple:'#b197fc',line:'#2a2f3a'};
+function baseOpt(){return{responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{display:false}},scales:{x:{ticks:{color:C.sub,maxRotation:60,font:{size:9}},grid:{color:C.line}},y:{ticks:{color:C.sub},grid:{color:C.line},beginAtZero:true}}};}
+function cum(o){let k=Object.keys(o).sort(),s=0,r=[];for(const x of k){s+=o[x];r.push(s);}return {k,r};}
+
+// 탭 — URL 해시(#slug)로 탭별 공유/특정 가능
+const tabs=document.getElementById('tabs');
+const names=['Summary',...DATA.camps.map(c=>c.name)];
+const isCtl=[false,...DATA.camps.map(c=>!!c.control)];
+function slugify(n){return n.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'');}
+const slugs=names.map((n,i)=>i===0?'summary':slugify(n));
+names.forEach((n,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' active':'')+(isCtl[i]?' ctl':'');b.id='tab-'+slugs[i];b.textContent=n+(isCtl[i]?' · 대조군':'');b.onclick=()=>{const cur=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();if(cur===slugs[i])sel(i);else location.hash=slugs[i];};tabs.appendChild(b);});
+function sel(i){if(i<0||i>=names.length)i=0;document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',j===i));}
+function selFromHash(){let h=decodeURIComponent((location.hash||'').replace(/^#/,'')).toLowerCase();let i=slugs.indexOf(h);if(i<0){const m=h.match(/^tab-?(\d+)$/);if(m)i=Number(m[1]);else if(/^\d+$/.test(h))i=Number(h);}sel(i<0?0:i);}
+window.addEventListener('hashchange',selFromHash);
+
+const charts=[];
+function mkLine(id,startO,compO,proj){
+  const s=cum(startO),c=cum(compO);
+  const labels=s.k.slice();
+  const startData=s.r.slice();
+  const compData=s.k.map(d=>c.k.includes(d)?c.r[c.k.indexOf(d)]:null);
+  let projData=labels.map(_=>null);
+  let showSet=new Set();
+  if(proj && proj.pace>0 && proj.end){
+    const lastComp = c.r.length? c.r[c.r.length-1] : 0;           // 현재 누적 완료
+    projData[projData.length-1]=lastComp;                          // 마지막 실측점에 앵커
+    let dt=new Date(labels[labels.length-1]+'T00:00:00');
+    const end=new Date(proj.end+'T00:00:00');
+    let acc=lastComp;
+    while(true){ dt.setDate(dt.getDate()+1); if(dt>end) break;
+      labels.push(dt.toISOString().slice(0,10)); startData.push(null); compData.push(null);
+      acc=acc+proj.pace; projData.push(Math.round(acc)); }
+    const fut=projData.map((v,i)=>v!=null?i:-1).filter(i=>i>=0).slice(1); // 앵커 제외 미래점
+    const step=Math.max(1,Math.ceil(fut.length/12));
+    fut.forEach((idx,k)=>{ if(k%step===0) showSet.add(idx); });
+    if(fut.length) showSet.add(fut[fut.length-1]);                  // 마감 예상치는 항상 표기
+  }
+  const ds=[
+    {label:'누적 지원시작',data:startData,borderColor:C.acc,backgroundColor:'transparent',tension:.25,pointRadius:2,pointBackgroundColor:C.acc,
+     datalabels:{display:ctx=>startData[ctx.dataIndex]!=null,align:'top',anchor:'end',color:C.acc,font:{weight:'bold',size:8},formatter:v=>v}},
+    {label:'누적 지원완료',data:compData,borderColor:C.blue,backgroundColor:'transparent',tension:.25,pointRadius:2,pointBackgroundColor:C.blue,spanGaps:true,
+     datalabels:{display:ctx=>compData[ctx.dataIndex]!=null,align:'bottom',anchor:'start',color:C.blue,font:{weight:'bold',size:8},formatter:v=>v}}
+  ];
+  if(showSet.size){
+    ds.push({label:'예상 완료(시뮬·점선)',data:projData,borderColor:C.green,borderDash:[6,4],backgroundColor:'transparent',tension:0,spanGaps:true,
+      pointRadius:ctx=>showSet.has(ctx.dataIndex)?2.5:0,pointBackgroundColor:C.green,
+      datalabels:{display:ctx=>showSet.has(ctx.dataIndex),align:'top',anchor:'end',color:C.green,font:{weight:'bold',size:8},formatter:v=>v}});
+  }
+  charts.push(new Chart(document.getElementById(id),{type:'line',data:{labels,datasets:ds},options:baseOpt()}));
+}
+function mkDailyBar(id,startO){
+  const k=Object.keys(startO).sort();
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:k,datasets:[
+    {label:'일별 신규 지원시작',data:k.map(d=>startO[d]),backgroundColor:C.acc,
+     datalabels:{display:true,anchor:'end',align:'end',color:C.sub,font:{size:9},formatter:v=>v}}]},options:baseOpt()}));
+}
+function mkNbcCross(id,rows,labelKey){
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:rows.map(r=>r.key),datasets:[
+    {label:'내배카 YES',data:rows.map(r=>r.yes),backgroundColor:C.green,stack:'s',
+     datalabels:{display:true,color:'#0f1115',font:{weight:'bold',size:11},formatter:v=>v>0?v:''}},
+    {label:'내배카 NO',data:rows.map(r=>r.no),backgroundColor:C.red,stack:'s',
+     datalabels:{display:true,color:'#0f1115',font:{weight:'bold',size:11},formatter:v=>v>0?v:''}},
+    {type:'line',label:'YES 비율(%)',data:rows.map(r=>r.yes_rate),borderColor:C.yellow,backgroundColor:'transparent',yAxisID:'y2',tension:.2,pointRadius:3,pointBackgroundColor:C.yellow,
+     datalabels:{display:true,align:'top',color:C.yellow,font:{weight:'bold',size:11},formatter:v=>v.toFixed(0)+'%'}}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{}},scales:{
+      x:{stacked:true,ticks:{color:C.sub,font:{size:11}},grid:{color:C.line}},
+      y:{stacked:true,ticks:{color:C.sub},grid:{color:C.line},beginAtZero:true,title:{display:true,text:'명',color:C.sub}},
+      y2:{position:'right',min:0,max:100,ticks:{color:C.yellow,callback:v=>v+'%'},grid:{drawOnChartArea:false},title:{display:true,text:'YES 비율',color:C.yellow}}}}}));
+}
+// 박스플롯 통계 레이블 플러그인 (q1/median/q3/min/max) — 박스 우측에 배경 픽셀과 함께 표기
+function boxStatLabels(stats,keys,fs){return {id:'boxlbl'+Math.random(),afterDatasetsDraw(c){
+  const meta=c.getDatasetMeta(0), y=c.scales.y, ctx=c.ctx; if(!y)return;
+  const F=fs||11; ctx.save();ctx.font='bold '+F+'px sans-serif';ctx.textBaseline='middle';ctx.textAlign='left';
+  const cfg={max:['max ',C.sub],q3:['Q3 ',C.red],median:['중앙 ',C.acc],q1:['Q1 ',C.blue],min:['min ',C.sub]};
+  stats.forEach((s,i)=>{const el=meta.data[i]; if(!el)return;
+    const hw=(el.width||el.getProps?(el.getProps(['width']).width||40):40)/2;
+    const x=el.x+hw+8;
+    keys.forEach(k=>{ if(s[k]==null)return; const o=cfg[k]; const yy=y.getPixelForValue(s[k]);
+      const txt=o[0]+s[k], w=ctx.measureText(txt).width;
+      ctx.fillStyle='rgba(15,17,21,.78)';
+      ctx.fillRect(x-3, yy-F/2-2, w+6, F+4);
+      ctx.fillStyle=o[1]; ctx.fillText(txt, x, yy);});});
+  ctx.restore();}};}
+// 합불상태별 색상 산점도 오버레이 (🟢합격 · 🔴불합격 · 회색 기타) — 박스 중심에 지터
+function scatterByStatus(scatters){return {id:'sbs'+Math.random(),afterDatasetsDraw(c){
+  const meta=c.getDatasetMeta(0), y=c.scales.y, ctx=c.ctx; if(!y)return;
+  const rnd=(k,a)=>{const s=Math.sin(k*12.9898+a*4.1414)*43758.5453; return (s-Math.floor(s))-0.5;};
+  ctx.save();
+  scatters.forEach((s,i)=>{const el=meta.data[i]; if(!el)return; const cx=el.x;
+    let hw=20; try{const w=el.getProps(['width'],true).width; if(w)hw=w/2;}catch(e){}
+    const draw=(arr,color,rad)=>{(arr||[]).forEach((age,k)=>{
+      const jx=cx+rnd(k+1,age)*hw*1.5;
+      ctx.beginPath();ctx.arc(jx,y.getPixelForValue(age),rad,0,6.2832);ctx.fillStyle=color;ctx.fill();});};
+    draw(s.other,'rgba(154,163,178,.30)',1.6);
+    draw(s.pass, 'rgba(81,207,102,.85)',2.3);
+    draw(s.fail, 'rgba(255,107,107,.85)',2.3);
+  });
+  ctx.restore();}};}
+function mkBoxCompare(id){
+  const labels=DATA.camps.map(c=>c.name), data=DATA.camps.map(c=>c.age_all_full||c.age_all);
+  const stats=DATA.camps.map(c=>c.age_full&&c.age_full.n?c.age_full:c.age);
+  const scatters=DATA.camps.map(c=>c.scatter||{});
+  charts.push(new Chart(document.getElementById(id),{type:'boxplot',data:{labels,datasets:[
+    {label:'만나이 분포',data,backgroundColor:'rgba(77,171,247,.14)',borderColor:C.blue,borderWidth:2,
+     itemRadius:0,outlierRadius:0,medianColor:C.acc,
+     datalabels:{display:false}}]},
+    options:{responsive:true,layout:{padding:{right:80}},plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}},y:{ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'만나이',color:C.sub}}}},
+    plugins:[scatterByStatus(scatters),boxStatLabels(stats,['max','q3','median','q1','min'],11)]}));
+}
+const medLine=(yval)=>({id:'medLine'+Math.random(),afterDatasetsDraw(c){
+  const {ctx,chartArea:{left,right},scales:{y}}=c; if(!y)return; const yy=y.getPixelForValue(yval);
+  ctx.save();ctx.strokeStyle=C.sub;ctx.setLineDash([5,4]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();
+  ctx.setLineDash([]);ctx.fillStyle=C.sub;ctx.font='11px sans-serif';ctx.fillText('전체 중앙값 '+yval+'세',left+6,yy-4);ctx.restore();}});
+function mkBoxDaily(id,byDay,overallMedian,boxStats,nbcDay){
+  const labels=Object.keys(byDay).sort(), data=labels.map(d=>byDay[d]);
+  const nbcData = nbcDay ? labels.map(d=> (nbcDay[d]? nbcDay[d].disp : null)) : null;
+  const nbcSm   = nbcDay ? labels.map(d=> (nbcDay[d]? !!nbcDay[d].smoothed : false)) : null;
+  const ds=[{label:'일별 만나이',data,backgroundColor:'rgba(177,151,252,.3)',borderColor:C.purple,borderWidth:1.5,
+     itemRadius:1.5,itemStyle:'circle',itemBackgroundColor:'rgba(255,122,69,.45)',outlierBackgroundColor:C.red,medianColor:C.acc,
+     datalabels:{display:false},yAxisID:'y'}];
+  let lineShow=new Set();
+  if(nbcData){
+    const idx=nbcData.map((v,i)=>v!=null?i:-1).filter(i=>i>=0);
+    const step=Math.max(1,Math.ceil(idx.length/8));
+    idx.forEach((ix,k)=>{ if(k%step===0) lineShow.add(ix); });
+    if(idx.length) lineShow.add(idx[idx.length-1]);
+    ds.push({type:'line',label:'내배카 소지율(% · n<5일은 ~7일 이동평균)',data:nbcData,yAxisID:'y2',borderColor:C.yellow,backgroundColor:'transparent',borderWidth:2,tension:.25,spanGaps:true,
+      pointRadius:ctx=> nbcData[ctx.dataIndex]==null?0:(nbcSm[ctx.dataIndex]?1.5:2.8),
+      pointStyle:ctx=> nbcSm[ctx.dataIndex]?'rectRot':'circle',
+      pointBackgroundColor:ctx=> nbcSm[ctx.dataIndex]?'rgba(255,212,59,.35)':C.yellow,
+      pointBorderColor:C.yellow,
+      datalabels:{display:ctx=>lineShow.has(ctx.dataIndex),align:'top',anchor:'end',color:C.yellow,font:{weight:'bold',size:8},formatter:(v,ctx)=>(nbcSm[ctx.dataIndex]?'~':'')+v+'%'}});
+  }
+  const scales={
+    x:{ticks:{color:C.sub,maxRotation:60,font:{size:8}},grid:{color:C.line}},
+    y:{ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'만나이',color:C.sub}}
+  };
+  if(nbcData) scales.y2={position:'right',min:0,max:100,ticks:{color:C.yellow,callback:v=>v+'%'},grid:{drawOnChartArea:false},title:{display:true,text:'내배카 소지율',color:C.yellow}};
+  charts.push(new Chart(document.getElementById(id),{type:'boxplot',data:{labels,datasets:ds},
+    options:{responsive:true,plugins:{legend:{display:!!nbcData,labels:{color:C.sub,font:{size:11}}},datalabels:{display:false}},scales},
+    plugins:[medLine(overallMedian),boxDailyLabels(boxStats)]}));
+}
+// 일별 박스 위/아래에 Q3/중앙/Q1 작게 표기
+function boxDailyLabels(stats){return {id:'bdl'+Math.random(),afterDatasetsDraw(c){
+  const meta=c.getDatasetMeta(0), y=c.scales.y, ctx=c.ctx; if(!y)return;
+  ctx.save();ctx.font='7px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  stats.forEach((s,i)=>{const el=meta.data[i]; if(!el)return; const x=el.x;
+    ctx.fillStyle=C.red;  ctx.fillText(s.q3,     x, y.getPixelForValue(s.q3)-6);
+    ctx.fillStyle=C.acc;  ctx.fillText(s.median, x, y.getPixelForValue(s.median)-0.5);
+    ctx.fillStyle=C.blue; ctx.fillText(s.q1,     x, y.getPixelForValue(s.q1)+6);});
+  ctx.restore();}};}
+// 연령대 × 합불상태 스택 가로막대 (각 세그먼트 명수 표기)
+function mkAgeStatus(id,rows,statuses){
+  const STC={'검토전':C.sub,'대상아님':C.blue,'예비합격':C.yellow,'합격':C.green,'불합격':C.red,'지원취소':'#7a7f8a'};
+  const labels=rows.map(r=>r.band+'세');
+  const ds=statuses.map(s=>({label:s,data:rows.map(r=>r.counts[s]||0),backgroundColor:STC[s]||C.sub,stack:'s',
+    datalabels:{display:true,color:'#0f1115',font:{weight:'bold',size:10},formatter:v=>v>0?v:''}}));
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:ds},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{}},scales:{
+      x:{stacked:true,ticks:{color:C.sub},grid:{color:C.line},title:{display:true,text:'명',color:C.sub}},
+      y:{stacked:true,ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
+}
+// 전환 퍼널 (지원시작→완료→고용24등록→교육시작) 가로막대 + 단계 전환율
+function mkFunnel(id,f){
+  if(!f) return;
+  const stages=[['지원시작',f.start],['지원완료',f.complete],['고용24등록',f.gov24],['교육시작',f.edustart]];
+  const labels=stages.map(s=>s[0]); const data=stages.map(s=>s[1]==null?0:s[1]);
+  const cols=[C.acc,C.blue,C.purple,C.green];
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[
+    {label:'인원',data,backgroundColor:cols,
+     datalabels:{display:true,anchor:'end',align:'right',color:C.txt,font:{weight:'bold',size:12},
+       formatter:(v,ctx)=>{const i=ctx.dataIndex;let conv='';if(i>0&&data[i-1]>0)conv=' ('+Math.round(v/data[i-1]*100)+'%)';return v+conv;}}}]},
+    options:{indexAxis:'y',responsive:true,layout:{padding:{right:60}},plugins:{legend:{display:false},datalabels:{}},
+      scales:{x:{ticks:{color:C.sub},grid:{color:C.line},beginAtZero:true,title:{display:true,text:'명',color:C.sub}},
+        y:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
+}
+// 선발(심사) 현황 — 합불상태 가로막대
+function mkSelection(id,sel){
+  if(!sel) return;
+  const items=[['검토전',sel.pending,C.sub],['예비합격',sel.pre,C.yellow],['합격',sel.pass,C.green],['불합격',sel.fail,C.red],['지원취소',sel.cancel,'#7a7f8a']];
+  const labels=items.map(x=>x[0]), data=items.map(x=>x[1]||0), cols=items.map(x=>x[2]);
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[
+    {label:'인원',data,backgroundColor:cols,
+     datalabels:{display:true,anchor:'end',align:'right',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v>0?v:''}}]},
+    options:{indexAxis:'y',responsive:true,layout:{padding:{right:40}},plugins:{legend:{display:false},datalabels:{}},
+      scales:{x:{ticks:{color:C.sub},grid:{color:C.line},beginAtZero:true,title:{display:true,text:'명',color:C.sub}},
+        y:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
+}
+// 기수 벤치마크 (현재 vs 같은 스쿨 모객완료 평균) 그룹 막대
+function mkBench(id,f,bm){
+  if(!f||!bm) return;
+  const labels=['완료율','교육시작전환','정원달성율'];
+  const cur=[f.cr,f.e_conv,f.fill]; const avg=[bm.complete_rate,bm.edu_conv,bm.fill];
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[
+    {label:'현재 기수',data:cur,backgroundColor:C.acc,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:11},formatter:v=>v==null?'-':v+'%'}},
+    {label:'기수 평균',data:avg,backgroundColor:C.sub,datalabels:{display:true,anchor:'end',align:'end',color:C.sub,font:{size:11},formatter:v=>v==null?'-':v+'%'}}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:C.sub,font:{size:11}}},datalabels:{}},
+      scales:{x:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}},y:{ticks:{color:C.sub,callback:v=>v+'%'},grid:{color:C.line},beginAtZero:true}}}}));
+}
+function mkStatusBar(id,rows){
+  charts.push(new Chart(document.getElementById(id),{type:'bar',data:{labels:rows.map(r=>r.key+' (n='+r.tot+')'),datasets:[
+    {label:'내배카 보유율(%)',data:rows.map(r=>r.yes_rate),backgroundColor:rows.map(r=>r.key==='알 수 없음'?C.sub:C.purple),
+     datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v.toFixed(1)+'%'}}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},datalabels:{}},scales:{
+      x:{min:0,max:100,ticks:{color:C.sub,callback:v=>v+'%'},grid:{color:C.line}},
+      y:{ticks:{color:C.txt,font:{size:12}},grid:{color:C.line}}}}}));
+}
+
+// summary charts
+new Chart(document.getElementById('sum_funnel'),{type:'bar',data:{labels:DATA.camps.map(c=>c.name),datasets:[
+  {label:'지원시작',data:DATA.camps.map(c=>c['시작']),backgroundColor:C.acc,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v}},
+  {label:'지원완료',data:DATA.camps.map(c=>c['완료']),backgroundColor:C.blue,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v}}]},options:baseOpt()});
+new Chart(document.getElementById('sum_rate'),{type:'bar',data:{labels:DATA.camps.map(c=>c.name),datasets:[
+  {label:'완료전환율',data:DATA.camps.map(c=>c.conv),backgroundColor:C.green,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v+'%'}},
+  {label:'내배카 보유율',data:DATA.camps.map(c=>c.nbc_rate),backgroundColor:C.purple,datalabels:{display:true,anchor:'end',align:'end',color:C.txt,font:{weight:'bold',size:12},formatter:v=>v+'%'}}]},options:baseOpt()});
+mkBoxCompare('sum_box');
+// per-camp
+DATA.camps.forEach((c,i)=>{const p='p'+(i+1);
+  mkDailyBar(p+'_daily',c.daily);
+  mkLine(p+'_cum',c.daily,c.comp_daily,c.proj);
+  mkBoxDaily(p+'_box',c.age_by_day,c.age.median,c.box_daily,c.nbc_day);
+  mkAgeStatus(p+'_agestatus',c.age_status,c.status_present);
+  mkNbcCross(p+'_age',c.by_age);
+  mkNbcCross(p+'_gender',c.by_gender);
+  mkStatusBar(p+'_status',c.by_status);
+  if(c.funnel){ mkFunnel(p+'_funnel',c.funnel); if(c.bench) mkBench(p+'_bench',c.funnel,c.bench); }
+  if(c.selection && c.selection.submitted>0) mkSelection(p+'_selection',c.selection);
+});
+// 초기 로드 시 URL 해시에 해당하는 탭 활성화 (공유 링크 지원)
+selFromHash();
+
+</script></body></html>
