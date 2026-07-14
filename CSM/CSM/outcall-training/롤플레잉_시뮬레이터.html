@@ -1,0 +1,3193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>멋쟁이사자처럼 아웃콜 스크립트 도구</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#f5f5f5;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* Header */
+.hd{background:#ff5500;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.hd-t{font-weight:800;font-size:14px}
+.hd-s{font-size:11px;opacity:.75}
+.hd-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:7px;font-size:12px;cursor:pointer}
+.hbtn:hover{background:rgba(255,255,255,.28)}
+.hbtn.hl{background:#fff;color:#ff5500;font-weight:700}
+
+/* Tabs */
+.tabs{background:#fff;border-bottom:2px solid #eee;display:flex;flex-shrink:0;padding:0 20px}
+.tab{padding:11px 18px;font-size:13px;font-weight:600;color:#aaa;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:.15s}
+.tab:hover{color:#555}
+.tab.active{color:#ff5500;border-bottom-color:#ff5500}
+
+/* Panels */
+.panels{flex:1;overflow:hidden;display:flex}
+.panel{display:none;flex:1;overflow:hidden}
+.panel.active{display:flex}
+
+/* ── 공통 채팅 레이아웃 ── */
+.rp-wrap{display:flex;flex:1;overflow:hidden}
+.rp-side{width:250px;background:#fff;border-right:1px solid #eee;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.ss{padding:13px 15px;border-bottom:1px solid #f3f3f3}
+.st{font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.pc{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px;font-size:12px;color:#555;line-height:1.6}
+.pc-tag{display:inline-block;background:#ff5500;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:6px}
+.hint{background:#fff8f0;border-left:3px solid #ff5500;border-radius:0 8px 8px 0;padding:9px 11px;font-size:12px;color:#c44800;line-height:1.55}
+.forb{font-size:11.5px;color:#ef4444;line-height:1.9}
+.scr-hint{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;font-size:12px;color:#15803d;line-height:1.6;white-space:pre-wrap}
+
+/* 채팅 */
+.rp-chat{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;gap:8px;max-width:80%}
+.msg.ag{align-self:flex-start}
+.msg.cu{align-self:flex-end;flex-direction:row-reverse}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ag .av{background:#ff5500}
+.cu .av{background:#e0e0e0}
+.bw{display:flex;flex-direction:column}
+.bt{font-size:10px;color:#bbb;margin-bottom:3px}
+.cu .bt{text-align:right}
+.bbl{padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.6}
+.ag .bbl{background:#fff;border:1px solid #e8e8e8;border-bottom-left-radius:3px;color:#333}
+.cu .bbl{background:#f0f0f0;color:#333;border-bottom-right-radius:3px;border:1px solid #e0e0e0}
+.fb{align-self:center;max-width:86%;border-radius:9px;padding:8px 12px;font-size:11.5px;line-height:1.5}
+.fb.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+.fb.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.fb.bad{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.fb .ft{font-weight:700;margin-bottom:3px}
+
+/* 지원금 카드 */
+.jw-card{align-self:flex-start;max-width:85%;background:#fff;border:1.5px solid #ff5500;border-radius:12px;overflow:hidden;font-size:12.5px}
+.jw-head{background:#ff5500;color:#fff;padding:8px 14px;font-weight:700;font-size:13px}
+.jw-body{padding:12px 14px;line-height:1.7}
+.jw-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.jw-table th{background:#fff8f5;color:#ff5500;padding:5px 8px;text-align:center;border:1px solid #ffd0b5;font-weight:700}
+.jw-table td{padding:5px 8px;text-align:center;border:1px solid #eee}
+.jw-table tr:nth-child(even) td{background:#fafafa}
+.jw-region-btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.jw-rbtn{padding:6px 14px;border:1.5px solid #ff5500;background:#fff;color:#ff5500;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600;transition:.15s}
+.jw-rbtn:hover,.jw-rbtn.sel{background:#ff5500;color:#fff}
+.jw-note{font-size:11px;color:#888;margin-top:8px;padding:8px;background:#fafafa;border-radius:6px;line-height:1.6}
+
+/* 스크립트 추천 */
+.sug{align-self:center;max-width:86%;background:#fff8f0;border:1px solid #ffd0b5;border-radius:9px;padding:10px 13px;font-size:12px;color:#c44800}
+.sug-t{font-weight:700;margin-bottom:5px}
+.sug-body{background:#fff;border:1px solid #ffe4cc;border-radius:6px;padding:8px 10px;font-size:12.5px;color:#333;line-height:1.55;margin-top:6px}
+.sug .use-btn{margin-top:7px;background:#ff5500;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer}
+.sug .use-btn:hover{background:#e04a00}
+
+/* 입력 */
+.inp-area{background:#fff;border-top:1px solid #eee;padding:12px 16px;flex-shrink:0}
+.inp-row{display:flex;gap:8px;align-items:flex-end}
+.inp-row textarea{flex:1;border:1.5px solid #ddd;border-radius:9px;padding:9px 13px;font-size:13px;resize:none;max-height:100px;outline:none;font-family:inherit;line-height:1.5}
+.inp-row textarea:focus{border-color:#ff5500}
+.snd-btn{background:#ff5500;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;cursor:pointer;font-weight:700;white-space:nowrap}
+.snd-btn:hover{background:#e04a00}
+.snd-btn:disabled{background:#ddd;cursor:not-allowed}
+.inp-hint{font-size:11px;color:#bbb;margin-top:5px}
+
+.td-ani{display:flex;gap:4px;align-items:center;padding:6px 10px}
+.td-ani span{width:6px;height:6px;border-radius:50%;background:#ddd;animation:tda 1s infinite}
+.td-ani span:nth-child(2){animation-delay:.15s}
+.td-ani span:nth-child(3){animation-delay:.3s}
+@keyframes tda{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* ── 스크립트 조회 ── */
+.sq-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f5f5f5;min-height:0}
+.sq-top{background:#fff;border-bottom:1px solid #eee;padding:16px 24px;flex-shrink:0}
+.sq-lbl{font-size:12px;font-weight:700;color:#888;margin-bottom:8px}
+.sq-row{display:flex;gap:10px}
+.sq-inp{flex:1;border:1.5px solid #ddd;border-radius:9px;padding:10px 14px;font-size:14px;outline:none;font-family:inherit}
+.sq-inp:focus{border-color:#ff5500}
+.sq-btn{background:#ff5500;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.sq-btn:hover{background:#e04a00}
+.sq-results{flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.sq-empty{text-align:center;color:#bbb;font-size:13px;padding:60px 0}
+.sq-card{background:#fff;border-radius:10px;border:1px solid #eee;overflow:hidden}
+.sq-ch{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3f3f3}
+.sq-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700}
+.bi{background:#dbeafe;color:#1d4ed8}
+.bc{background:#dcfce7;color:#166534}
+.bs{background:#fef9c3;color:#854d0e}
+.bco{background:#f3e8ff;color:#6b21a8}
+.bm{background:#ffe4e6;color:#be123c}
+.sq-cb{padding:12px 14px;font-size:13px;color:#444;line-height:1.7;white-space:pre-wrap}
+.sq-related{padding:8px 14px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid #f5f5f5}
+.rel-btn{padding:5px 12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:20px;font-size:12px;color:#555;cursor:pointer;transition:.15s}
+.rel-btn:hover{background:#fff8f5;border-color:#ff5500;color:#ff5500}
+.sq-copy{display:block;width:100%;padding:8px;background:#fafafa;border:none;border-top:1px solid #f0f0f0;font-size:12px;color:#888;cursor:pointer}
+.sq-copy:hover{background:#f0f0f0}
+
+/* ── 전체 문서 ── */
+.doc-wrap{flex:1;overflow-y:auto;padding:24px 32px;background:#f5f5f5;min-height:0}
+.doc-inner{max-width:780px;margin:0 auto}
+.doc-h1{font-size:20px;font-weight:800;color:#222;margin-bottom:4px}
+.doc-sub{font-size:13px;color:#888;margin-bottom:20px}
+.doc-sec{background:#fff;border-radius:10px;border:1px solid #eee;margin-bottom:14px;overflow:hidden}
+.doc-sh{padding:12px 16px;display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:1px solid #f3f3f3;user-select:none}
+.doc-sh:hover{background:#fafafa}
+.doc-si{font-size:16px}
+.doc-stitle{font-weight:700;font-size:13.5px;color:#333;flex:1}
+.doc-arr{color:#bbb;font-size:11px;transition:.2s}
+.doc-sb{padding:14px 16px;font-size:13px;color:#444;line-height:1.8;white-space:pre-wrap;font-family:inherit}
+.doc-sb.col{display:none}
+
+/* ── 오버레이 ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:100}
+.ovbox{background:#fff;border-radius:14px;padding:28px;max-width:460px;width:92%}
+.ov-title{font-size:20px;font-weight:800;color:#222;margin-bottom:6px}
+.ov-sub{font-size:13px;color:#777;margin-bottom:16px;line-height:1.6}
+.ov-sec{font-size:12px;font-weight:700;color:#aaa;margin-bottom:8px}
+.ov-types{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ot{padding:12px;border:2px solid #eee;border-radius:10px;cursor:pointer;text-align:center;transition:.15s}
+.ot:hover,.ot.sel{border-color:#ff5500;background:#fff8f5}
+.ot .oi{font-size:22px;margin-bottom:4px}
+.ot .on{font-weight:700;font-size:13px;color:#333}
+.ot .od{font-size:11px;color:#aaa;margin-top:2px}
+.ov-roles{display:flex;gap:10px;margin-bottom:18px}
+.or{flex:1;padding:14px;border:2px solid #eee;border-radius:10px;cursor:pointer;text-align:center;transition:.15s}
+.or:hover,.or.sel{border-color:#ff5500;background:#fff8f5}
+.or .ori{font-size:26px;margin-bottom:5px}
+.or .orn{font-weight:700;font-size:14px;color:#333}
+.or .ord{font-size:11px;color:#aaa;margin-top:3px;line-height:1.4}
+.ov-start{background:#ff5500;color:#fff;border:none;border-radius:9px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.ov-start:hover{background:#e04a00}
+.ov-start:disabled{background:#ddd;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- 오버레이 -->
+<div class="ov" id="ov" style="display:none">
+  <div class="ovbox">
+    <div class="ov-title">🦁 롤플레잉 설정</div>
+    <div class="ov-sub">역할과 과정을 선택하세요.<br><span style="font-size:12px;color:#aaa">고객 유형은 대화 흐름에 따라 자동으로 감지돼요.</span></div>
+    <div class="ov-sec">역할 선택</div>
+    <div class="ov-roles">
+      <div class="or" onclick="selRole('cu')" id="r_cu">
+        <div class="ori">👤</div>
+        <div class="orn">[고객] 역할</div>
+        <div class="ord">내가 고객 역할<br>AI 직원 응대 관찰</div>
+      </div>
+      <div class="or" onclick="selRole('ag')" id="r_ag">
+        <div class="ori">🦁</div>
+        <div class="orn">[직원] 역할</div>
+        <div class="ord">내가 직원 역할<br>AI 고객 응대 연습</div>
+      </div>
+    </div>
+    <div class="ov-sec" style="margin-top:4px">과정 선택</div>
+    <div class="ov-roles" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="or" onclick="selBC('ainlp')" id="bc_ainlp">
+        <div class="ori">🤖</div>
+        <div class="orn">AI·NLP 5기</div>
+        <div class="ord">모집 05.18~06.22<br>09:30~18:00 · 자부담 0~30만원</div>
+      </div>
+      <div class="or" onclick="selBC('bejv')" id="bc_bejv">
+        <div class="ori">☕</div>
+        <div class="orn">백엔드자바 26기</div>
+        <div class="ord">모집 05.27~06.29<br>09:00~19:00 · 자부담 0~40만원</div>
+      </div>
+      <div class="or" onclick="selBC('gm')" id="bc_gm">
+        <div class="ori">📈</div>
+        <div class="orn" id="gm_title">그로스마케팅 6기</div>
+        <div class="ord" id="gm_status">(모객 예정) 06.16~<br>09:00~19:00 · 자부담 0~40만원</div>
+      </div>
+    </div>
+    <button class="ov-start" id="ovStart" onclick="startRP()" disabled>역할과 과정을 먼저 선택해주세요</button>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="hd">
+  <div style="font-size:20px">🦁</div>
+  <div><div class="hd-t">멋쟁이사자처럼 아웃콜 스크립트 도구</div><div class="hd-s">롤플레잉 · 스크립트 조회 · 전체 문서</div></div>
+  <div class="hd-r">
+    <span id="sdot" style="font-size:11px;color:rgba(255,255,255,.6)">스크립트 미로드</span>
+    <button class="hbtn hl" onclick="loadSC()">📂 스크립트 로드</button>
+    <button class="hbtn" id="refBtn" onclick="refSC()" style="display:none">🔄 새로고침</button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="swTab(0)" id="tab0">🎭 롤플레잉</div>
+  <div class="tab" onclick="swTab(1)" id="tab1">🔍 스크립트 조회</div>
+  <div class="tab" onclick="swTab(2)" id="tab2">📄 전체 문서</div>
+  <div class="tab" onclick="swTab(3)" id="tab3">🤖 AINLP 아웃콜</div>
+  <div class="tab" onclick="swTab(4)" id="tab4">☕ BEJV 아웃콜</div>
+  <div class="tab" onclick="swTab(5)" id="tab5">📈 GM 아웃콜</div>
+</div>
+
+<div class="panels">
+
+<!-- ── 패널 1: 롤플레잉 ── -->
+<div class="panel active" id="p0">
+  <div class="rp-wrap">
+    <div class="rp-side">
+      <div class="ss"><div class="st">현재 설정</div><div class="pc" id="pcCard"><span style="color:#ccc">설정을 선택해주세요</span></div></div>
+      <div class="ss"><div class="st">💡 힌트</div><div class="hint" id="hintBox">대화를 시작하면 힌트가 표시돼요.</div></div>
+      <div class="ss" id="scrHintSec" style="display:none"><div class="st">📋 스크립트 참고</div><div class="scr-hint" id="scrHint"></div></div>
+      <div class="ss"><div class="st">🚫 금지 표현</div><div class="forb">• "자부담금 40만원이에요"<br>• "무료예요 / 0원이에요"<br>• "다음기수로" (즉시 포기)<br>• "알겠습니다" (종료)</div></div>
+      <div class="ss"><button onclick="resetRP()" style="width:100%;padding:8px;background:#f5f5f5;border:none;border-radius:7px;font-size:12px;color:#888;cursor:pointer">↩ 초기화</button></div>
+    </div>
+    <div class="rp-chat">
+      <div class="msgs" id="msgs">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:40px 0">
+          <div style="font-size:32px">🦁</div>
+          <div style="font-size:15px;font-weight:700;color:#333">아웃콜 롤플레잉</div>
+          <div style="font-size:13px;color:#aaa;text-align:center">역할과 과정을 선택해서<br>실전 연습을 시작해보세요</div>
+          <button onclick="document.getElementById('ov').style.display='flex'" style="background:#ff5500;color:#fff;border:none;border-radius:10px;padding:13px 32px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px">🎭 롤플레잉 시작하기</button>
+        </div>
+      </div>
+      <div class="inp-area">
+        <div class="inp-row">
+          <textarea id="rpInp" placeholder="입력..." rows="1" disabled
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();rpSend()}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+          <button class="snd-btn" id="rpSnd" onclick="rpSend()" disabled>전송</button>
+        </div>
+        <div class="inp-hint" id="rpHint">Enter 전송 · Shift+Enter 줄바꿈</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 패널 2: 스크립트 조회 ── -->
+<div class="panel" id="p1">
+  <div class="sq-wrap">
+    <div class="sq-top">
+      <div class="sq-lbl">고객이 뭐라고 했나요? 추천 스크립트를 찾아드려요.</div>
+      <div class="sq-row">
+        <input class="sq-inp" id="sqInp" placeholder="예: 자부담금이 부담된다 / 일정이 있어서요 / 잘 따라갈 수 있을지 / 지원금 얼마 받아요?"
+          onkeydown="if(event.key==='Enter')sqSearch()"/>
+        <button class="sq-btn" onclick="sqSearch()">🔍 찾기</button>
+      </div>
+    </div>
+    <div class="sq-results" id="sqRes"><div class="sq-empty">고객의 말을 입력하면 추천 스크립트가 표시돼요.</div></div>
+  </div>
+</div>
+
+<!-- ── 패널 3: 전체 문서 ── -->
+<div class="panel" id="p2">
+  <div class="doc-wrap">
+    <div class="doc-inner" id="docInner">
+      <div class="doc-h1">📋 아웃콜 스크립트 전체 문서</div>
+      <div class="doc-sub" id="docSub">스크립트를 로드하면 전체 내용이 표시돼요.</div>
+      <!-- 바로가기 버튼 -->
+      <div id="docNav" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+        <button onclick="scrollToSec('sec-bejv')" style="padding:7px 14px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">☕ BEJV 26기</button>
+        <button onclick="scrollToSec('sec-ainlp')" style="padding:7px 14px;background:#8b5cf6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">🤖 AINLP 5기</button>
+        <button onclick="scrollToSec('sec-gm')" style="padding:7px 14px;background:#10b981;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">📈 GM 6기</button>
+        <button onclick="scrollToSec('sec-common')" style="padding:7px 14px;background:#ff5500;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">📋 공통 스크립트</button>
+        <button onclick="scrollToSec('sec-sms')" style="padding:7px 14px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">📱 문자 양식</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 패널 4: AINLP 아웃콜 ── -->
+<div class="panel" id="p3">
+  <div style="display:flex;flex:1;overflow:hidden">
+
+    <!-- 왼쪽: 대화 흐름 -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+      <div style="background:#f8f8f8;border-bottom:1px solid #eee;padding:10px 16px;font-size:12px;color:#888;display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-weight:700;color:#555">📋 대화 흐름 기록</span>
+        <button onclick="ainlpReset()" style="margin-left:auto;padding:5px 12px;background:#fff;border:1px solid #ddd;border-radius:6px;font-size:12px;color:#666;cursor:pointer">↩ 처음부터</button>
+      </div>
+      <div id="ainlpMsgs" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+        <div style="text-align:center;color:#ccc;font-size:13px;padding:60px 0">오른쪽 버튼으로 단계를 진행하세요</div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 스텝 가이드 -->
+    <div style="width:400px;background:#fff;border-left:1px solid #eee;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0">
+      <div style="padding:14px 18px;border-bottom:1px solid #f0f0f0;background:#ff5500;color:#fff;flex-shrink:0">
+        <div style="font-weight:800;font-size:15px">🤖 AINLP 아웃콜</div>
+        <div style="font-size:12px;opacity:.85;margin-top:3px">2026.06.23~09.02 · 자부담 0~30만원</div>
+      </div>
+      <!-- 마감 임박 배너 -->
+      <div id="ainlpDeadlineBanner" style="display:none;background:#fffbeb;border-bottom:2px solid #fcd34d;padding:8px 16px;font-size:12px;font-weight:700;color:#92400e;flex-shrink:0">
+        ⚠️ 모집 마감 5영업일 이하 — 국취제 권유 자제
+      </div>
+      <!-- 스텝 진행바 -->
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;color:#bbb;margin-bottom:8px">진행 단계</div>
+        <div id="ainlpProgress" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+          <div class="sp-dot active" id="sp0">오프닝</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="sp1">STEP1</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="sp2">STEP2</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="sp3">STEP3</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="sp4">STEP4</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="sp5">완료</div>
+        </div>
+      </div>
+      <!-- 현재 스텝 스크립트 (스크롤 가능) -->
+      <div style="flex:1;overflow-y:auto;padding:16px 18px" id="ainlpScriptArea">
+        <div style="font-size:12px;font-weight:700;color:#ff5500;margin-bottom:10px;letter-spacing:.3px" id="ainlpStepLabel">📞 오프닝</div>
+        <div style="background:#fff8f0;border:1.5px solid #ffd0b5;border-radius:10px;padding:14px;font-size:14px;color:#222;line-height:1.8;white-space:pre-wrap;word-break:keep-all" id="ainlpScript"></div>
+        <div style="margin-top:12px;font-size:11px;font-weight:700;color:#aaa;letter-spacing:.3px" id="ainlpTipLabel"></div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#15803d;line-height:1.7;margin-top:6px;display:none;white-space:pre-wrap" id="ainlpTip"></div>
+        <div id="ainlpSmsRec" style="display:none;margin-top:12px"></div>
+      </div>
+      <!-- 고객 반응 버튼 -->
+      <div style="padding:14px 18px;border-top:1px solid #f0f0f0;background:#fafafa;flex-shrink:0" id="ainlpBtns"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 패널 5: BEJV 아웃콜 ── -->
+<div class="panel" id="p4">
+  <div style="display:flex;flex:1;overflow:hidden">
+    <!-- 왼쪽: 대화 흐름 -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+      <div style="background:#f8f8f8;border-bottom:1px solid #eee;padding:10px 16px;font-size:12px;color:#888;display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-weight:700;color:#555">📋 대화 흐름 기록</span>
+        <button onclick="bejvReset()" style="margin-left:auto;padding:5px 12px;background:#fff;border:1px solid #ddd;border-radius:6px;font-size:12px;color:#666;cursor:pointer">↩ 처음부터</button>
+      </div>
+      <div id="bejvMsgs" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+        <div style="text-align:center;color:#ccc;font-size:13px;padding:60px 0">오른쪽 버튼으로 단계를 진행하세요</div>
+      </div>
+    </div>
+    <!-- 오른쪽: 스텝 가이드 -->
+    <div style="width:400px;background:#fff;border-left:1px solid #eee;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0">
+      <div style="padding:14px 18px;border-bottom:1px solid #f0f0f0;background:#3b82f6;color:#fff;flex-shrink:0">
+        <div style="font-weight:800;font-size:15px">☕ 백엔드자바 26기 아웃콜</div>
+        <div style="font-size:12px;opacity:.85;margin-top:3px">2026.06.30~12.10 · 자부담 0~40만원 · 09:00~19:00</div>
+      </div>
+      <!-- 마감 임박 배너 -->
+      <div id="bejvDeadlineBanner" style="display:none;background:#fffbeb;border-bottom:2px solid #fcd34d;padding:8px 16px;font-size:12px;font-weight:700;color:#92400e;flex-shrink:0">
+        ⚠️ 모집 마감 5영업일 이하 — 국취제 권유 자제
+      </div>
+      <!-- 스텝 진행바 -->
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;color:#bbb;margin-bottom:8px">진행 단계</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+          <div class="sp-dot active" id="bsp0">오프닝</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="bsp1">STEP1</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="bsp2">STEP2</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="bsp3">STEP3</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="bsp4">STEP4</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="bsp5">완료</div>
+        </div>
+      </div>
+      <!-- 현재 스텝 -->
+      <div style="flex:1;overflow-y:auto;padding:16px 18px" id="bejvScriptArea">
+        <div style="font-size:12px;font-weight:700;color:#3b82f6;margin-bottom:10px;letter-spacing:.3px" id="bejvStepLabel">📞 오프닝</div>
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px;font-size:14px;color:#222;line-height:1.8;white-space:pre-wrap;word-break:keep-all" id="bejvScript"></div>
+        <div style="margin-top:12px;font-size:11px;font-weight:700;color:#aaa;letter-spacing:.3px" id="bejvTipLabel"></div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#15803d;line-height:1.7;margin-top:6px;display:none;white-space:pre-wrap" id="bejvTip"></div>
+        <div id="bejvSmsArea" style="display:none;margin-top:12px"></div>
+      </div>
+      <!-- 고객 반응 버튼 -->
+      <div style="padding:14px 18px;border-top:1px solid #f0f0f0;background:#fafafa;flex-shrink:0" id="bejvBtns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 패널 6: GM 아웃콜 ── -->
+<div class="panel" id="p5">
+  <div style="display:flex;flex:1;overflow:hidden">
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+      <div style="background:#f8f8f8;border-bottom:1px solid #eee;padding:10px 16px;font-size:12px;color:#888;display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-weight:700;color:#555">📋 대화 흐름 기록</span>
+        <button onclick="gmReset()" style="margin-left:auto;padding:5px 12px;background:#fff;border:1px solid #ddd;border-radius:6px;font-size:12px;color:#666;cursor:pointer">↩ 처음부터</button>
+      </div>
+      <div id="gmMsgs" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+        <div style="text-align:center;color:#ccc;font-size:13px;padding:60px 0">오른쪽 버튼으로 단계를 진행하세요</div>
+      </div>
+    </div>
+    <div style="width:400px;background:#fff;border-left:1px solid #eee;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0">
+      <div style="padding:14px 18px;border-bottom:1px solid #f0f0f0;background:#10b981;color:#fff;flex-shrink:0">
+        <div style="font-weight:800;font-size:15px">📈 그로스마케팅 6기 아웃콜</div>
+        <div style="font-size:12px;opacity:.85;margin-top:3px">2026.07.21~11.04 · 자부담 0~40만원 · 09:00~19:00</div>
+      </div>
+      <div id="gmDeadlineBanner" style="display:none;background:#fffbeb;border-bottom:2px solid #fcd34d;padding:8px 16px;font-size:12px;font-weight:700;color:#92400e;flex-shrink:0">📌 주의 배너</div>
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;color:#bbb;margin-bottom:8px">진행 단계</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+          <div class="sp-dot active" id="gsp0">오프닝</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="gsp1">STEP1</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="gsp2">STEP2</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="gsp3">STEP3</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="gsp4">STEP4</div>
+          <div style="color:#ddd;font-size:10px">›</div>
+          <div class="sp-dot" id="gsp5">완료</div>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 18px" id="gmScriptArea">
+        <div style="font-size:12px;font-weight:700;color:#10b981;margin-bottom:10px" id="gmStepLabel">📞 오프닝</div>
+        <div style="background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:14px;font-size:14px;color:#222;line-height:1.8;white-space:pre-wrap;word-break:keep-all" id="gmScript"></div>
+        <div style="margin-top:12px;font-size:11px;font-weight:700;color:#aaa" id="gmTipLabel"></div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#15803d;line-height:1.7;margin-top:6px;display:none;white-space:pre-wrap" id="gmTip"></div>
+        <div id="gmSmsArea" style="display:none;margin-top:12px"></div>
+      </div>
+      <div style="padding:14px 18px;border-top:1px solid #f0f0f0;background:#fafafa;flex-shrink:0" id="gmBtns"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /panels -->
+
+<style>
+.sp-dot{padding:3px 8px;background:#eee;color:#aaa;border-radius:10px;font-size:10px;font-weight:700;transition:.2s}
+.sp-dot.active{background:#ff5500;color:#fff}
+.sp-dot.done{background:#22c55e;color:#fff}
+.ainlp-btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;border:none}
+.ainlp-btn.yes{background:#22c55e;color:#fff}
+.ainlp-btn.yes:hover{background:#16a34a}
+.ainlp-btn.no{background:#ef4444;color:#fff}
+.ainlp-btn.no:hover{background:#dc2626}
+.ainlp-btn.hold{background:#f59e0b;color:#fff}
+.ainlp-btn.hold:hover{background:#d97706}
+.ainlp-btn.next{background:#ff5500;color:#fff}
+.ainlp-btn.next:hover{background:#e04a00}
+</style>
+
+<script>
+// ── 페르소나 ──
+const PERSONAS={
+  info:{tag:'정보탐색형',desc:'비교 중, 결정 트리거 없음. 취업 연계 & AI 시대 의문.'},
+  cost:{tag:'비용고민형',desc:'자부담금 부담. 무수입 취준생. 지원금 제도 모름.'},
+  sched:{tag:'일정부담형',desc:'특정 기간 일정 충돌. 병행 가능한지 확신 없음.'},
+  conf:{tag:'확신부족형',desc:'비전공 배경. 자격증 없음. "잘 따라갈 수 있을까" 걱정.'}
+};
+
+// ── 지원금 정보 ──
+const JW_INFO={
+  desc:`KDT 훈련장려금은 수강 중 출석 조건 충족 시 매달 지급됩니다.\n국민취업지원제도는 별도 신청·자격 심사가 필요하며, 수급이 보장되지 않습니다.`,
+  table:{
+    수도권:{kdt:'30만원 (장려금 20 + 특별수당 10) · 비대면 기준',gov:'약 30만원~ (자격 심사 필요)'},
+    비수도권:{kdt:'40만원 (장려금 20 + 특별수당 20)',gov:'약 30만원~ (자격 심사 필요)'},
+    인구감소지역:{kdt:'50만원 (장려금 20 + 특별수당 30)',gov:'약 30만원~ (자격 심사 필요)'}
+  },
+  note:`⚠️ 국취제 구직촉진수당은 자격 요건 심사 후 지급되며 보장되지 않습니다.\n정확한 금액은 고용24(www.work24.go.kr) 또는 고용센터(☎ 1350)에서 확인하세요.`
+};
+
+// ── 기본 스크립트 ──
+const DEF={
+  opening:`안녕하세요, 멋쟁이사자처럼 부트캠프 안내매니저입니다.
+[고객]님 맞으실까요?
+
+다름이 아니라 저희 부트캠프에 관심 가져주신 걸로 확인이 돼서
+혹시 고민되시는 부분이 있으신가 해서 연락드렸어요.
+지금 잠깐 통화 괜찮으세요?`,
+
+  // 고객 역할 (AI 직원이 응대)
+  types:{
+    info:[
+`요즘 과정이 많다 보니까 보다 보면 더 헷갈리실 수 있거든요.
+혹시 지금 제일 중요하게 보고 계신 게 어떤 부분이세요?
+수업 내용인지, 취업 지원인지, 비용인지요?`,
+`AI가 많이 발전한 건 맞는데요,
+요즘은 기술을 얼마나 배웠냐보다 이 툴을 얼마나 잘 쓸 수 있냐의 싸움이거든요.
+저희 과정이 딱 그 부분을 집중적으로 다뤄요.
+혹시 어떤 방향으로 커리어를 생각하고 계세요?`,
+`저희 취업률은 내부 데이터라 정확한 수치는 말씀드리기 어렵지만,
+이 과정은 관련 직종 취업률이 타 과정보다 높은 편이에요.
+수료 후 취업 지원이 무제한이라 합격할 때까지 함께해요.
+혹시 지금 내일배움카드는 가지고 계세요?`,
+`상세 커리큘럼이랑 수강생 후기 문자로 보내드릴게요.
+보시고 궁금하신 점 있으시면 편하게 연락 주세요!`
+    ],
+    cost:[
+`맞아요, 비용 부분은 당연히 가장 중요하게 확인하셔야죠.
+그런데 사실 조건이 맞으시면 오히려 매달 지원금을 받으면서 공부하실 수 있거든요.
+혹시 국민취업지원제도라고 들어보셨어요?`,
+`자비부담금은 개인 상황마다 달라서 제가 딱 얼마라고 말씀드리기가 어렵고요.
+그런데 지원금이랑 합산하면 오히려 플러스가 되는 경우도 많아요.
+혹시 지역이 어디세요? 지역에 따라 받으실 수 있는 금액이 달라서요.`,
+`국민취업지원제도 I유형 + KDT 수당 기준으로 (2026년 기준)
+KDT 훈련장려금 수도권 30만원~/월 (비대면 기준, 출석 조건 충족 시)
+국취제 구직촉진수당은 별도 신청 및 자격 심사가 필요하며, 미보장이에요.
+정확한 금액은 고용24에서 확인해 주세요.
+단, 개인 조건에 따라 다를 수 있어서 정확한 금액은 고용24에서 확인하셔야 해요.
+오늘 고용24에서 한번 확인해보시고 저한테 알려주시면 맞춰서 안내드릴게요!`,
+`오늘 고용24에서 금액 한번 확인해보시고요,
+제가 내일 다시 연락드려도 괜찮을까요?
+확인하신 내용 기준으로 같이 맞춰보면 될 것 같아서요.`
+    ],
+    sched:[
+`어떤 일정이세요?
+매주 반복되는 건지, 아니면 특정 기간만 겹치는 건지
+여쭤봐도 될까요?`,
+`그 기간만 겹치는 거라면 크게 문제 없으실 것 같아요.
+저희가 출석률 80% 이상이면 수료가 가능하거든요.
+그 기간 이외에는 정상적으로 참여하실 수 있으신가요?`,
+`빠지신 날 수업은 강사님이 자료를 올려주셔서 이후에 확인하시면 돼요.
+출석률 80% 이상만 채워주시면 수료에는 문제없어요.
+혹시 지원금 부분은 알고 계세요? 수강하시면서 매달 받으실 수도 있거든요.`,
+`이번 기수 일정이 가능하실 것 같으세요?
+지원 마감이 얼마 안 남아서 미리 지원서라도 작성해두시면 나중에 훨씬 편하거든요.`
+    ],
+    conf:[
+`그 걱정 정말 많이 하세요.
+저희 수강생 분들 중에 비전공자, 처음 시작하시는 분들이 정말 많거든요.
+혹시 가장 걱정되시는 게 어떤 부분이에요?`,
+`저희 과정이 기초부터 차근차근 나가도록 설계되어 있어요.
+중간에 어렵다 싶으시면 기초반 수업도 별도로 지원해드리고
+강사님들도 1:1로 질문하실 수 있어요.
+혼자 뒤처지도록 두지 않아요.`,
+`비전공자 분들도 정말 많으세요.
+처음 시작하시는 분들은 꾸준히 따라갈 수 있는 환경인지를 많이 보시더라고요.
+저희는 그 환경이 잘 갖춰져 있어요.
+그리고 수강하시면서 지원금도 받으실 수 있거든요, 혹시 이 부분 알고 계세요?`,
+`지금 당장 결정하셔야 하는 게 아니라
+우선 상세 커리큘럼이랑 수강생 후기 한번 보시면 어떨까요?
+문자로 보내드릴게요.`
+    ]
+  },
+
+  // AI 고객 (직원 역할 연습용)
+  aiCustomer:{
+    info:[
+      '알아보고 있는데요, 정확히 뭘 배우는 건지 잘 몰라가지고요.',
+      '요즘 AI가 다 해주는데 배울 필요가 있나요?',
+      '취업이 잘 되는지도 궁금하고요, 다른 과정이랑도 비교 중이에요.',
+      '조금 더 생각해보고 연락드릴게요.'
+    ],
+    cost:[
+      '내일배움카드 있는데 자부담금이 얼마 정도 되는지 궁금해서요.',
+      '40만원이 부담이 좀 돼서요. 지원금 같은 게 있다고 들었는데.',
+      '지원금 얼마나 받을 수 있어요? 조건이 어떻게 되는지.',
+      '일단 생각을 좀 해봐야 될 것 같아요.'
+    ],
+    sched:[
+      '5월이랑 6월에 개인적인 일정이 있어서요.',
+      '매주는 아니고 한 달 정도 좀 어려울 것 같아서요.',
+      '빠진 날 수업은 어떻게 처리되는 건가요?',
+      '그러면 이번 기수는 어렵겠네요.'
+    ],
+    conf:[
+      '처음 아무것도 모르는데 어쨌든 배우다 보면 될까요?',
+      '원래 다녔던 과가 의료 쪽이거든요. 컴퓨터 자격증도 없고.',
+      '비전공자도 취업이 가능한가요?',
+      '좀 더 알아보고 결정할게요.'
+    ]
+  },
+
+  modules:{
+    card:`내일배움카드는 오늘 신청하시면 보통 1~2일이면 발급돼요.
+신한 앱카드로 하시면 가장 빠르게 발급되고요.
+카드 실물이 없어도 앱카드 등록만 되면 수강신청 바로 가능해요.
+발급 방법 문자로 보내드릴게요!`,
+    kdt:`KDT 과정은 5년에 1회만 수강이 가능해요.
+이전에 들으신 과정이 KDT였는지 아닌지가 중요한데요.
+고용24 마이페이지에서 훈련 참여 이력 확인해보시면 바로 알 수 있어요.
+확인해보시고 알려주시면 제가 안내드릴게요!`,
+    gov:`국민취업지원제도를 활용하시면 수강하면서 매달 지원금을 받으실 수 있어요.
+KDT 훈련장려금 수도권 30만원~/월 (비대면 기준, 출석 조건 충족 시)
++ 국취제 참여 시 구직촉진수당 약 30만원~/월 추가 가능 (자격 심사 필요)
+고용센터 직접 가시면 3~4주 걸리는데, 민간위탁기관 통하시면 1주일 안에 등록 가능해요.
+방법 문자로 보내드릴게요!`,
+    deadline:`지원 마감이 얼마 안 남았거든요.
+합격 후 고용24 수강신청까지 1~2주 걸릴 수 있어서
+결정하시면 빠르게 진행하시는 게 좋아요.
+오늘이나 내일 중에 결정하실 수 있을 것 같으세요?`,
+    card_lowgrade:`대학교 재학생이시면 내일배움카드 발급이 제한될 수 있어요.
+2학년 1학기까지(2학년 2학기 등록 전)이면서, 휴학 중 + 고용보험 가입된 재직(알바 포함) 상태이고
+정규 수업 시간에 온전히 참여 가능하시면 발급 및 수강이 가능해요.
+현재 몇 학년이신지, 2학년 2학기 등록 여부, 휴학·고용보험 가입 여부를 먼저 확인해볼게요!
+조건 확인되면 발급 방법 문자로 보내드릴게요.`
+  }
+};
+
+// ── 마감 임박 체크 유틸 ──
+function getRecruitEndDate(recruitStr){
+  if(!recruitStr)return null;
+  const parts=recruitStr.split('~');
+  const end=parts[parts.length-1].trim(); // "06.22"
+  const yearMatch=recruitStr.match(/^(\d{4})/);
+  if(!yearMatch)return null;
+  const [m,d]=end.split('.');
+  return new Date(parseInt(yearMatch[1]),parseInt(m)-1,parseInt(d),23,59,59);
+}
+function businessDaysUntil(targetDate){
+  const today=new Date();today.setHours(0,0,0,0);
+  if(targetDate<today)return 0;
+  let count=0,d=new Date(today);
+  while(d<=targetDate){
+    const day=d.getDay();
+    if(day!==0&&day!==6)count++;
+    d.setDate(d.getDate()+1);
+  }
+  return Math.max(0,count-1);
+}
+function isNearDeadline(bcId){
+  const bc=BOOTCAMPS.find(b=>b.id===bcId);
+  if(!bc||!bc.recruit)return false;
+  const dl=getRecruitEndDate(bc.recruit);
+  if(!dl)return false;
+  return businessDaysUntil(dl)<=5;
+}
+
+// ── 부트캠프 목록 ──
+const BOOTCAMPS=[
+  {id:'ainlp',name:'AI·NLP 5기',period:'2026.06.23~09.02',cost:'자부담 0~30만원',time:'09:30~18:00',recruit:'2026.05.18~06.22'},
+  {id:'bejv',name:'백엔드자바 26기',period:'2026.06.30~12.10',cost:'자부담 0~40만원',time:'09:00~19:00',recruit:'2026.05.27~06.29'},
+  {id:'gm',name:'그로스마케팅 6기',period:'2026.07.21~11.04',cost:'자부담 0~40만원',time:'09:00~19:00',recruit:'2026.06.16~07.19'},
+  {id:'cloud',name:'클라우드엔지니어링 7기',period:'2026.06.02~11.12',cost:'자부담 0~50만원',recruit:'2026.04.28~05.31'},
+  {id:'fe',name:'프론트엔드 부트캠프',period:'2026.07.14~10.09',cost:'자부담 0~40만원'}
+];
+
+// ── AI 고객 대사 — 유형별 × 태도별(적극/소극) ──
+// 구조: 전화 받음 → 고민 힌트 → 구체 거절 → 재거절 → 결정 (출처6: push back 2~3회)
+// Persona: 상황 + 핵심 우려 + 행동 + 변화 경로 (출처2)
+const AI_CUSTOMER_DATA={
+  info:{
+    active:[
+      // [1] 통화 수락 + 관심사 힌트
+      '네, 통화 가능해요. 과정을 좀 알아보고 있는데요, 커리큘럼이랑 취업까지 연결이 되는지 궁금해서요.',
+      // [2] 구체적 의문 (AI 시대 거절)
+      '그런데 요즘 AI가 워낙 발전하잖아요. 배워도 금방 대체되는 거 아닌가 해서요. 솔직히 어떻게 생각하세요?',
+      // [3] 비교 거절
+      '다른 부트캠프랑도 비교해보고 있는데, 취업률이나 합격자 분들 배경 데이터 같은 게 있나요?',
+      // [4] 마무리 행동 (정보 더 보고 결정)
+      '커리큘럼이랑 수강생 후기 좀 더 보고 싶어요. 빠르게 보내주실 수 있을까요?'
+    ],
+    passive:[
+      // [1] 통화 수락 (짧게)
+      '네... 가능해요.',
+      // [2] 막연한 거절
+      'AI가 다 해주는데 배울 필요가 있나 싶어서요.',
+      // [3] 재거절 (더 막연하게)
+      '취업이 잘 되는지도 모르겠고요.',
+      // [4] 이탈 시도
+      '좀 더 생각해볼게요.'
+    ]
+  },
+  cost:{
+    active:[
+      // [1] 통화 수락 + 비용 관심 힌트
+      '네, 통화 가능해요. 비용 쪽으로 좀 여쭤보고 싶어서요.',
+      // [2] 구체 거절 (비용 부담)
+      '내일배움카드 있는데 자부담금이 얼마나 되는지... 40만원이면 좀 부담이 되거든요.',
+      // [3] 재거절 (지원금 의심)
+      '지원금이 있다고 하셨는데, 저 취준생이고 소득이 없는데 조건이 맞는 건지 모르겠어요.',
+      // [4] 조건부 수락
+      '금액이 맞으면 바로 신청하고 싶어요. 오늘 고용24 확인해보고 연락드릴게요.'
+    ],
+    passive:[
+      // [1] 통화 수락 (짧게)
+      '네... 가능해요.',
+      // [2] 비용 걱정 (짧게)
+      '비용이 좀 걱정돼서요.',
+      // [3] 재거절
+      '40만원이 부담이 되긴 해서요.',
+      // [4] 이탈 시도
+      '일단 생각을 좀 해봐야 될 것 같아요.'
+    ]
+  },
+  sched:{
+    active:[
+      // [1] 통화 수락 + 일정 관심 힌트
+      '네, 통화 가능해요. 일정 때문에 여쭤볼 게 있어서요.',
+      // [2] 구체 거절 (특정 기간 충돌)
+      '6월 중에 한 달 정도 개인 일정이 있거든요. 그 기간에 빠져도 수료가 되는 건가요?',
+      // [3] 재거절 (출석률 확인)
+      '빠진 날 수업은 어떻게 처리되는 건지, 강의 다시 볼 수 있는 건지도 궁금해요.',
+      // [4] 조건부 수락
+      '기준이 충족되면 이번 기수 바로 신청할게요. 지원 마감이 언제까지예요?'
+    ],
+    passive:[
+      // [1] 통화 수락 (짧게)
+      '네... 가능해요.',
+      // [2] 일정 걱정 (짧게)
+      '5월이랑 6월에 좀 어려울 것 같아서요.',
+      // [3] 재거절
+      '빠진 날 수업은 어떻게 되는 건가요?',
+      // [4] 이탈 시도
+      '이번 기수는 어렵겠네요.'
+    ]
+  },
+  conf:{
+    active:[
+      // [1] 통화 수락 + 확신 부족 힌트
+      '네, 통화 가능해요. 솔직히 제가 따라갈 수 있을지 여쭤보고 싶어서요.',
+      // [2] 구체 거절 (비전공 배경)
+      '저 의료 쪽 배경이고 코딩은 완전 처음이거든요. 비전공자도 정말 따라갈 수 있나요?',
+      // [3] 재거절 (취업 가능성 의심)
+      '비전공자도 실제로 취업이 되는 건지요. 포트폴리오를 어떻게 만드는지도 모르겠어요.',
+      // [4] 조건부 수락
+      '설명 들어보니 도전해볼 만할 것 같긴 해요. 커리큘럼 좀 더 보내주실 수 있어요?'
+    ],
+    passive:[
+      // [1] 통화 수락 (짧게)
+      '네... 가능해요.',
+      // [2] 확신 부족 (짧게)
+      '처음이라 잘 따라갈 수 있을지 모르겠어요.',
+      // [3] 재거절
+      '비전공이라서 좀 걱정이 돼서요.',
+      // [4] 이탈 시도
+      '좀 더 알아보고 결정할게요.'
+    ]
+  }
+};
+
+// 직원 모드 스크립트 힌트
+const AG_HINTS={
+  info:['비교 기준을 고객에게서 먼저 끌어내세요','AI 시대에도 툴 활용 능력이 중요하다는 포인트를 강조하세요','취업 지원 무제한 + 지원금 연결하세요','다음 행동(문자 발송, 재연락)을 구체적으로 제시하세요'],
+  cost:['비용 이의에 공감부터 하세요','지원금으로 프레임을 전환하세요 — "오히려 받으실 수도 있어요"','지역을 물어보고 예상 금액을 안내하세요','확정 금액 절대 금지 — 고용24 확인 유도'],
+  sched:['어떤 일정인지 구체적으로 파악하세요','80% 출석률 기준을 활용하세요','지원금 얘기로 동기부여를 더하세요','현기수 가능성 먼저 확인 후 다음기수 언급'],
+  conf:['불안을 정상화하세요 — "모두가 처음엔 같았다"','기초반·1:1 질문 등 지원 시스템을 소개하세요','지원금으로 추가 동기 부여하세요','커리큘럼 먼저 보도록 행동을 유도하세요']
+};
+
+// 조회 매핑
+const SQMAP=[
+  {keys:['지원금 얼마','얼마 받','받을 수 있','장려금 얼마','국취제 얼마'],special:'jw',label:'지원금/국취제 상세 안내',cls:'bm',smsKey:'gov'},
+  {keys:['저학년','재학생','휴학','복학','1학년','2학년'],mk:'card_lowgrade',label:'대학교 저학년 재학생 — 내배카 발급 조건',cls:'bm',smsKey:'card_lowgrade'},
+  {keys:['카드 없','내일배움카드 없','발급'],mk:'card',label:'내일배움카드 없는 경우',cls:'bm',smsKey:'card'},
+  {keys:['kdt','이전에 들','예전에 국비','5년'],mk:'kdt',label:'KDT 이력 문제',cls:'bm'},
+  {keys:['국취제','국민취업','지원금','장려금'],mk:'gov',label:'국취제/훈련장려금',cls:'bm',smsKey:'gov'},
+  {keys:['마감','기간','언제까지'],mk:'deadline',label:'마감 임박',cls:'bm'},
+  {keys:['비용','자부담','얼마','부담','40만'],tk:'cost',idx:0,label:'비용 걱정',cls:'bc',smsKey:'cost'},
+  {keys:['일정','학교','직장','병행','시간'],tk:'sched',idx:0,label:'일정 문제',cls:'bs'},
+  {keys:['출석','빠진','수료'],tk:'sched',idx:2,label:'출석률 걱정',cls:'bs'},
+  {keys:['취업률','취업 연계','취업이'],tk:'info',idx:2,label:'취업 연계 문의',cls:'bi'},
+  {keys:['ai','인공지능','배울 필요'],tk:'info',idx:1,label:'AI 시대 의문',cls:'bi'},
+  {keys:['비교','스파르타','타 과정','다른 곳'],tk:'info',idx:0,label:'경쟁사 비교',cls:'bi'},
+  {keys:['어렵','따라갈','비전공','모르겠','처음'],tk:'conf',idx:1,label:'난이도 걱정',cls:'bco'},
+  {keys:['걱정','불안','할 수 있'],tk:'conf',idx:0,label:'확신 부족',cls:'bco'}
+];
+
+// ── 상태 ──
+let S={type:null,role:null,scripts:null,rIdx:0,started:false,dirHandle:null,rawFiles:{},bootcamp:null,attitude:null,typeFixed:false,phase:'opening',selectedBC:null};
+
+// ── 탭 ──
+function swTab(n){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.getElementById('ov').style.display='none';
+  if(n===3) ainlpInit();
+  if(n===4) bejvInit();
+  if(n===5) gmInit();
+}
+
+// ── 스크립트 로드 ──
+async function loadSC(){
+  try{const d=await window.showDirectoryPicker({mode:'read'});S.dirHandle=d;await readSC(d);document.getElementById('refBtn').style.display='inline-block';}
+  catch(e){if(e.name!=='AbortError')alert('오류: '+e.message);}
+}
+async function refSC(){if(!S.dirHandle){loadSC();return;}await readSC(S.dirHandle);}
+async function readSC(dir){
+  const loaded={types:{},rawFiles:{}};const files=[];
+  for await(const e of dir.values()){if(e.kind==='file'&&e.name.endsWith('.md'))files.push(e);}
+  for(const e of files){
+    const txt=await(await e.getFile()).text();
+    loaded.rawFiles[e.name]=txt;
+    const blocks=exCB(txt);const n=e.name.toLowerCase();
+    if(n.includes('00')||n.includes('오프')){if(blocks[0])loaded.opening=blocks[0];}
+    else if(n.includes('02')||n.includes('정보')){if(blocks.length)loaded.types.info=blocks;}
+    else if(n.includes('03')||n.includes('비용')){if(blocks.length)loaded.types.cost=blocks;}
+    else if(n.includes('04')||n.includes('일정')){if(blocks.length)loaded.types.sched=blocks;}
+    else if(n.includes('05')||n.includes('확신')){if(blocks.length)loaded.types.conf=blocks;}
+    else if(n.includes('06')||n.includes('모듈')){loaded.modules=parseMod(txt);}
+  }
+  S.scripts={opening:loaded.opening||DEF.opening,types:{...DEF.types,...loaded.types},modules:loaded.modules||DEF.modules};
+  S.rawFiles=loaded.rawFiles;
+  document.getElementById('sdot').textContent=`✅ ${files.length}개 로드됨`;
+  document.getElementById('sdot').style.color='#fff';
+  renderDoc();
+  sysmsg(`✅ 스크립트 ${files.length}개 로드 완료! 수정 후 🔄 새로고침으로 반영하세요.`,'msgs');
+}
+function exCB(md){const rx=/```[\s\S]*?\n([\s\S]*?)```/g;const out=[];let m;while((m=rx.exec(md))!==null){const t=m[1].trim();if(t)out.push(t);}return out;}
+function parseMod(md){
+  const m={};
+  ['내일배움카드','국취제','KDT','마감'].forEach(k=>{
+    const idx=md.indexOf(k);if(idx<0)return;
+    const sn=md.slice(idx,idx+600);
+    const bl=exCB('```\n'+sn.split('```').slice(1).join('```'));
+    if(k==='내일배움카드'&&bl[0])m.card=bl[0];
+    else if(k==='국취제'&&bl[0])m.gov=bl[0];
+    else if(k==='KDT'&&bl[0])m.kdt=bl[0];
+    else if(k==='마감'&&bl[0])m.deadline=bl[0];
+  });
+  return Object.keys(m).length?m:DEF.modules;
+}
+function getSC(){return S.scripts||DEF;}
+
+// ── 유형 자동 감지 ──
+const TYPE_DETECT=[
+  {type:'cost',keys:['비용','자부담','얼마','카드','지원금','40만','부담']},
+  {type:'sched',keys:['일정','학교','직장','병행','시간','빠질','못할']},
+  {type:'conf',keys:['따라갈','비전공','처음','모르','걱정','자신','어렵']},
+  {type:'info',keys:['뭘 배','커리큘럼','취업','비교','AI','다른 곳','스파르타']}
+];
+function detectType(txt){
+  const tl=txt.toLowerCase();
+  let best=null,bestScore=0;
+  for(const r of TYPE_DETECT){
+    const score=r.keys.filter(k=>tl.includes(k)).length;
+    if(score>bestScore){bestScore=score;best=r.type;}
+  }
+  return best;
+}
+
+// ── 롤플레잉 ──
+function selRole(r){
+  S.role=r;
+  document.querySelectorAll('#r_cu,#r_ag').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('r_'+r).classList.add('sel');
+  checkOvReady();
+}
+function selBC(id){
+  S.selectedBC=id;
+  document.querySelectorAll('#bc_ainlp,#bc_bejv,#bc_gm').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('bc_'+id).classList.add('sel');
+  checkOvReady();
+}
+function checkOvReady(){
+  const ok=S.role&&S.selectedBC;
+  const btn=document.getElementById('ovStart');
+  btn.disabled=!ok;
+  btn.textContent=ok?'시작하기 →':'역할과 과정을 먼저 선택해주세요';
+}
+const TNAMES={info:'🔍 정보탐색형',cost:'💰 비용고민형',sched:'⏰ 일정부담형',conf:'🤔 확신부족형'};
+const ANAMES={active:'적극적',passive:'소극적'};
+
+function updateCuCard(){
+  if(S.role!=='ag')return;
+  const bc=S.bootcamp||{name:'?'};
+  document.getElementById('pcCard').innerHTML=`<span class="pc-tag">🦁 직원 역할 연습</span>
+    <div style="margin-top:6px;font-size:11.5px;color:#555;line-height:2">
+      <b style="color:#aaa;font-size:10px">배정 고객 유형</b><br>
+      <span style="color:#ff5500;font-weight:700">${TNAMES[S.type]||'?'}</span>
+      <span style="color:#999;margin-left:4px">${ANAMES[S.attitude]||''}</span><br>
+      <b style="color:#aaa;font-size:10px">문의 과정</b><br>
+      <span style="color:#333">${bc.name}</span>
+    </div>`;
+}
+
+function startRP(){
+  if(!S.role||!S.selectedBC)return;
+  document.getElementById('ov').style.display='none';
+  document.getElementById('rpInp').disabled=false;
+  document.getElementById('rpSnd').disabled=false;
+  document.getElementById('rpInp').placeholder=S.role==='cu'?'[고객]으로서 답변 입력... (또는 [질문] 물어봐)':'[직원]으로서 응대를 입력하세요...';
+  document.getElementById('rpHint').textContent=S.role==='cu'?'Enter 전송 · [내용] 물어봐 → 스크립트 추천':'Enter 전송 · 직원으로서 고객에게 응대해보세요';
+  document.getElementById('msgs').innerHTML='';
+  S.rIdx=0;S.started=true;S.type=null;S.attitude=null;S.typeFixed=false;S.phase='opening';
+  S.bootcamp=BOOTCAMPS.find(b=>b.id===S.selectedBC)||BOOTCAMPS[0];
+  setTimeout(()=>{
+    const sc=getSC();
+    if(S.role==='cu'){
+      document.getElementById('pcCard').innerHTML=`<span class="pc-tag">👤 고객 역할</span><br><span style="font-size:11px;color:#aaa">${S.bootcamp.name}</span><br><span style="font-size:11px;color:#999">AI 직원이 먼저 말을 걸어요</span>`;
+      setHint('AI 직원이 먼저 인사합니다. 고객으로서 자연스럽게 응대해보세요.');
+      // AI 직원 먼저 오프닝 발화
+      setTimeout(()=>{
+        const opening=sc.opening||'안녕하세요, 멋쟁이사자처럼 부트캠프 안내매니저입니다.\n[고객]님 맞으실까요?\n잠깐 통화 가능하세요?';
+        const agDiv=document.createElement('div');
+        agDiv.className='msg ag';
+        agDiv.innerHTML=`<div class="av">🦁</div><div class="bw"><div class="bt">직원</div><div class="bbl">${opening.replace(/\n/g,'<br>')}</div></div>`;
+        document.getElementById('msgs').appendChild(agDiv);
+        document.getElementById('msgs').scrollTop=9999;
+      },400);
+    } else {
+      // 직원 모드: 유형 랜덤, 과정 선택한 것으로 고정
+      const types=['info','cost','sched','conf'];
+      const attitudes=['active','passive'];
+      S.type=types[Math.floor(Math.random()*types.length)];
+      S.attitude=attitudes[Math.floor(Math.random()*attitudes.length)];
+      S.typeFixed=true;
+      updateCuCard();
+      showScrHint(sc.types[S.type]?.[0]||'');
+      setHint(`오프닝 스크립트로 먼저 인사하고, "고민되시는 부분이 어떤 건가요?"로 탐색해보세요.`);
+      sysmsg(`🎯 고객 배정: ${TNAMES[S.type]} (${ANAMES[S.attitude]}) · ${S.bootcamp.name}`,'msgs');
+      if(S.bootcamp.id==='ainlp'){
+        sysmsg(`📌 AINLP 안내: 합격자는 '예비 합격' 분류 → 사전설명회 링크 이메일 자동 발송`,'msgs');
+      }
+      const opener=S.attitude==='active'?'네, 안녕하세요!':'네...';
+      addCu(opener);
+      // 과정 언급
+      const bcNames={ainlp:'AI·NLP',bejv:'백엔드자바',gm:'그로스마케팅',cloud:'클라우드엔지니어링'};
+      const bcN=bcNames[S.bootcamp.id]||S.bootcamp.name||'부트캠프';
+      const bcIntro=S.attitude==='active'
+        ?`저 ${bcN} 과정 지원했는데요, 여쭤볼 게 있어서요.`
+        :`${bcN} 과정이요...`;
+      setTimeout(()=>addCu(bcIntro),1000);
+    }
+  },400);
+}
+
+function rpSend(){
+  const el=document.getElementById('rpInp');
+  const txt=el.value.trim();if(!txt||!S.started)return;
+  el.value='';el.style.height='auto';
+  if(S.role==='cu'){
+    // 고객 모드: 사용자=고객, AI=직원
+    const askM=txt.match(/[(\[「](.+?)[)\]」]\s*물어봐/);
+    const askM2=!askM&&txt.match(/(.+?)\s*(?:라고|이라고)?\s*물어봐$/);
+    if(askM||askM2){handleAsk((askM?.[1]||askM2?.[1]||'').trim());return;}
+    addCu(txt);
+    // 지원금 키워드 체크
+    if(/지원금 얼마|얼마 받|받을 수 있|장려금/.test(txt)){
+      setTimeout(()=>addJwCard(),800);return;
+    }
+    const ty=addTyping();
+    setTimeout(()=>{ty.remove();respondCuMode(txt);},700+Math.random()*400);
+  } else {
+    // 직원 모드: 사용자=직원, AI=고객
+    addAg2(txt);
+    analyzeFB(txt);
+    const sk=detectSmsFromText(txt);
+    if(sk)setTimeout(()=>addSmsCard(sk),500);
+    agCuRespond(txt);
+  }
+}
+
+function handleAsk(q){
+  const sc=getSC();const ql=q.toLowerCase();let found=null;
+  for(const r of SQMAP){
+    if(r.keys.some(k=>ql.includes(k.toLowerCase()))){
+      if(r.special==='jw'){addCu(`"${q}"에 대해 물어봐요.`);setTimeout(()=>addJwCard(),400);return;}
+      const text=r.mk?(sc.modules[r.mk]||DEF.modules[r.mk]):(sc.types[r.tk]||DEF.types[r.tk])[r.idx];
+      found={text,label:r.label};break;
+    }
+  }
+  if(!found){const list=sc.types[S.type]||DEF.types[S.type];found={text:list[Math.min(S.rIdx,list.length-1)],label:'현재 단계 추천'};}
+  addCu(`"${q}"에 대해 물어봐요.`);
+  setTimeout(()=>addSug(found.label,found.text),400);
+}
+
+function respondCuMode(txt){
+  const sc=getSC();const tl=txt.toLowerCase();
+
+  // ── PHASE 1: 오프닝 — 인사 + 탐색 질문 ──
+  if(S.phase==='opening'){
+    const bc=S.bootcamp;
+    const _bcMap={ainlp:'AI·NLP 부트캠프',bejv:'백엔드자바 부트캠프',gm:'그로스마케팅 부트캠프',cloud:'클라우드엔지니어링 부트캠프'};
+    const bcName=_bcMap[bc?.id]||bc?.name||'부트캠프';
+    addAg(`네, 안녕하세요 :) 멋쟁이사자처럼 안내매니저입니다!\n${bcName}에 관심 가져주셔서 감사해요.\n\n다름이 아니라 지원하시면서 고민되시는 부분이 있으실까 해서 연락드렸는데요,\n어떤 부분이 가장 걱정되세요?`);
+    S.phase='discovery';
+    setHint('고객이 고민을 말하면 유형이 자동 감지돼요. 아직 말 안 하면 한 번 더 탐색하세요.');
+    return;
+  }
+
+  // ── PHASE 2: 탐색 — 유형 감지 대기 ──
+  // 참고: Discovery 단계 — 먼저 파악, 그 다음 솔루션 (출처6)
+  if(S.phase==='discovery'){
+    const detected=detectType(txt);
+    if(!detected){
+      // 고민 안 드러나면 구체적인 선택지 제시
+      addAg(`혹시 조금 더 말씀해주실 수 있을까요?\n비용이 걱정이신지, 일정이 안 맞으시는지,\n아니면 커리큘럼이나 취업 쪽이 궁금하신 건지요?`);
+      return;
+    }
+    S.type=detected;S.rIdx=0;S.phase='handling';
+    sysmsg(`유형 감지: ${TNAMES[detected]} — 관련 스크립트로 전환됐어요`,'msgs');
+    document.getElementById('pcCard').innerHTML=`<span class="pc-tag">${TNAMES[detected]}</span><br><span style="font-size:11px;color:#aaa">${PERSONAS[detected].desc}</span>`;
+    setHint(AG_HINTS[detected]?.[0]||'공감부터 시작하세요.');
+  }
+
+  // ── PHASE 3: 응대 — 유형별 스크립트 진행 ──
+  const type=S.type||'info';
+  const list=sc.types[type]||DEF.types[type];
+  // 스크립트 끝 도달 시 마무리 응답으로 전환 (같은 멘트 반복 방지)
+  if(S.rIdx>=list.length){
+    const wrap=/^(네|네네|알겠습니다|감사합니다|좋아요|그렇군요|오케이|ㅇㅋ|ㅇㅇ)/i.test(txt);
+    if(wrap){
+      addAg(`네, 천천히 확인해보시고 궁금한 점 있으시면 언제든 연락 주세요 :)\n좋은 결과 있으시길 바랍니다!`);
+    } else {
+      addAg(`혹시 더 궁금하신 점 있으신가요?\n편하게 물어보세요 :)`);
+    }
+    sysmsg('💡 스크립트 종료 — 초기화 후 다시 연습하거나 질문에 자유롭게 응대해보세요.','msgs');
+    return;
+  }
+  const idx=S.rIdx;let resp=list[idx];S.rIdx++;
+  const mods=sc.modules||DEF.modules;
+  if(/지원금 얼마|얼마 받|받을 수 있|장려금/.test(tl)){addJwCard();return;}
+  let smsShown=false;
+  if(S.bootcamp?.id==='ainlp'&&/사전설명회|설명회/.test(tl)){
+    resp=`신청하시면 사전설명회 안내 이메일이 자동으로 발송돼요!\n커리큘럼, 준비사항, 일정을 미리 확인하실 수 있어요.\n👉 [링크]\n궁금하신 점 있으시면 편하게 물어보세요 :)`;
+    addAg(resp);return;
+  }
+  if(S.bootcamp?.id==='ainlp'&&/예비.?합격|합격.?분류|합격.?이메일/.test(tl)){
+    resp=`AI·NLP 과정은 과제 및 1:1 맞춤 안내를 위해 합격자를 '예비 합격'으로 분류해요.\n합격 후 이메일로 사전설명회 링크가 자동 발송되니 꼭 확인해보세요!\n👉 [링크]`;
+    addAg(resp);return;
+  }
+  if(/저학년|재학생|휴학|복학/.test(tl)){resp=mods.card_lowgrade;setTimeout(()=>addSmsCard('card_lowgrade'),800);smsShown=true;}
+  else if(/카드.{0,5}없|발급.{0,5}안/.test(tl)){resp=mods.card;setTimeout(()=>addSmsCard('card'),800);smsShown=true;}
+  else if(/kdt|예전에.{0,8}들|5년/.test(tl))resp=mods.kdt;
+  else if(/국취제|국민취업|지원금/.test(tl)){resp=mods.gov;setTimeout(()=>addSmsCard('gov'),800);smsShown=true;}
+  else if(/자비부담|얼마 내야|비용/.test(tl)){setTimeout(()=>addSmsCard('cost'),800);smsShown=true;}
+  addAg(resp);analyzeFB(resp);
+  if(!smsShown){const sk=detectSmsFromText(resp);if(sk)setTimeout(()=>addSmsCard(sk),1000);}
+  setHint(AG_HINTS[type]?.[Math.min(S.rIdx,3)]||'대화를 이어가세요.');
+  if(S.rIdx>=list.length)setTimeout(()=>sysmsg('준비된 응답을 모두 사용했어요. 초기화 후 다시 연습하세요.','msgs'),600);
+}
+
+// ── 문자 양식 데이터 ──
+const SMS={
+  precall:{
+    title:'📱 문자 양식 — 콜 발신 전 사전 안내',
+    tip:'💡 팁: 1차 콜 발신 전 반드시 1회 발송. [부트캠프 이름] 채워서 발송.',
+    body:`안녕하세요 멋쟁이사자처럼 매니저입니다.
+현재 [부트캠프 이름] 지원중 이신 것 확인하여 수강 안내를 위해 오늘 전화 드리려 합니다.
+
+지원 과정에서 해소하고 싶은 고민이나 궁금한 점 있다면 해소될 수 있게 저희가 돕겠습니다.
+감사합니다.`
+  },
+  absent:{
+    title:'📱 문자 양식 — 부재 시 콜백 유도',
+    tip:'💡 팁: 부재 / 통화 불가 / 거절 시 필수 발송. [부트캠프명] 채워서 발송.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+지원하신 [부트캠프명] 관련 안내드릴 내용이 있어 연락드렸습니다.
+
+📞 평일 운영시간(10:00~18:00) 중 다시 연락드릴게요.
+💬 채팅 상담 👉 http://likelion.channel.io/
+
+감사합니다.`
+  },
+  card:{
+    title:'📱 문자 양식 — 내일배움카드 발급 안내',
+    tip:'💡 팁: 신한 앱카드 추천 (1~2일 발급). 실물 없어도 앱카드 등록 후 수강신청 가능.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+내일배움카드 발급 방법 안내드립니다.
+
+▶ 빠른 발급 방법 (1~2일)
+신한 앱카드로 신청하시면 가장 빠르게 발급돼요.
+
+1. 고용24 접속 → 로그인
+   👉 고용24 링크 (https://abit.ly/naeil_lms)
+2. [훈련역량 강화] → [국민내일배움카드] → [발급 신청]
+3. 카드 선택 시 → 신한카드 선택
+4. 신한 SOL Pay 앱 설치 → 내일배움카드 등록
+
+📌 실물 카드 없이 앱카드 등록만 되면
+   고용24 수강신청 바로 가능해요!
+
+발급 완료 시 채팅으로 문의주시면 빠르게 진행 단계 안내 도와드릴게요!
+
+궁금하신 점 있으시면 편하게 연락 주세요.`
+  },
+  card_lowgrade:{
+    title:'📱 문자 양식 — 내일배움카드 발급 안내 (대학교 저학년 재학생)',
+    tip:`⚠️ 상담사 필독 — 발급 전 학년부터 확인\n• 가장 먼저 "현재 몇 학년이세요? 2학년 2학기 등록하셨어요?"로 확인 — 2학년 1학기까지만 아래 특례 대상, 2학년 2학기 등록 시 해당 없음\n• 3학년 이상(또는 2학년 2학기 등록자)은 조건 충족 여부와 무관하게 일반적으로 KDT/내배카 대상 아님 — 특례 안내하지 말 것\n• 내배카 유효기간은 5년 — 그 사이 학업/고용 상태가 바뀌면 발급 당시엔 가능했어도 현재는 수강 불가할 수 있음(예: 휴학생→복학생)\n• 노동부 주무관 지침: 앞으로 개강하는 모든 과정은 훈련생 자격을 재확인한 후 실시신고\n• [저학년 특례] 대상: 4년제 대학 1학년~2학년 1학기까지(2학년 2학기 등록 시 제외) / 조건: 휴학 + 고용보험 가입 재직(알바 포함) + 정규 수업시간 온전 참여 가능 → 위 조건 모두 충족해야 발급·수강 가능\n• 조건 미충족 시 무리하게 발급 안내하지 말고 재학/휴학/고용보험 상태부터 확인`,
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+[대학교 저학년 재학생] 내일배움카드 발급 안내드립니다.
+
+⚠️ 발급 전 꼭 확인해주세요!
+내일배움카드는 발급 후 5년간 유효한데, 그 기간 동안 학업·고용 상태가 바뀌면
+발급 당시엔 수강 가능했어도 현재는 어려울 수 있어요.
+(예: 휴학생 → 복학생(2학년 1학기 복학))
+
+▶ 저학년 재학생도 아래 조건을 모두 충족하면 발급 및 수강 가능해요
+1. 4년제 대학 재학 중 1학년 ~ 2학년 1학기까지 (2학년 2학기 등록 시에는 해당되지 않아요)
+2. 휴학 상태 + 고용보험 가입된 재직(알바 포함) 상태
+3. 정규 수업 시간에 온전히 참여 가능한 상태
+
+위 조건에 해당되시면 아래 방법으로 발급 진행해주세요.
+
+▶ 빠른 발급 방법 (1~2일)
+신한 앱카드로 신청하시면 가장 빠르게 발급돼요.
+
+1. 고용24 접속 → 로그인
+   👉 고용24 링크 (https://abit.ly/naeil_lms)
+2. [훈련역량 강화] → [국민내일배움카드] → [발급 신청]
+3. 카드 선택 시 → 신한카드 선택
+4. 신한 SOL Pay 앱 설치 → 내일배움카드 등록
+
+📌 실물 카드 없이 앱카드 등록만 되면
+   고용24 수강신청 바로 가능해요!
+
+위 조건(재학 상태/학년/휴학·재직 여부) 확인해서 채팅으로 알려주시면
+발급 가능 여부와 진행 단계를 빠르게 안내 도와드릴게요!
+
+궁금하신 점 있으시면 편하게 연락 주세요.`
+  },
+  gov:{
+    title:'📱 문자 양식 — 국취제/지원금 안내',
+    tip:`💡 팁 — 상담사 숙지 필수\n• I유형: 미취업 + 중위소득 60% + 재산 4억 이하 + 취업경험 100일\n• 청년 특례 (18~34세): 취업경험 없어도 소득·재산 조건만 충족 시 가능\n• II유형: 청년(15~34세) or 중위소득 100% 이하면 해당\n• ⚠️ 주 15시간 이상 근무 시 훈련장려금 불가\n• ⚠️ 확정 금액 절대 금지 — "약" "최대" 표현만\n• 국취제 참여 중이면 고용24 수강신청 본인 직접 금지`,
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+국민취업지원제도 빠른 등록 방법 안내드립니다.
+
+▶ 지역별 예상 지원금 (월, 2026년 기준)
+• KDT 훈련장려금 (출석 조건 충족 시)
+  - 수도권(비대면 포함): 30만원 / 비수도권: 40만원 / 인구감소지역: 50만원
+  ※ 비대면 과정은 수도권 기준 적용 → 실질 30만원
+• 국취제 구직촉진수당: 약 30만원~/월 (별도 신청·자격 심사 필요 — 미보장)
+
+⚠️ 개인 상황·고용센터 판단에 따라 달라질 수 있어요.
+정확한 금액은 담당 상담사 또는 고용24에서 확인해 주세요.
+
+▶ 1주일 안에 등록하는 방법
+(고용센터 직접 신청은 3~4주 소요 — 아래 방법 추천!)
+1. 고용24에서 구직등록 먼저 완료
+   👉 www.work24.go.kr
+2. 관할 지역 민간위탁기관에 직접 전화
+   → "국민취업지원제도 참여 희망합니다"
+3. 기관 방문 상담 → 서류 제출 → 유형 판정
+
+📌 민간위탁기관 통하시면 대기 없이 약 1주일 내 등록 가능해요.
+
+신청하셨거나 진행 중이시면 신청 일자도 알려주시면 감사하겠습니다!
+
+문의: 고용노동부 ☎ 1350
+
+궁금하신 점 있으시면 편하게 연락 주세요.`
+  },
+  cost:{
+    title:'📱 문자 양식 — 자비부담금 확인 안내',
+    tip:`💡 자비부담금 면제 조건\n① 국취제 I유형\n② 국취제 II유형 중 특정계층\n③ 내배카 운영규정 별표4 특례자\n④ 비수도권 거주 + 최근 4개월 이상 고용보험 취득이력 없는 훈련생\n⑤ KDT AI 캠퍼스 과정 참여자\n→ 정확한 금액은 고용24 [본인부담액 보기]에서 확인.`,
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+자비부담금 확인 방법 안내드립니다.
+
+▶ 확인 방법
+1. 고용24 접속
+   👉 고용24 링크 (www.work24.go.kr)
+2. 해당 과정 상세 페이지
+3. [본인부담액 보기] 클릭
+→ 1분 안에 정확한 금액 확인 가능해요
+
+📌 아래 경우 자비부담금이 면제될 수 있어요:
+① 국취제 I유형
+② 국취제 II유형 중 특정계층
+④ 비수도권 거주 + 최근 4개월 고용보험 이력 없는 경우
+→ 고용24에서 직접 확인해 주세요!
+
+궁금하신 점 있으시면 편하게 연락 주세요.`
+  },
+  enroll:{
+    title:'📱 문자 양식 — 고용24 수강신청 안내',
+    tip:'💡 팁: 국취제 참여 중이면 본인이 직접 신청 절대 금지 — 담당 상담사 통해야 함.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+고용24 수강신청 방법 안내드립니다.
+
+▶ 순서
+1. 고용24 접속
+   👉 고용24 링크 (www.work24.go.kr)
+2. 멋쟁이사자처럼 과정 검색
+3. [수강신청] 클릭
+4. 훈련장려금 받을 계좌번호 입력
+5. 신청 완료 → 상태 확인
+
+📌 국취제 참여 중이시면
+   본인이 직접 신청하지 마시고
+   담당 상담사님께 먼저 말씀해 주세요!
+
+궁금하신 점 있으시면 편하게 연락 주세요.`
+  },
+  kdt:{
+    title:'📱 문자 양식 — KDT 이력 확인 안내',
+    tip:'💡 팁: 5년 제한. 동일 유형 KDT만 적용. 고용24 마이페이지에서 직접 확인 가능.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+KDT(K-디지털 트레이닝) 수강 이력은 아래 방법으로 직접 확인하실 수 있어요.
+
+▶ 확인 방법
+1. 고용24 접속 → 로그인
+   👉 www.work24.go.kr
+2. [마이페이지] → [훈련이력] 또는 [나의 훈련현황] 클릭
+3. KDT 과정 수강 이력 여부 확인
+
+📌 KDT 과정은 5년에 1회만 수강 가능합니다.
+   이전에 수강하신 이력이 있으시면 아쉽게도 이번 과정 참여가 어렵습니다.
+
+궁금하신 점 있으시면 편하게 연락 주세요.`
+  },
+  passed:{
+    title:'📱 문자 양식 — 합격생 수강 가이드',
+    tip:'💡 팁: 합격자 아웃콜 후 공통 발송. [지원자명] [과정명] [마감일] [운영담당 연락처] 채워서 발송.',
+    body:`[멋쟁이사자처럼] {지원자명}님, {과정명} 합격을 다시 한번 축하드립니다!
+
+▶ 수강 확정까지 남은 절차를 아래 가이드에서 확인해주세요.
+   내일배움카드 발급, 국취제 신청, 고용24 수강신청 방법이
+   모두 정리되어 있습니다.
+
+📌 합격생 가이드: https://abit.ly/passed
+
+▶ 수강신청 마감일: {마감일}
+
+궁금한 점은 {운영담당 연락처}로 연락 주세요.`
+  },
+  email:{
+    title:'📱 문자 양식 — 이메일 확인',
+    tip:'💡 팁: 검토전 아웃콜 후 이메일이 다를 경우 발송. {이메일주소} 채워서 발송.',
+    body:`안녕하세요, {지원자명}님.
+멋쟁이사자처럼 {과정명} 부트캠프 담당 매니저입니다.
+
+합격 안내는 아래 이메일로 발송드릴 예정입니다.
+👉 {이메일주소}
+
+이메일 변경을 원하실 경우
+아래 채팅 상담을 통해서도 가능합니다.
+💬 http://likelion.channel.io/`
+  },
+  bejv_info:{
+    title:'📱 문자 양식 — BEJV 26기 사전설명회 안내',
+    tip:'💡 팁: 6/10(수) 오후 7시 YouTube 라이브. 참여 전 사전 등록 유도.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 백엔드자바 26기 담당 매니저입니다.
+
+6월 10일(수) 오후 7시에 YouTube 라이브로
+사전설명회가 진행될 예정이에요!
+
+강사님께 직접 질문하실 수 있고,
+교육 난이도부터 인턴 혜택까지
+궁금한 점을 실시간으로 해결하실 수 있어요.
+
+📌 사전 신청 링크
+https://likelion2.typeform.com/to/jX3AcGHI
+
+참여 후 결정하셔도 충분해요!
+(모집 마감: 6월 29일)
+
+감사합니다.`
+  },
+  detail:{
+    title:'📱 문자 양식 — 상세페이지/커리큘럼 안내',
+    tip:'💡 팁: 발송 전 [링크 삽입] 부분에 실제 링크를 입력하세요.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+과정 상세 정보 링크 안내드립니다.
+
+▶ 과정 상세페이지
+[링크 삽입]
+
+▶ 수강생 후기
+[링크 삽입]
+
+▶ 사전 설명회 다시보기 (AINLP 5기)
+https://www.youtube.com/live/xHEiUkaOSug?si=o-6b7CSUY4y_YmDL
+
+궁금하신 점 있으시면 편하게 연락 주세요.`
+  },
+  employed:{
+    title:'📱 문자 양식 — 취업 확정',
+    tip:'💡 팁: 좋은 인상으로 마무리. 강요 없이 깔끔하게.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+취업 확정 정말 축하드려요! 🎉
+
+이번 기수는 어렵게 되셨지만,
+추후 커리어 발전을 위해 다시 도전하고 싶으실 때
+저희 과정 먼저 떠올려 주세요.
+
+새 직장에서도 좋은 일만 가득하시길 바랍니다!`
+  },
+  comparison:{
+    title:'📱 문자 양식 — 타 부트캠프 비교 중 어필',
+    tip:'💡 팁: 강요하지 말고 우리만의 강점만 간결하게. 판단은 고객에게 맡길 것.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+다양한 과정 비교하고 계신 것 충분히 이해해요.
+비교하실 때 참고가 될 만한 내용 안내드립니다.
+
+▶ 멋쟁이사자처럼만의 강점
+✔ 수도권 특별훈련수당 적용 — 타 과정 대비 지원금 유리
+✔ 현직 멘토 1:1 코드리뷰 및 취업 연계 운영
+✔ 프리스쿨 제공 — 개강 전 기초 학습 지원
+✔ 장기 과정 (5개월+) — 깊이 있는 커리큘럼
+
+마감 전까지 천천히 비교해보시고,
+궁금하신 점 있으시면 편하게 연락 주세요!`
+  },
+  gm_absent:{
+    title:'📱 문자 양식 — GM 부재 시 콜백 유도',
+    tip:'💡 팁: 부재 시 필수 발송. 발신번호 02-6216-0203 명시.',
+    body:`안녕하세요! 멋쟁이사자처럼 그로스마케팅 운영 담당자입니다.
+
+지원서 기반으로 유선 상담을 진행하고 있으나
+통화 연결이 어려워 문자 남겨드립니다.
+
+원활한 운영을 위해 7월 19일 23시까지 별도 연락이 없으신 경우
+수강이 어려운 점 양해 부탁드립니다.
+
+💬 채팅 상담 👉 http://likelion.channel.io/
+
+감사합니다.`
+  },
+  gm_info:{
+    title:'📱 문자 양식 — GM 사전설명회 안내',
+    tip:'💡 팁: 6/30(화) 18시 YouTube 라이브. 커리큘럼 궁금한 고객에게 적극 안내.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 그로스마케팅 담당자입니다.
+
+6월 30일(화) 오후 6시에 YouTube 라이브로
+그로스마케팅 6기 사전설명회가 진행될 예정이에요!
+
+강사님께 직접 질문하실 수 있고,
+커리큘럼, 프로젝트, 취업 연계 등
+궁금한 점을 실시간으로 해결하실 수 있어요.
+
+📌 사전설명회 참여 링크
+[링크 삽입]
+
+참여 후 결정하셔도 충분해요!
+(모집 마감: 7월 19일 23시)
+
+감사합니다.`
+  },
+  callback:{
+    title:'📱 문자 양식 — 재연락 약속 안내',
+    tip:'💡 팁: 재연락 일정을 구체적으로 기재. 010 번호로 발신 예정이면 번호 미리 안내.',
+    body:`안녕하세요 :)
+멋쟁이사자처럼 매니저입니다.
+
+[날짜] [시간]에 다시 연락드리기로 했던 매니저입니다.
+
+약속드린 시간에 연락드릴게요.
+혹시 일정이 변경되셨다면 편하게 말씀해 주세요!
+
+📞 발신 번호: [번호]`
+  }
+};
+
+// SMS 카드 표시
+function addSmsCard(key){
+  const s=SMS[key];if(!s)return;
+  const d=document.createElement('div');
+  d.style.cssText='align-self:flex-start;max-width:88%;background:#fff;border:1.5px solid #ff5500;border-radius:12px;overflow:hidden;font-size:12.5px;margin:4px 0';
+  d.innerHTML=`<div style="background:#ff5500;color:#fff;padding:8px 14px;font-weight:700;font-size:13px">${s.title}</div>
+    <div style="padding:10px 14px">
+      <div style="background:#fff8f0;border-left:3px solid #ff5500;padding:8px 10px;border-radius:0 6px 6px 0;font-size:11.5px;color:#c44800;line-height:1.6;margin-bottom:10px;white-space:pre-wrap">${s.tip}</div>
+      <div style="background:#f8f8f8;border:1px solid #eee;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#333;line-height:1.7;white-space:pre-wrap">${s.body}</div>
+      <button onclick="cpTxt(this)" data-txt="${s.body.replace(/"/g,'&quot;')}"
+        style="margin-top:8px;width:100%;padding:7px;background:#ff5500;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">📋 문자 내용 복사</button>
+    </div>`;
+  ap(d,'msgs');
+}
+function cpTxt(btn){
+  const txt=btn.dataset.txt||btn.getAttribute('data-txt')||'';
+  const orig=btn.textContent;
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(txt).then(()=>{btn.textContent='✅ 복사됨!';setTimeout(()=>btn.textContent=orig,1500);});
+    } else {
+      const ta=document.createElement('textarea');
+      ta.value=txt;ta.style.cssText='position:fixed;left:-9999px;top:0;opacity:0';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent='✅ 복사됨!';setTimeout(()=>btn.textContent=orig,1500);
+    }
+  } catch(e){btn.textContent='⚠️ 직접 복사';setTimeout(()=>btn.textContent=orig,2000);}
+}
+
+// 응답 텍스트에서 발송할 문자 양식 자동 감지
+function detectSmsFromText(text){
+  if(!/문자/.test(text))return null;
+  // 우선순위: 지원금/카드/비용 관련을 커리큘럼보다 먼저 체크
+  if(/국취제|국민취업|지원금|훈련장려금/.test(text))return 'gov';
+  if(/저학년|재학생|휴학|복학/.test(text))return 'card_lowgrade';
+  if(/내일배움카드|발급/.test(text))return 'card';
+  if(/수강신청/.test(text))return 'enroll';
+  if(/자비부담/.test(text))return 'cost';
+  if(/커리큘럼|후기|상세페이지|설명회/.test(text))return 'detail';
+  return null;
+}
+
+// 지원금 카드 (지역 선택형)
+function addJwCard(){
+  const d=document.createElement('div');d.className='jw-card';
+  d.innerHTML=`<div class="jw-head">💰 국민취업지원제도 + KDT 지원금 안내</div>
+<div class="jw-body">
+  <div style="margin-bottom:8px">${JW_INFO.desc.replace(/\n/g,'<br>')}</div>
+  <div style="font-weight:700;font-size:12px;color:#ff5500;margin-bottom:6px">지역이 어디세요? (예상 금액이 달라요)</div>
+  <div class="jw-region-btns">
+    <button class="jw-rbtn" onclick="showJwRegion(this,'수도권')">수도권</button>
+    <button class="jw-rbtn" onclick="showJwRegion(this,'비수도권')">비수도권</button>
+    <button class="jw-rbtn" onclick="showJwRegion(this,'인구감소지역')">인구감소지역</button>
+  </div>
+  <div class="jw-result" style="display:none;margin-top:10px"></div>
+  <div class="jw-note">${JW_INFO.note.replace(/\n/g,'<br>')}</div>
+</div>`;
+  ap(d,'msgs');
+}
+function showJwRegion(btn,region){
+  btn.closest('.jw-region-btns').querySelectorAll('.jw-rbtn').forEach(b=>{b.classList.remove('sel');});
+  btn.classList.add('sel');
+  const info=JW_INFO.table[region];
+  const res=btn.closest('.jw-body').querySelector('.jw-result');
+  res.style.display='block';
+  res.innerHTML=`<table class="jw-table"><thead><tr><th>항목</th><th>금액/월</th></tr></thead><tbody>
+    <tr><td>KDT 훈련장려금 <span style="font-size:10px;color:#22c55e">(출석 조건 충족 시)</span></td><td><b>${info.kdt}</b></td></tr>
+    <tr><td>국취제 구직촉진수당 <span style="font-size:10px;color:#f59e0b">⚠️ 미보장</span></td><td><b>${info.gov}</b></td></tr>
+  </tbody></table>
+  <div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:6px">
+    ⚠️ 국취제는 자격 심사 필요 — 보장 안됨
+  </div>
+  <div style="font-size:11px;color:#888;margin-top:4px">
+    📢 정확한 금액은 고용24 또는 고용센터(☎1350) 확인 필수
+  </div>`;
+  const c=document.getElementById('msgs');c.scrollTop=c.scrollHeight;
+}
+
+// DOM 헬퍼
+function addAg(text){
+  const d=document.createElement('div');d.className='msg ag';
+  const cr=/\[(\d)\]\s*([^\[]+?)(?=\[|\n|$)/g;const cs=[];let cm;
+  while((cm=cr.exec(text))!==null)cs.push({n:cm[1],l:cm[2].trim()});
+  let ch='';
+  if(cs.length>=2)ch=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">`+
+    cs.map(c=>`<button onclick="pickC('${c.n}','${c.l.replace(/'/g,"\\'")}',this)"
+      style="background:#fff8f5;border:1.5px solid #ff5500;color:#ff5500;border-radius:7px;padding:4px 11px;font-size:12px;cursor:pointer;font-weight:600"
+      onmouseover="this.style.background='#ff5500';this.style.color='white'"
+      onmouseout="this.style.background='#fff8f5';this.style.color='#ff5500'">${c.n}. ${e(c.l)}</button>`).join('')+`</div>`;
+  d.innerHTML=`<div class="av">🦁</div><div class="bw"><div class="bt">AI 직원</div><div class="bbl">${e(text)}${ch}</div></div>`;
+  ap(d,'msgs');
+}
+function addAg2(text){// 직원 모드에서 사용자(직원) 말
+  const d=document.createElement('div');d.className='msg cu';
+  d.innerHTML=`<div class="av" style="background:#ff5500">🦁</div><div class="bw"><div class="bt">[직원]</div><div class="bbl" style="background:#ff5500">${e(text)}</div></div>`;
+  ap(d,'msgs');
+}
+function addCu(text){
+  const d=document.createElement('div');d.className='msg cu';
+  d.innerHTML=`<div class="av">👤</div><div class="bw"><div class="bt">[고객]</div><div class="bbl">${e(text)}</div></div>`;
+  ap(d,'msgs');
+}
+function addSug(label,text){
+  const d=document.createElement('div');d.className='sug';
+  d.innerHTML=`<div class="sug-t">📋 스크립트 추천 — ${e(label)}</div><div class="sug-body">${e(text)}</div>
+    <button class="use-btn" onclick="useSug(this)">이 스크립트 사용하기</button>`;
+  ap(d,'msgs');
+}
+function useSug(btn){
+  const text=btn.parentElement.querySelector('.sug-body').innerText;
+  btn.parentElement.remove();const ty=addTyping();
+  setTimeout(()=>{ty.remove();addAg(text);analyzeFB(text);},600);
+}
+function pickC(num,label,btn){
+  btn.closest('.bbl').querySelectorAll('button').forEach(b=>{b.disabled=true;b.style.opacity='.5';});
+  btn.style.opacity='1';btn.style.background='#ff5500';btn.style.color='white';
+  addCu(`[${num}] ${label}`);const ty=addTyping();
+  setTimeout(()=>{ty.remove();respondCuMode(`[${num}] ${label}`);},700);
+}
+function addTyping(){
+  const d=document.createElement('div');d.className='msg ag';
+  d.innerHTML=`<div class="av">🦁</div><div class="bbl"><div class="td-ani"><span></span><span></span><span></span></div></div>`;
+  ap(d,'msgs');return d;
+}
+function sysmsg(text,container){
+  const d=document.createElement('div');d.style.cssText='text-align:center;font-size:11.5px;color:#bbb;padding:5px 0';
+  d.textContent=text;ap(d,container||'msgs');
+}
+function ap(el,id){const c=document.getElementById(id||'msgs');c.appendChild(el);c.scrollTop=c.scrollHeight;}
+function setHint(t){document.getElementById('hintBox').textContent=t;}
+function showScrHint(t){
+  const sec=document.getElementById('scrHintSec');
+  const box=document.getElementById('scrHint');
+  if(t){sec.style.display='';box.textContent=t;}else{sec.style.display='none';}
+}
+function hints(i){const h=AG_HINTS[S.type]||[];return h[Math.min(i,h.length-1)]||'대화를 이어가세요.';}
+function resetRP(){
+  S={...S,type:null,role:null,rIdx:0,started:false,bootcamp:null,attitude:null,typeFixed:false,phase:'opening',selectedBC:null};
+  document.getElementById('msgs').innerHTML='<div style="text-align:center;color:#ccc;font-size:13px;padding:60px 0">역할과 과정 선택 후 시작해주세요</div>';
+  document.getElementById('rpInp').disabled=true;document.getElementById('rpSnd').disabled=true;
+  document.getElementById('pcCard').innerHTML='<span style="color:#ccc">설정을 선택해주세요</span>';
+  document.getElementById('hintBox').textContent='대화를 시작하면 힌트가 표시돼요.';
+  document.getElementById('scrHintSec').style.display='none';
+  document.querySelectorAll('.or').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('ovStart').disabled=true;document.getElementById('ovStart').textContent='역할과 과정을 먼저 선택해주세요';
+  document.getElementById('ov').style.display='flex';
+}
+
+// 직원 모드: AI 고객 응답
+function agCuRespond(agentTxt){
+  // 부트캠프 문의 감지
+  if(S.bootcamp&&/어떤 부트|어떤 과정|무슨 과정|어느 과정|어떤 걸/.test(agentTxt)){
+    const bc=S.bootcamp;
+    const ty=addTyping();
+    setTimeout(()=>{ty.remove();addCu(`저 ${bc.name} 관련해서요.`);},600);
+    return;
+  }
+  // typeFixed가 false인 경우에만 유형 자동 감지 (사전 배정된 경우 고정)
+  if(!S.typeFixed){
+    const detected=detectType(agentTxt);
+    if(detected&&(!S.type||S.type!==detected)){
+      S.type=detected;
+      const sc=getSC();
+      showScrHint(sc.types[detected]?.[Math.min(S.rIdx,sc.types[detected].length-1)]||'');
+      setHint(AG_HINTS[detected]?.[Math.min(S.rIdx,3)]||'계속 응대해보세요.');
+    }
+  }
+  const type=S.type||'info';
+  const attitude=S.attitude||'passive';
+  const lines=(AI_CUSTOMER_DATA[type]?.[attitude])||DEF.aiCustomer[type];
+  const next=lines?.[S.rIdx]||null;
+  S.rIdx++;
+  if(next){
+    const ty=addTyping();
+    setTimeout(()=>{ty.remove();addCu(next);const sc=getSC();showScrHint(sc.types[type]?.[Math.min(S.rIdx,3)]||'');},800+Math.random()*400);
+  } else {
+    setTimeout(()=>sysmsg('AI 고객 시나리오 종료. 초기화 후 다시 연습해보세요.','msgs'),600);
+  }
+}
+
+// 피드백
+const FBR={
+  bad:[{rx:/\d0만원이에요|\d0만원입니다/,msg:'확정 금액 발언 금지 — "고용24에서 확인하셔야 해요"로 수정하세요.'},{rx:/무료예요|0원이에요/,msg:'잘못된 확정 발언 — 유형에 따라 다릅니다.'}],
+  warn:[{rx:/알겠습니다\s*[.!]?\s*$/,msg:'"알겠습니다"로만 끝나면 안돼요. 다음 액션을 추가하세요.'},{rx:/고민해보시고|생각해보시고/,msg:'고민하라고 하지 말고 다음 단계를 제시하세요.'},{rx:/다음 기수/,msg:'이번 기수 가능성을 먼저 확인했나요?'}],
+  good:[{rx:/공감|맞아요|충분히/,msg:'공감 표현 — 고객 감정을 먼저 인정했어요.'},{rx:/국민취업|국취제|90만원|지원금/,msg:'지원제도 안내 — 비용 걱정을 제도로 전환했어요.'},{rx:/지역이 어디/,msg:'지역 확인 — 맞춤 지원금 안내를 위한 좋은 질문이에요.'},{rx:/문자로 보내|방법 보내/,msg:'다음 액션 제시 — 고객이 할 행동을 알려줬어요.'},{rx:/내일 연락|다시 연락/,msg:'재연락 약속 — 관계를 유지하는 마무리예요.'},{rx:/고용24|확인해보시/,msg:'확인 경로 안내 — 정확한 정보는 고용24로 유도했어요.'},{rx:/모든 분들이|비전공자분들도/,msg:'정상화 — 고객의 불안을 집단적으로 정상화했어요.'}]
+};
+function analyzeFB(resp){
+  for(const r of FBR.bad){if(r.rx.test(resp)){addFb(r.msg,'bad');return;}}
+  for(const r of FBR.warn){if(r.rx.test(resp)){addFb(r.msg,'warn');return;}}
+  for(const r of FBR.good){if(r.rx.test(resp)){addFb(r.msg,'good');return;}}
+}
+function addFb(text,type){
+  const d=document.createElement('div');d.className=`fb ${type}`;
+  const icon=type==='good'?'💚 잘했어요':type==='warn'?'💛 개선 포인트':'🔴 주의';
+  d.innerHTML=`<div class="ft">${icon}</div>${e(text)}`;ap(d,'msgs');
+}
+
+// ── 스크립트 조회 ──
+function sqSearch(){
+  const q=document.getElementById('sqInp').value.trim();if(!q)return;
+  const ql=q.toLowerCase();const sc=getSC();const results=[];
+  for(const r of SQMAP){
+    if(r.keys.some(k=>ql.includes(k.toLowerCase()))){
+      if(r.special==='jw'){results.push({label:r.label,special:'jw',cls:r.cls,relKeys:['국취제','훈련장려금','내일배움카드','KDT','마감']});continue;}
+      const text=r.mk?(sc.modules[r.mk]||DEF.modules[r.mk]):(sc.types[r.tk]||DEF.types[r.tk])[r.idx];
+      if(text)results.push({label:r.label,text,cls:r.cls,relKeys:getRelKeys(r)});
+    }
+  }
+  if(!results.length){const list=sc.types.cost||DEF.types.cost;results.push({label:'가장 가까운 스크립트',text:list[0],cls:'bc',relKeys:['지원금','국취제','내일배움카드']});}
+  const con=document.getElementById('sqRes');
+  con.innerHTML=`<div style="font-size:12px;color:#aaa;margin-bottom:4px">"<b>${e(q)}</b>" 관련 스크립트 ${results.length}개</div>`;
+  results.forEach(r=>{
+    const d=document.createElement('div');d.className='sq-card';
+    const smsHtml=r.smsKey&&SMS[r.smsKey]?renderSmsInSQ(r.smsKey):'';
+    if(r.special==='jw'){
+      d.innerHTML=`<div class="sq-ch"><span class="sq-badge ${r.cls}">${r.label}</span></div>
+        <div class="sq-cb">${renderJwTable()}</div>
+        ${smsHtml}
+        <div class="sq-related">${(r.relKeys||[]).map(k=>`<button class="rel-btn" onclick="sqRelClick('${k}')">${k}</button>`).join('')}</div>`;
+    } else {
+      d.innerHTML=`<div class="sq-ch"><span class="sq-badge ${r.cls}">${r.label}</span></div>
+        <div class="sq-cb">${e(r.text)}</div>
+        ${smsHtml}
+        <div class="sq-related">${(r.relKeys||[]).map(k=>`<button class="rel-btn" onclick="sqRelClick('${k}')">${k}</button>`).join('')}</div>
+        <button class="sq-copy" onclick="cpSQ(this)">📋 복사하기</button>`;
+    }
+    con.appendChild(d);
+  });
+}
+function renderSmsInSQ(key){
+  const s=SMS[key];if(!s)return '';
+  return `<div style="margin:0 14px 12px;border:1.5px solid #ff5500;border-radius:10px;overflow:hidden;font-size:12px">
+    <div style="background:#ff5500;color:#fff;padding:7px 12px;font-weight:700">📱 ${s.title}</div>
+    <div style="padding:10px 12px">
+      <div style="background:#fff8f0;border-left:3px solid #ff5500;padding:7px 10px;border-radius:0 6px 6px 0;font-size:11.5px;color:#c44800;line-height:1.6;margin-bottom:8px;white-space:pre-wrap">${s.tip}</div>
+      <div style="background:#f8f8f8;border:1px solid #eee;border-radius:8px;padding:9px 11px;font-size:12px;color:#333;line-height:1.7;white-space:pre-wrap">${s.body}</div>
+      <button onclick="cpTxt(this)" data-txt="${s.body.replace(/"/g,'&quot;')}"
+        style="margin-top:7px;width:100%;padding:6px;background:#ff5500;color:#fff;border:none;border-radius:6px;font-size:11.5px;cursor:pointer">📋 문자 내용 복사</button>
+    </div>
+  </div>`;
+}
+function renderJwTable(){
+  const rows=Object.entries(JW_INFO.table).map(([region,v])=>`<tr><td>${region}</td><td>${v.kdt}만원</td><td>${v.gov}만원</td><td><b style="color:#ff5500">${v.total}만원</b></td></tr>`).join('');
+  return `<b>국민취업지원제도 + KDT 수당 예상 금액</b><br><br>
+<table class="jw-table" style="width:100%"><thead><tr><th>지역</th><th>KDT 수당</th><th>국취제</th><th>월 합계</th></tr></thead><tbody>${rows}</tbody></table>
+<br>⚠️ 개인 조건에 따라 달라질 수 있어요. 정확한 금액은 고용24(www.work24.go.kr) 또는 고용센터(☎1350)에 확인하세요.`;
+}
+function getRelKeys(r){
+  const map={cost:['국취제','지원금 얼마','내일배움카드','마감'],sched:['출석률','빠진 날','일정'],conf:['비전공','어렵','따라갈'],info:['AI','취업률','비교']};
+  if(r.mk) return['비용','지원금 얼마','KDT','마감'];
+  return map[r.tk]||[];
+}
+function sqRelClick(k){document.getElementById('sqInp').value=k;sqSearch();}
+function cpSQ(btn){
+  btn.dataset.txt=btn.previousElementSibling.previousElementSibling.innerText;
+  cpTxt(btn);
+}
+
+// ── 전체 문서 ──
+const FILE_ICON=[
+  {m:['00','오프닝'],i:'👋'},{m:['02','정보탐색'],i:'🔍'},
+  {m:['03','비용'],i:'💰'},{m:['04','일정'],i:'⏰'},
+  {m:['05','확신'],i:'🤔'},{m:['06','모듈'],i:'🔧'},
+  {m:['07','ainlp'],i:'🤖'},{m:['08','문자'],i:'📱'}
+];
+function getFileIcon(name){
+  const nl=name.toLowerCase();
+  const f=FILE_ICON.find(o=>o.m.some(m=>nl.includes(m.toLowerCase())));
+  return f?f.i:'📄';
+}
+
+function mkSecHeader(id,color,label){
+  const h=document.createElement('div');
+  h.id=id;
+  h.style.cssText=`background:${color};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:800;margin:20px 0 10px;scroll-margin-top:12px`;
+  h.textContent=label;
+  return h;
+}
+
+function mkDocSec(icon,title,bodyHtml,accentColor){
+  const d=document.createElement('div');d.className='doc-sec';
+  const borderColor=accentColor||'#ff5500';
+  d.innerHTML=`<div class="doc-sh" onclick="togSec(this)" style="border-left:4px solid ${borderColor}">
+    <span class="doc-si">${icon}</span>
+    <span class="doc-stitle">${title}</span>
+    <span class="doc-arr">▼</span>
+  </div><div class="doc-sb col"></div>`;
+  d.querySelector('.doc-sb').innerHTML=bodyHtml;
+  return d;
+}
+
+function scriptBlock(label,text,color){
+  return `<div style="margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;color:#bbb;margin-bottom:5px">${label}</div>
+    <div style="font-size:13px;color:#333;line-height:1.8;white-space:pre-wrap;background:${color||'#fff8f0'};border-left:3px solid ${color?'#3b82f6':'#ff5500'};border-radius:0 8px 8px 0;padding:12px 14px">${e(text)}</div>
+  </div>`;
+}
+
+function renderDoc(){
+  const inner=document.getElementById('docInner');
+  inner.querySelectorAll('.doc-sec,.doc-sec-head').forEach(n=>n.remove());
+  const existingAnchors=inner.querySelectorAll('[id^="sec-"]');
+  existingAnchors.forEach(n=>n.remove());
+
+  document.getElementById('docSub').textContent='📂 스크립트 로드 시 최신 파일 내용이 표시돼요.';
+  const sc=getSC();
+
+  // ── BEJV 26기 ──
+  const hBejv=mkSecHeader('sec-bejv','#3b82f6','☕ BEJV 26기');
+  hBejv.className='doc-sec-head';
+  inner.appendChild(hBejv);
+
+  const bejvStepMap={
+    '오프닝':BEJV_STEPS.opening?.script,
+    'STEP1 · 기본 안내':BEJV_STEPS.step1?.script,
+    'STEP2 · 수강의지 확인':BEJV_STEPS.step2?.script,
+    'STEP3 · 내배카 확인':BEJV_STEPS.step3?.script,
+    'STEP4 · 자비부담 안내':BEJV_STEPS.step4?.script,
+    'STEP5 · 최종 안내':BEJV_STEPS.step5?.script
+  };
+  const bejvBody=Object.entries(bejvStepMap).filter(([,v])=>v).map(([k,v])=>scriptBlock(k,v,'#eff6ff')).join('');
+  inner.appendChild(mkDocSec('📞','BEJV 26기',bejvBody,'#3b82f6'));
+
+  // ── AINLP 5기 ──
+  const hAinlp=mkSecHeader('sec-ainlp','#8b5cf6','🤖 AINLP 5기');
+  hAinlp.className='doc-sec-head';
+  inner.appendChild(hAinlp);
+
+  const ainlpStepMap={
+    '오프닝':AINLP_STEPS.opening?.script,
+    'STEP1 · 기본 안내':AINLP_STEPS.step1?.script,
+    'STEP2 · 수강의지 확인':AINLP_STEPS.step2?.script,
+    'STEP3 · 내배카 확인':AINLP_STEPS.step3?.script,
+    'STEP4 · 자비부담 안내':AINLP_STEPS.step4?.script,
+    'STEP5 · 최종 안내':AINLP_STEPS.step5?.script
+  };
+  const ainlpBody=Object.entries(ainlpStepMap).filter(([,v])=>v).map(([k,v])=>scriptBlock(k,v,'#f5f3ff')).join('');
+  inner.appendChild(mkDocSec('📞','AINLP 5기',ainlpBody,'#8b5cf6'));
+
+  // ── GM 6기 ──
+  const hGm=mkSecHeader('sec-gm','#10b981','📈 그로스마케팅 6기');
+  hGm.className='doc-sec-head';
+  inner.appendChild(hGm);
+
+  const gmStepMap={
+    '오프닝':GM_STEPS.opening?.script,
+    'STEP1 · 기본 안내':GM_STEPS.step1?.script,
+    'STEP2 · 수강의지 확인':GM_STEPS.step2?.script,
+    'STEP3 · 내배카 확인':GM_STEPS.step3?.script,
+    'STEP4 · 자비부담 안내':GM_STEPS.step4?.script,
+    'STEP5 · 최종 안내':GM_STEPS.step5?.script
+  };
+  const gmBody=Object.entries(gmStepMap).filter(([,v])=>v).map(([k,v])=>scriptBlock(k,v,'#f0fdf4')).join('');
+  inner.appendChild(mkDocSec('📞','그로스마케팅 6기',gmBody,'#10b981'));
+
+  // ── 공통 스크립트 ──
+  const hCommon=mkSecHeader('sec-common','#ff5500','📋 공통 스크립트');
+  hCommon.className='doc-sec-head';
+  inner.appendChild(hCommon);
+
+  inner.appendChild(mkDocSec('👋','공통 오프닝',scriptBlock('오프닝',sc.opening)));
+  inner.appendChild(mkDocSec('🔍','정보탐색형',(sc.types.info||[]).map((t,i)=>scriptBlock(`STEP ${i+1}`,t)).join('')));
+  inner.appendChild(mkDocSec('💰','비용고민형',(sc.types.cost||[]).map((t,i)=>scriptBlock(`STEP ${i+1}`,t)).join('')));
+  inner.appendChild(mkDocSec('⏰','일정부담형',(sc.types.sched||[]).map((t,i)=>scriptBlock(`STEP ${i+1}`,t)).join('')));
+  inner.appendChild(mkDocSec('🤔','확신부족형',(sc.types.conf||[]).map((t,i)=>scriptBlock(`STEP ${i+1}`,t)).join('')));
+  if(sc.modules.card)inner.appendChild(mkDocSec('💳','공통모듈 — 내일배움카드',scriptBlock('스크립트',sc.modules.card)));
+  if(sc.modules.gov)inner.appendChild(mkDocSec('🏛️','공통모듈 — 국취제/훈련장려금',scriptBlock('스크립트',sc.modules.gov)));
+  if(sc.modules.kdt)inner.appendChild(mkDocSec('📋','공통모듈 — KDT 이력',scriptBlock('스크립트',sc.modules.kdt)));
+
+  // ── 문자 양식 ──
+  const hSms=mkSecHeader('sec-sms','#22c55e','📱 문자 양식');
+  hSms.className='doc-sec-head';
+  inner.appendChild(hSms);
+
+  Object.entries(SMS).forEach(([key,s])=>{
+    const body=`
+      <div style="background:#f0fdf4;border-left:3px solid #22c55e;border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;color:#166534;margin-bottom:10px;white-space:pre-wrap">${e(s.tip)}</div>
+      <div style="background:#f8fffe;border:1px solid #d1fae5;border-radius:8px;padding:12px;font-size:13px;color:#333;line-height:1.7;white-space:pre-wrap;margin-bottom:8px">${e(s.body)}</div>
+      <button onclick="cpTxt(this)" style="padding:6px 14px;background:#22c55e;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">📋 복사</button>
+    `;
+    inner.appendChild(mkDocSec('📱',s.title.replace('📱 문자 양식 — ',''),body,'#22c55e'));
+  });
+}
+
+function scrollToSec(id){
+  const el=document.getElementById(id);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function togSec(h){const b=h.nextElementSibling;b.classList.toggle('col');h.querySelector('.doc-arr').textContent=b.classList.contains('col')?'▶':'▼';}
+
+function e(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+// ─────────── AINLP 스텝 데이터 ───────────
+const AINLP_STEPS={
+  opening:{
+    label:'📞 오프닝',
+    script:`"안녕하세요, [고객]님.
+멋쟁이사자처럼 AINLP 과정 운영 담당자입니다.
+
+지원해주셔서 감사드려요.
+안내 드릴 게 있어서 연락드렸는데, 지금 잠깐 통화 가능하실까요?"`,
+    tip:null,
+    btns:[
+      {label:'📞 통화 가능',cls:'yes',next:'step1',msg:'네, 잠깐 통화 가능해요.'},
+      {label:'⏰ 통화 불가',cls:'no',next:'callback',msg:'지금은 통화가 어려워요.'},
+      {label:'📵 부재',cls:'hold',next:'absent',msg:'(부재)'},
+      {label:'🔇 사명 후 즉시 종료',cls:'no',next:'hangup',msg:'(사명 청취 직후 전화 끊김)'}
+    ]
+  },
+  callback:{
+    label:'⏰ 재연락 일정',
+    script:`"네, 불편하셨을 텐데 감사합니다.
+혹시 편하신 시간을 말씀해주시면 그때 다시 연락드릴게요."`,
+    tip:null,
+    sms:'callback',
+    btns:[{label:'✅ 일정 확인 완료',cls:'next',next:'END_CALLBACK',msg:'xx월 xx일 xx시에 다시 연락 주세요.'}]
+  },
+  absent:{
+    label:'📵 부재 처리',
+    script:`[부재 시 처리]
+1. 안내 위해 연락드렸다는 문자 발송
+2. 당일 재시도 (1회)
+3. 일 1회 N회차 부재 시 → 예비 처리`,
+    tip:'💡 발송 후 당일 1회 재시도. 2차 콜은 010 번호로 발신.',
+    sms:'absent',
+    btns:[{label:'✅ 문자 발송 완료',cls:'next',next:'END_ABSENT',msg:'(문자 발송 완료 처리)'}]
+  },
+  step1:{
+    label:'STEP 1 · 기본 안내',
+    script:`"먼저 과정 일정 안내드릴게요.
+
+1. 교육 기간은 2026년 6월 23일부터 9월 2일까지예요.
+   전 기간 참여 가능하실까요?
+
+2. 평일 오전 9시 30분 ~ 오후 6시 비대면 실시간 수업이에요.
+   이 일정에 온전히 참여하실 수 있으실까요?
+
+3. 혹시 이전에 다른 KDT 과정 수강하신 적 있으세요?
+   KDT 과정은 5년에 1회만 참여 가능하거든요."`,
+    tip:`✅ CRM 처리 가능 구간
+• 일정/방식 안내는 CRM이 진행
+• KDT 이력 있으면 → 수강 어렵다고 안내 후 종료
+• 일정 불가 → 고민 사항 파악 후 취소 여부 확인`,
+    btns:[
+      {label:'✅ 네, 참여 가능해요',cls:'yes',next:'step2',msg:'네, 일정 다 괜찮아요.'},
+      {label:'❌ 참여 어려워요',cls:'no',next:'step1_no',msg:'일정이 좀 안 맞아서요...'},
+      {label:'📋 KDT 이력 있어요',cls:'hold',next:'step1_kdt',msg:'작년에 KDT 과정 들었는데요.'}
+    ]
+  },
+  step1_no:{
+    label:'STEP 1 · 참여 불가',
+    script:`"혹시 참여가 어려우신 상황이신지,
+아니면 고민 중이신 부분이 있으신지 여쭤봐도 될까요?
+
+지원 취소를 원하시면 말씀해 주시면 처리해드릴게요."`,
+    tip:'⚠️ 바로 취소 처리하지 말 것 — 고민 사항 먼저 파악',
+    btns:[
+      {label:'✅ 취소 의사 확인',cls:'no',next:'END_CANCEL',msg:'네, 취소할게요.'},
+      {label:'💼 취업 확정됐어요',cls:'no',next:'a_employed',msg:'사실 취업이 됐어요.'},
+      {label:'⚖️ 다른 부트캠프 비교 중',cls:'hold',next:'a_comparison',msg:'다른 곳이랑 비교 중이에요.'},
+      {label:'💭 고민 중이에요',cls:'hold',next:'step2',msg:'조금 더 생각해볼게요.'}
+    ]
+  },
+  a_employed:{
+    label:'🎉 취업 확정 대응',
+    script:`"네 알려주셔서 감사합니다.
+신청하신 부트캠프 수강이 어려우시다면
+취소로 도움드릴까요?"`,
+    tip:'💡 고객 의사 재확인 후 처리. 취소 원하면 처리, 고민 중이면 기다려볼 수 있음.',
+    btns:[
+      {label:'✅ 취소 원하심',cls:'yes',next:'END_CANCEL',msg:'네, 취소 부탁드려요.'},
+      {label:'💭 조금 더 생각해볼게요',cls:'hold',next:'END_HOLD',msg:'좀 더 생각해볼게요.'}
+    ]
+  },
+  a_comparison:{
+    label:'⚖️ 타 부트캠프 비교 중',
+    script:`"충분히 비교해보시는 게 맞아요.
+저희 AINLP 과정만의 강점을 간단히 안내드릴게요.
+
+✔ 수도권 특별훈련수당 포함 — 타 과정 대비 지원금 유리
+✔ 현직 멘토 1:1 코드리뷰 및 취업 연계 운영
+✔ 프리스쿨 제공 — 개강 전 기초 학습 지원
+✔ 오프라인 동대문캠퍼스 · 기업연계(클라비)
+
+6월 22일 오후 5시 마감 전까지 비교해보시고 결정하셔도 충분해요.
+상세 자료 문자로 보내드릴까요?"`,
+    tip:'💡 강요 금지. 강점만 간결하게.',
+    sms:'comparison',
+    btns:[
+      {label:'📱 문자 발송 후 대기',cls:'hold',next:'END_HOLD',msg:'네, 보내주세요.'},
+      {label:'✅ 바로 지원 예정',cls:'yes',next:'step2',msg:'설명 들으니 지원할 것 같아요.'}
+    ]
+  },
+  step1_kdt:{
+    label:'STEP 1 · KDT 이력',
+    script:`"아, 이전에 KDT 과정을 수강하셨군요.
+KDT 과정은 동일 유형으로 5년에 1회만 참여가 가능해서
+추가 수강이 어려우실 수 있어요.
+
+정확한 확인을 위해 고용24 마이페이지에서
+훈련 참여 이력 먼저 확인해보시는 게 좋을 것 같아요.
+
+확인 방법 문자로 보내드릴까요?"`,
+    tip:'⚠️ 바로 불합격 처리하지 말 것 — KDT 이력 유형 확인 필요 (매니저 확인 요청)',
+    sms:'kdt',
+    btns:[{label:'✅ 문자 발송 후 종료',cls:'next',next:'END_KDT',msg:'(고용24 확인 안내 문자 발송)'}]
+  },
+  step2:{
+    label:'STEP 2 · 수강의지 확인 ⚠️',
+    script:`"감사합니다. 몇 가지 더 여쭤볼게요.
+
+1. 수료까지 완주하실 의지가 있으신지 여쭤봐도 될까요?
+   중간에 포기하시면 KDT 5년 제한이나
+   내배카 크레딧 차감 페널티가 생겨서요.
+
+2. PyTorch나 HuggingFace 사용해보셨다고 하셨는데,
+   어느 정도 다뤄보셨나요?
+
+3. 비전공자이신 경우, 프리스쿨로 기초 학습을 도와드리고 있어요.
+
+4. 팀 프로젝트 경험이 있으신가요?
+   GitHub 등 협업 툴 활용을 익히는 기회가 돼요."`,
+    tip:`⚠️ 이 구간은 매니저 판단 기준 필요
+• 합격 기준: 일정 참여 가능 + 완주 의지 확인 + 기초 수준 적합
+• 예비: 고민 중이거나 의지 불확실한 경우
+• 불합격: KDT 이력 문제, 일정 완전 불가 등`,
+    btns:[
+      {label:'✅ 정보 수집 완료 (매니저 전달)',cls:'yes',next:'step3',msg:'네, 정보 확인됐어요.'},
+      {label:'👔 재직 중이에요',cls:'hold',next:'a_job',msg:'지금 재직 중이라 병행 가능한지 고민돼요.'},
+      {label:'💼 취업 확정됐어요',cls:'no',next:'a_employed',msg:'사실 취업이 됐어요.'},
+      {label:'⏸ 예비 판단',cls:'hold',next:'step2_hold',msg:'조금 더 생각해봐야 할 것 같아요.'}
+    ]
+  },
+  step2_hold:{
+    label:'STEP 2 · 예비 처리',
+    script:`"네, 알겠습니다.
+혹시 6월 22일 오후 5시까지 고민해보시고
+수강 여부 연락 주실 수 있을까요?
+
+결정하기 어려우신 부분이 있으시면
+편하게 말씀해 주셔도 돼요."`,
+    tip:'💡 비용 부담이면 → 국취제 안내 / 일정 고민이면 → 구체적 파악',
+    btns:[{label:'✅ 기한 안내 완료',cls:'next',next:'END_HOLD',msg:'네, 그때까지 생각해볼게요.'}]
+  },
+  a_job:{
+    label:'👔 재직자 대응',
+    script:`"재직 중이시군요, 충분히 고민되실 것 같아요.
+
+저희 과정은 평일 오전 9시 30분~오후 6시 풀타임 비대면 수업으로
+출석률 80% 이상 유지가 수료 조건이에요.
+
+개강일(6월 23일) 전까지 퇴직 또는 휴직이 가능하신 상황이라면
+참여 가능하세요.
+
+혹시 개강 전에 상황 정리가 가능하실까요?"`,
+    tip:`💡 재직자 핵심 체크\n• 퇴직/휴직 예정일 확인 (개강일: 6월 23일)\n• 주 15시간 이상 근무 시 훈련장려금 불가\n• 병행 불가 판단 시 → 취소 처리`,
+    btns:[
+      {label:'✅ 개강 전 정리 가능',cls:'yes',next:'step3',msg:'퇴직 예정이라 괜찮아요.'},
+      {label:'❌ 어렵습니다',cls:'no',next:'a_job_cancel',msg:'현실적으로 어려울 것 같아요.'}
+    ]
+  },
+  a_job_cancel:{
+    label:'👔 재직자 취소 처리',
+    script:`"그렇군요, 충분히 이해해요.
+
+아쉽지만 이번 기수는 어려우시겠네요.
+지원 취소 처리해드리겠습니다.
+
+통화 응해주셔서 감사합니다.
+좋은 하루 되세요, 멋쟁이사자처럼이었습니다."`,
+    tip:'💡 강요 없이 깔끔하게 마무리.',
+    btns:[{label:'✅ 취소 처리 완료',cls:'no',next:'END_CANCEL',msg:'감사합니다.'}]
+  },
+  step2_explain:{
+    label:'STEP 2 · 커리큘럼 안내',
+    script:`"과정 상세 커리큘럼이나 수강생 후기가 궁금하시다면
+상세 페이지 링크 문자로 보내드릴게요.
+
+확인해보시고 결정하셔도 충분해요!"`,
+    tip:'💡 상세페이지 링크 발송 후 기한(6/22) 내 재연락 일정 잡기.',
+    sms:'detail',
+    btns:[{label:'✅ 문자 발송 완료',cls:'next',next:'END_HOLD',msg:'네, 문자 주세요.'}]
+  },
+  step3:{
+    label:'STEP 3 · 내배카 확인',
+    script:`"내일배움카드 보유하고 계세요?"`,
+    tip:`✅ CRM 처리 가능 구간
+• 보유 → STEP4 진행
+• 발급 중 → 발급일 확인
+• 미신청 → 발급 방법 문자 발송 (6/22 오후 5시까지)`,
+    btns:[
+      {label:'✅ 카드 있어요',cls:'yes',next:'step4',msg:'네, 가지고 있어요.'},
+      {label:'🔄 발급 중이에요',cls:'hold',next:'step3_pending',msg:'신청은 했는데 아직 안 왔어요.'},
+      {label:'❌ 아직 없어요',cls:'no',next:'step3_none',msg:'아직 신청 안 했어요.'},
+      {label:'💸 잔액 소진',cls:'no',next:'a_step3_limit',msg:'카드 잔액이 없어요.'}
+    ]
+  },
+  a_step3_limit:{
+    label:'STEP 3 · 내배카 한도 소진',
+    script:`"아, 내일배움카드 잔액이 없으신 상황이시군요.
+
+내일배움카드 잔액이 부족한 경우
+신용카드로 직접 충전 후 결제하시거나,
+신용카드 결제로도 가능해요.
+
+단, KDT 5년 이력이 있으신 경우엔
+잔액과 무관하게 수강이 어려울 수 있으니
+먼저 훈련 이력 확인 부탁드려요."`,
+    tip:'💡 카드 잔액과 KDT 이력은 별개. 이력 먼저 확인 후 안내.',
+    sms:'kdt',
+    btns:[
+      {label:'✅ 이력 없음 → 다음',cls:'yes',next:'step4',msg:'이력은 없어요.'},
+      {label:'📋 이력 확인 필요',cls:'hold',next:'step1_kdt',msg:'이력 있는 것 같아요.'}
+    ]
+  },
+  step3_pending:{
+    label:'STEP 3 · 발급 중',
+    script:`"신청은 언제 하셨어요?
+
+카드 받으시면 모집 마감(6월 22일 오후 5시) 전까지
+고용24에서 수강신청까지 완료하셔야 참여 확정돼요.
+
+카드 받으시면 저희가 다시 연락드릴게요!"`,
+    tip:'💡 발급 후 고용24 수강신청 완료까지 안내 필수. 모집 마감 6/22.',
+    btns:[{label:'✅ 안내 완료 · 재연락 예정',cls:'next',next:'END_PENDING',msg:'알겠어요, 카드 받으면 연락드릴게요.'}]
+  },
+  step3_none:{
+    label:'STEP 3 · 미신청',
+    script:`"과정 참여를 위해서는 내일배움카드 발급이 필수예요.
+발급까지 약 일주일 정도 소요되어서
+모집 마감(6월 22일 오후 5시) 전까지 신청해주셔야 해요.
+
+카드 받으시면 고용24에서 수강신청까지 완료하셔야 참여 확정되니
+발급 후 저희가 다시 연락드릴게요!
+
+발급 방법 문자로 보내드릴게요."`,
+    tip:'💡 신한 앱카드 추천 → 1~2일 발급. 발급 후 고용24 수강신청 완료까지 안내 필요. 모집 마감 6/22.',
+    sms:'card',
+    btns:[{label:'✅ 문자 발송 · 재연락 예정',cls:'next',next:'END_CARD',msg:'네, 신청해볼게요.'}]
+  },
+  step4:{
+    label:'STEP 4 · 자비부담 안내',
+    script:`"자비부담금 안내드릴게요.
+
+자비부담금을 결제하셔야 최종 참여가 가능하고요,
+국취제 참여 유형에 따라 0원~최대 30만원이에요.
+
+단, 국민취업지원제도 유형에 따라 금액이 달라져서
+고용24 수강신청 페이지에서 직접 확인하실 수 있어요.
+
+결제는 반드시 내일배움카드로만 가능해요.
+
+혹시 국민취업지원제도 활용하고 계세요?
+조건이 맞으시면 오히려 매달 지원금을 받으실 수도 있거든요."`,
+    tip:`⚠️ 확정 금액 절대 금지 — "최대 30만원", "고용24 확인" 표현만 사용
+💡 국취제 궁금해하면 → 지역 물어보고 예상 금액 안내 (KDT 훈련장려금 수도권 30만원~ (국취제는 자격 심사 필요))`,
+    btns:[
+      {label:'✅ 합격 → 최종 안내',cls:'yes',next:'step5',msg:'네, 진행할게요.'},
+      {label:'⏸ 비용 부담 → 예비',cls:'hold',next:'step4_hold',msg:'자부담금이 좀 부담되네요.'},
+      {label:'💰 국취제 궁금해요',cls:'next',next:'step4_gov',msg:'지원금 얼마나 받을 수 있어요?'}
+    ]
+  },
+  step4_gov:{
+    label:'STEP 4 · 국취제 안내',
+    script:`"지역이 어디세요?
+지역에 따라 받으실 수 있는 금액이 달라서요.
+
+KDT 훈련장려금 수도권 30만원~/월 (비대면 기준, 출석 조건 충족 시)
+국취제는 별도 신청·자격 심사가 필요해요.
+단, 개인 조건에 따라 달라서 정확한 금액은
+고용24에서 직접 확인하셔야 해요.
+
+자세한 내용 문자로 보내드릴게요!"`,
+    tip:`⚠️ 상담사 숙지 필수
+• I유형 조건: 미취업 + 중위소득 60% + 재산 4억 이하 + 취업경험 100일
+• 청년 특례(18~34세): 소득·재산 조건만 맞으면 가능
+• 확정 발언 절대 금지`,
+    sms:'gov',
+    btns:[
+      {label:'✅ 안내 후 합격',cls:'yes',next:'step5',msg:'좋아요, 진행하겠습니다.'},
+      {label:'⏸ 좀 더 고민할게요',cls:'hold',next:'step4_hold',msg:'확인해보고 연락드릴게요.'}
+    ]
+  },
+  step4_hold:{
+    label:'STEP 4 · 예비 처리',
+    script:`"비용 부분이 부담되시는군요.
+국민취업지원제도를 활용하시면
+자비부담금이 면제될 수도 있어요.
+
+6월 22일 오후 5시까지 고민해보시고 연락 주세요.
+국취제 안내 문자도 함께 보내드릴게요!"`,
+    tip:'💡 국취제 문자 양식 함께 발송',
+    btns:[{label:'✅ 안내 완료',cls:'next',next:'END_HOLD',msg:'네, 확인해볼게요.'}]
+  },
+  step5:{
+    label:'STEP 5 · 최종 안내 ✅',
+    script:`"정보 확인 감사합니다.
+
+검토 후 개별적으로 결과를 안내드릴 예정이에요.
+이메일로 안내드릴 테니 꼭 확인 부탁드립니다.
+
+궁금하신 점 있으시면 채널톡이나 이 번호로 편하게 연락 주세요.
+
+지원해주셔서 감사합니다! 😊"`,
+    tip:'✅ CRM 최종 구간 — 합격 여부는 매니저가 결정. CRM은 "검토 후 안내 예정"으로만 마무리.',
+    btns:[ {label:'✅ 통화 완료 (매니저 전달)',cls:'yes',next:'END_COMPLETE',msg:'감사합니다!'}]
+  }
+};
+
+const AINLP_END={
+  END_COMPLETE:{label:'✅ 정보 수집 완료',color:'#22c55e',msg:'정보 수집 완료. 매니저에게 전달.'},
+  END_HOLD:{label:'⏸ 예비 처리',color:'#f59e0b',msg:'예비 처리. 기한: 6월 22일 오후 5시'},
+  END_CANCEL:{label:'❌ 취소 처리',color:'#ef4444',msg:'지원 취소 처리 완료.'},
+  END_KDT:{label:'📋 KDT 확인 필요',color:'#8b5cf6',msg:'KDT 이력 확인 후 매니저 판단 필요.'},
+  END_CALLBACK:{label:'⏰ 재연락 예약',color:'#6366f1',msg:'재연락 일정 등록.'},
+  END_ABSENT:{label:'📵 부재 처리',color:'#64748b',msg:'문자 발송 완료. 재시도 예정.'},
+  END_PENDING:{label:'🔄 카드 발급 대기',color:'#f59e0b',msg:'카드 발급 후 재연락 요청.'},
+  END_CARD:{label:'💳 카드 신청 안내',color:'#f59e0b',msg:'내배카 신청 안내 문자 발송 완료.'},
+  END_EXPLAIN:{label:'📅 설명회 안내',color:'#3b82f6',msg:'6/2 사전설명회 참여 안내 완료.'}
+};
+
+let ainlpCur='opening';
+
+function ainlpInit(){
+  ainlpCur='opening';
+  ['sp0','sp1','sp2','sp3','sp4','sp5'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){el.className='sp-dot'+(i===0?' active':'');}
+  });
+  document.getElementById('ainlpMsgs').innerHTML='<div style="text-align:center;color:#ccc;font-size:13px;padding:40px 0">아래 버튼으로 단계를 진행하세요</div>';
+  // 마감 임박 주의 배너
+  const banner=document.getElementById('ainlpDeadlineBanner');
+  if(banner){
+    const near=isNearDeadline('ainlp');
+    banner.style.display=near?'block':'none';
+    if(near){const bc=BOOTCAMPS.find(b=>b.id==='ainlp');const dl=getRecruitEndDate(bc.recruit);banner.textContent=`📌 주의: 모집 마감 ${businessDaysUntil(dl)}영업일 남음 — 국취제 권유 자제`;}
+  }
+  ainlpRender();
+}
+
+function ainlpRender(){
+  if(AINLP_END[ainlpCur]){
+    const e=AINLP_END[ainlpCur];
+    document.getElementById('ainlpStepLabel').textContent=e.label;
+    document.getElementById('ainlpScript').textContent='';
+    document.getElementById('ainlpTipLabel').textContent='';
+    document.getElementById('ainlpTip').style.display='none';
+    document.getElementById('ainlpSmsRec').style.display='none';
+    document.getElementById('ainlpBtns').innerHTML=`<div style="background:${e.color};color:#fff;border-radius:9px;padding:12px;text-align:center;font-weight:700;font-size:14px">${e.label}</div><div style="font-size:12px;color:#888;text-align:center;margin-top:6px">${e.msg}</div><button onclick="ainlpReset()" style="margin-top:10px;width:100%;padding:9px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#444">↩ 처음부터 다시</button>`;
+    return;
+  }
+  const step=AINLP_STEPS[ainlpCur];if(!step)return;
+  document.getElementById('ainlpStepLabel').textContent=step.label;
+  document.getElementById('ainlpScript').textContent=step.script;
+  const tipLabel=document.getElementById('ainlpTipLabel');
+  const tipBox=document.getElementById('ainlpTip');
+  if(step.tip){
+    tipLabel.textContent='💡 상담사 팁';
+    tipBox.textContent=step.tip;
+    tipBox.style.display='block';
+  } else {
+    tipLabel.textContent='';
+    tipBox.style.display='none';
+  }
+  // SMS 추천 (스크립트에 문자 발송이 포함된 경우)
+  const smsRec=document.getElementById('ainlpSmsRec');
+  const smsKey=step.sms||detectSmsFromText(step.script);
+  if(smsKey&&SMS[smsKey]){
+    const s=SMS[smsKey];
+    smsRec.style.display='block';
+    smsRec.innerHTML=`<div style="font-size:11px;font-weight:700;color:#ff5500;margin-bottom:6px;letter-spacing:.3px">📱 발송 추천 문자</div>
+      <div style="background:#fff;border:1.5px solid #ff5500;border-radius:10px;overflow:hidden">
+        <div style="background:#ff5500;color:#fff;padding:6px 12px;font-weight:700;font-size:12px">${s.title}</div>
+        <div style="padding:10px 12px">
+          <div style="background:#f8f8f8;border:1px solid #eee;border-radius:7px;padding:9px 11px;font-size:12px;color:#333;line-height:1.7;white-space:pre-wrap;max-height:160px;overflow-y:auto">${s.body}</div>
+          <button onclick="cpTxt(this)" data-txt="${s.body.replace(/"/g,'&quot;')}"
+            style="margin-top:7px;width:100%;padding:6px;background:#ff5500;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">📋 문자 내용 복사</button>
+        </div>
+      </div>`;
+  } else {
+    smsRec.style.display='none';
+    smsRec.innerHTML='';
+  }
+  // 버튼 렌더
+  const btns=document.getElementById('ainlpBtns');
+  btns.innerHTML=`<div style="font-size:10px;font-weight:700;color:#aaa;margin-bottom:8px">고객 반응 선택</div><div style="display:flex;flex-wrap:wrap;gap:8px">`;
+  step.btns.forEach(b=>{
+    btns.innerHTML+=`<button class="ainlp-btn ${b.cls}" onclick="ainlpNext('${b.next}','${b.msg.replace(/'/g,"\\'")}')">${b.label}</button>`;
+  });
+  btns.innerHTML+='</div>';
+}
+
+function ainlpNext(nextKey, custMsg){
+  const sc=AINLP_STEPS[ainlpCur];
+  const msgs=document.getElementById('ainlpMsgs');
+  if(msgs.children[0]?.style.textAlign==='center') msgs.innerHTML='';
+
+  // 직원 스크립트 (전체 표시 — BEJV와 동일)
+  if(sc){
+    const agDiv=document.createElement('div');
+    agDiv.style.cssText='background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;max-width:85%';
+    agDiv.textContent='🦁 '+sc.script;
+    msgs.appendChild(agDiv);
+  }
+
+  // 고객 반응
+  const cuDiv=document.createElement('div');
+  cuDiv.style.cssText='background:#f3f4f6;border-radius:10px;padding:10px 14px;font-size:13px;align-self:flex-end;max-width:75%';
+  cuDiv.textContent='👤 '+custMsg;
+  msgs.appendChild(cuDiv);
+  msgs.scrollTop=msgs.scrollHeight;
+
+  // 문자 발송 팝업 (해당 스텝에서 자동 표시)
+  const smsTrigger={
+    step3_none:'card',
+    END_CARD:'card',
+    step4_gov:'gov',
+    step4_hold:'gov',
+    END_HOLD:'gov'
+  };
+  if(smsTrigger[nextKey]){
+    setTimeout(()=>{
+      const s=SMS[smsTrigger[nextKey]];if(!s)return;
+      const d=document.createElement('div');
+      d.style.cssText='background:#fff;border:1.5px solid #ff5500;border-radius:10px;overflow:hidden;font-size:12px;margin:4px 0';
+      d.innerHTML=`<div style="background:#ff5500;color:#fff;padding:7px 12px;font-weight:700;font-size:12px">${s.title}</div>
+        <div style="padding:10px 12px">
+          <div style="background:#fff8f0;border-left:3px solid #ff5500;padding:7px 10px;border-radius:0 6px 6px 0;font-size:11px;color:#c44800;line-height:1.6;margin-bottom:8px;white-space:pre-wrap">${s.tip}</div>
+          <div style="background:#f8f8f8;border:1px solid #eee;border-radius:7px;padding:10px;font-size:12px;color:#333;line-height:1.7;white-space:pre-wrap">${s.body}</div>
+          <button onclick="cpTxt(this)" data-txt="${s.body.replace(/"/g,'&quot;')}"
+            style="margin-top:7px;width:100%;padding:7px;background:#ff5500;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">📋 문자 내용 복사</button>
+        </div>`;
+      const c=document.getElementById('ainlpMsgs');c.appendChild(d);c.scrollTop=c.scrollHeight;
+    },600);
+  }
+
+  // 종료 처리
+  if(nextKey.startsWith('END_')){
+    const end=AINLP_END[nextKey];
+    const endDiv=document.createElement('div');
+    endDiv.style.cssText=`align-self:center;background:${end.color};color:#fff;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;margin:8px 0`;
+    endDiv.textContent=end.label+' — '+end.msg;
+    msgs.appendChild(endDiv);
+    msgs.scrollTop=msgs.scrollHeight;
+    document.getElementById('ainlpBtns').innerHTML=`<button class="ainlp-btn next" onclick="ainlpInit()">↩ 처음부터 다시</button>`;
+    // 진행바 완료
+    ['sp0','sp1','sp2','sp3','sp4','sp5'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='sp-dot done';});
+    return;
+  }
+
+  // 진행바 업데이트
+  const stepOrder=['opening','step1','step2','step3','step4','step5'];
+  const dotIds=['sp0','sp1','sp2','sp3','sp4','sp5'];
+  const nextBaseStep=nextKey.replace(/_\w+$/,'').replace('step','step');
+  const curIdx=stepOrder.indexOf(ainlpCur.replace(/_\w+$/,''));
+  const nextIdx=stepOrder.indexOf(nextKey.replace(/_\w+$/,''));
+  dotIds.forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    if(i<Math.max(curIdx,0)) el.className='sp-dot done';
+    else if(i===Math.max(nextIdx,0)) el.className='sp-dot active';
+    else el.className='sp-dot';
+  });
+
+  ainlpCur=nextKey;
+  ainlpRender();
+}
+
+function ainlpReset(){ainlpInit();}
+
+// ── BEJV 26기 아웃콜 ──
+const BEJV_STEPS={
+  opening:{
+    label:'📞 오프닝',
+    script:`"안녕하세요, [고객]님.
+멋쟁이사자처럼 백엔드자바 부트캠프 담당 매니저입니다.
+
+지원해주셔서 감사드려요.
+안내 드릴 게 있어서 연락드렸는데, 지금 잠깐 통화 가능하실까요?"`,
+    tip:null,
+    btns:[
+      {label:'📞 통화 가능',cls:'yes',next:'step1',msg:'네, 잠깐 통화 가능해요.'},
+      {label:'⏰ 통화 불가',cls:'no',next:'callback',msg:'지금은 통화가 어려워요.'},
+      {label:'📵 부재',cls:'hold',next:'absent',msg:'(부재)'},
+      {label:'🔇 사명 후 즉시 종료',cls:'no',next:'hangup',msg:'(사명 청취 직후 전화 끊김)'}
+    ]
+  },
+  callback:{
+    label:'⏰ 재연락 일정',
+    script:`"네, 불편하셨을 텐데 감사합니다.
+혹시 편하신 시간을 말씀해주시면 그때 다시 연락드릴게요."`,
+    tip:null,
+    sms:'callback',
+    btns:[{label:'✅ 일정 확인 완료',cls:'next',next:'BEND_CALLBACK',msg:'재연락 일정 확인 완료.'}]
+  },
+  hangup:{
+    label:'📵 통화 즉시 종료 대응',
+    script:`[사명 청취 직후 통화 종료 — 전화 끊김]
+
+▶ 즉시 처리 순서:
+1. 부재중 콜백 유도 문자 발송
+2. 당일 1회 재시도
+3. 재시도 무응답 시 → 예비 처리
+
+📌 이 유형은 보통 의도적 거부보다
+   통화 환경 문제 또는 스팸 전화 오인이 많아요.
+   문자 발송 후 반응 확인이 우선입니다.`,
+    tip:'💡 즉시 종료 후 문자 발송이 핵심. 재시도 시 010 번호 활용.',
+    sms:'absent',
+    btns:[
+      {label:'📱 문자 발송 완료',cls:'next',next:'BEND_ABSENT',msg:'(문자 발송)'},
+    ]
+  },
+  absent:{
+    label:'📵 부재 처리',
+    script:`[부재 시 처리]
+1. 안내 위해 연락드렸다는 문자 발송
+2. 당일 재시도 (1회)
+3. N회 부재 → 예비 처리`,
+    tip:'💡 문자: "안녕하세요 :) 멋쟁이사자처럼 백엔드자바 담당 매니저입니다. 안내드릴 사항이 있어 연락드렸습니다. 편하신 시간에 연락 주세요."',
+    btns:[{label:'✅ 문자 발송 완료',cls:'next',next:'BEND_ABSENT',msg:'(문자 발송 완료)'}]
+  },
+  step1:{
+    label:'STEP 1 · 기본 안내',
+    script:`"먼저 과정 일정 안내드릴게요.
+
+1. 교육 기간은 2026년 6월 30일부터 12월 10일까지예요.
+   전 기간 참여 가능하실까요?
+
+2. 평일 오전 9시 ~ 오후 7시 비대면 실시간 수업이에요.
+   이 일정에 온전히 참여하실 수 있으실까요?
+
+3. 혹시 이전에 다른 KDT 과정을 수강하신 적 있으세요?
+   KDT 과정은 5년에 1회만 참여 가능하거든요."`,
+    tip:`✅ CRM 처리 가능 구간
+• 일정/방식 안내는 CRM이 진행
+• KDT 이력 있으면 → 수강 어렵다고 안내 후 종료
+• 일정 불가 → 고민 사항 파악 후 취소 여부 확인`,
+    btns:[
+      {label:'✅ 네, 참여 가능해요',cls:'yes',next:'step2',msg:'네, 일정 다 괜찮아요.'},
+      {label:'❌ 참여 어려워요',cls:'no',next:'step1_no',msg:'일정이 좀 안 맞아서요...'},
+      {label:'📋 KDT 이력 있어요',cls:'hold',next:'step1_kdt',msg:'이전에 KDT 과정 들었어요.'}
+    ]
+  },
+  step1_no:{
+    label:'STEP 1 · 참여 불가',
+    script:`"혹시 참여가 어려우신 상황이신지,
+아니면 고민 중이신 부분이 있으신지 여쭤봐도 될까요?
+
+지원 취소를 원하시면 말씀해 주시면 처리해드릴게요."`,
+    tip:'⚠️ 바로 취소 처리하지 말 것 — 고민 사항 먼저 파악',
+    btns:[
+      {label:'✅ 취소 의사 확인',cls:'no',next:'BEND_CANCEL',msg:'네, 취소할게요.'},
+      {label:'💼 취업 확정됐어요',cls:'no',next:'step_employed',msg:'사실 취업이 됐어요.'},
+      {label:'⚖️ 다른 부트캠프 비교 중',cls:'hold',next:'step_comparison',msg:'다른 곳이랑 비교 중이에요.'},
+      {label:'💭 고민 중이에요',cls:'hold',next:'step2',msg:'조금 더 생각해볼게요.'}
+    ]
+  },
+  step_employed:{
+    label:'🎉 취업 확정 대응',
+    script:`"네 알려주셔서 감사합니다.
+신청하신 부트캠프 수강이 어려우시다면
+취소로 도움드릴까요?"`,
+    tip:'💡 고객 의사 재확인 후 처리.',
+    btns:[
+      {label:'✅ 취소 원하심',cls:'yes',next:'BEND_CANCEL',msg:'네, 취소 부탁드려요.'},
+      {label:'💭 조금 더 생각해볼게요',cls:'hold',next:'BEND_HOLD',msg:'좀 더 생각해볼게요.'}
+    ]
+  },
+  step_comparison:{
+    label:'⚖️ 타 부트캠프 비교 중',
+    script:`"충분히 비교해보시는 게 맞아요.
+저희 과정만의 강점을 간단히 안내드릴게요.
+
+✔ 수도권 특별훈련수당 포함 — 타 과정 대비 지원금 유리
+✔ 현직 멘토 1:1 코드리뷰 및 취업 연계 운영
+✔ 프리스쿨 제공 — 개강 전 기초 학습 지원
+
+비교하신 후에 결정하셔도 충분해요.
+상세 자료 문자로 보내드릴까요?"`,
+    tip:'💡 강요 금지. 강점만 간결하게 전달하고 판단은 고객에게 맡길 것.',
+    sms:'comparison',
+    btns:[
+      {label:'📱 문자 발송 후 대기',cls:'hold',next:'BEND_HOLD',msg:'네, 보내주세요.'},
+      {label:'✅ 바로 지원 예정',cls:'yes',next:'step2',msg:'설명 들으니 지원할 것 같아요.'}
+    ]
+  },
+  step1_kdt:{
+    label:'STEP 1 · KDT 이력',
+    script:`"아, 이전에 KDT 과정을 수강하셨군요.
+KDT 과정은 동일 유형으로 5년에 1회만 참여 가능해서
+추가 수강이 어려우실 수 있어요.
+
+고용24 마이페이지에서 훈련 참여 이력 확인해보시는 게 좋을 것 같아요.
+확인 방법 문자로 보내드릴까요?"`,
+    tip:'⚠️ 바로 불합격 처리하지 말 것 — KDT 이력 유형 확인 필요',
+    btns:[{label:'✅ 문자 발송 후 종료',cls:'next',next:'BEND_KDT',msg:'(고용24 확인 안내 문자 발송)'}]
+  },
+  step2:{
+    label:'STEP 2 · 수강의지 확인 ⚠️',
+    script:`"감사합니다. 몇 가지 더 여쭤볼게요.
+
+1. 수료까지 완주하실 의지가 있으신지 여쭤봐도 될까요?
+   중간에 포기하시면 KDT 5년 제한이나
+   내배카 크레딧 차감 페널티가 생겨서요.
+
+2. 백엔드나 자바(Java)를 다뤄보신 경험이 있으신가요?
+   비전공자도 기초부터 가르쳐 드리고 있어서 괜찮으세요.
+
+3. 팀 프로젝트 경험이 있으신가요?
+   실무 협업 방식, GitHub 활용을 익히는 기회가 돼요."`,
+    tip:`⚠️ 이 구간은 매니저 판단 기준 필요
+• 합격 기준: 일정 참여 가능 + 완주 의지 확인 + 기초 수준 적합
+• 예비: 고민 중이거나 의지 불확실한 경우
+• 불합격: KDT 이력 문제, 일정 완전 불가 등`,
+    btns:[
+      {label:'✅ 정보 수집 완료 (매니저 전달)',cls:'yes',next:'step3',msg:'네, 정보 확인됐어요.'},
+      {label:'👔 재직 중이에요',cls:'hold',next:'step2_job',msg:'지금 재직 중이라 병행 가능한지 고민돼요.'},
+      {label:'💼 취업 확정됐어요',cls:'no',next:'step2_employed',msg:'사실 취업이 됐어요.'},
+      {label:'⏸ 예비 판단',cls:'hold',next:'step2_hold',msg:'조금 더 고민해볼게요.'},
+      {label:'📺 사전설명회 안내',cls:'hold',next:'bejv_info_step',msg:'설명회가 있다면 들어보고 싶어요.'}
+    ]
+  },
+  bejv_info_step:{
+    label:'📺 BEJV 사전설명회 안내',
+    script:`"참고로, 6월 10일(수) 오후 7시에
+YouTube 라이브로 사전설명회가 예정되어 있어요!
+
+강사님께 직접 질문하실 수 있고,
+교육 난이도부터 인턴 혜택까지 궁금한 점을
+실시간으로 해결하실 수 있으니 부담 없이 들어보세요.
+
+사전 신청 링크 문자로 함께 보내드릴게요.
+혹시 다른 궁금하신 점은 없으신가요?"`,
+    tip:'💡 필수 아님 — 가볍게 안내하고 대화 계속 이어가기. 문자 발송 후 고객 반응 확인.',
+    sms:'bejv_info',
+    btns:[
+      {label:'✅ 문자 발송 · 대화 계속',cls:'yes',next:'step3',msg:'감사해요, 신청해볼게요.'},
+      {label:'⏸ 더 고민해볼게요',cls:'hold',next:'BEND_HOLD',msg:'들어보고 생각해볼게요.'}
+    ]
+  },
+  step2_hold:{
+    label:'STEP 2 · 예비',
+    script:`"네, 알겠습니다.
+6월 29일 오후 5시까지 고민해보시고
+수강 여부 연락 주실 수 있을까요?"`,
+    tip:null,
+    btns:[{label:'✅ 예비 처리',cls:'hold',next:'BEND_HOLD',msg:'네, 생각해볼게요.'}]
+  },
+  step2_employed:{
+    label:'🎉 취업 확정 대응',
+    script:`"네 알려주셔서 감사합니다.
+신청하신 부트캠프 수강이 어려우시다면
+취소로 도움드릴까요?"`,
+    tip:'💡 고객 의사 재확인 후 처리.',
+    btns:[
+      {label:'✅ 취소 원하심',cls:'yes',next:'BEND_CANCEL',msg:'네, 취소 부탁드려요.'},
+      {label:'💭 조금 더 생각해볼게요',cls:'hold',next:'BEND_HOLD',msg:'좀 더 생각해볼게요.'}
+    ]
+  },
+  step2_job:{
+    label:'👔 재직자 대응',
+    script:`"재직 중이시군요, 충분히 고민되실 것 같아요.
+
+저희 부트캠프 특성 먼저 안내드릴게요.
+
+평일 오전 9시부터 오후 7시까지 풀타임으로 진행되는 과정으로,
+출석률 80% 이상 유지가 수료 조건이에요.
+
+현재 재직 중이신 상태에서는 병행이 어려운 구조이지만,
+개강일 전까지 퇴직 또는 휴직이 가능하신 상황이라면 참여 가능하세요.
+
+혹시 개강 전에 상황 정리가 가능하실까요?"`,
+    tip:`💡 재직자 핵심 체크
+• 퇴직/휴직 예정일 확인 (개강일: 6월 30일)
+• 주 15시간 이상 근무 시 훈련장려금 불가
+• 병행 불가 판단 시 → 취소 처리`,
+    btns:[
+      {label:'✅ 개강 전 정리 가능',cls:'yes',next:'step3',msg:'퇴직 예정이라 괜찮아요.'},
+      {label:'❌ 어렵습니다',cls:'no',next:'step2_job_cancel',msg:'현실적으로 어려울 것 같아요.'}
+    ]
+  },
+  step2_job_cancel:{
+    label:'👔 재직자 취소 처리',
+    script:`"그렇군요, 충분히 이해해요.
+
+아쉽지만 이번 기수는 어려우시겠네요.
+지원 취소 처리해드리겠습니다.
+
+통화 응해주셔서 감사합니다.
+좋은 하루 되세요, 멋쟁이사자처럼이었습니다."`,
+    tip:'💡 강요 없이 깔끔하게 마무리.',
+    btns:[{label:'✅ 취소 처리 완료',cls:'no',next:'BEND_CANCEL',msg:'감사합니다.'}]
+  },
+  step3:{
+    label:'STEP 3 · 내배카 확인',
+    script:`"혹시 지금 내일배움카드 보유하고 계세요?"`,
+    tip:null,
+    btns:[
+      {label:'✅ 보유 중',cls:'yes',next:'step4',msg:'네, 있어요.'},
+      {label:'🔄 발급 중',cls:'hold',next:'step3_pending',msg:'신청했는데 아직 안 왔어요.'},
+      {label:'❌ 미신청',cls:'no',next:'step3_none',msg:'아직 신청 안 했어요.'},
+      {label:'💸 잔액 소진',cls:'no',next:'step3_limit',msg:'카드 잔액이 없어요.'}
+    ]
+  },
+  step3_pending:{
+    label:'STEP 3 · 발급 대기',
+    script:`"신청은 언제 하셨어요?
+
+카드 받으시면 모집 마감(6월 29일) 전까지
+고용24에서 수강신청까지 완료하셔야 참여 확정돼요.
+
+카드 받으시면 저희가 다시 연락드릴게요!"`,
+    tip:'💡 발급 후 고용24 수강신청 완료까지 안내 필수. 모집 마감 6/29.',
+    btns:[{label:'✅ 안내 완료 · 재연락 예정',cls:'hold',next:'BEND_PENDING',msg:'알겠어요, 카드 받으면 연락드릴게요.'}]
+  },
+  step3_none:{
+    label:'STEP 3 · 미신청',
+    script:`"과정 참여를 위해서는 내일배움카드 발급이 필수예요.
+발급까지 약 일주일 정도 소요되고 있어서
+모집 마감(6월 29일) 전까지 신청해주셔야 해요.
+
+카드 받으시면 고용24에서 수강신청까지 완료하셔야 참여 확정되니
+발급 후 저희가 다시 연락드릴게요!
+
+발급 방법 문자로 보내드릴게요."`,
+    tip:'💡 신한 앱카드 추천 → 1~2일 발급. 발급 후 고용24 수강신청 완료까지 안내 필요. 모집 마감 6/29.',
+    sms:'card',
+    btns:[{label:'✅ 문자 발송 · 재연락 예정',cls:'next',next:'BEND_CARD',msg:'감사합니다.'}]
+  },
+  step3_limit:{
+    label:'STEP 3 · 내배카 한도 소진',
+    script:`"아, 내일배움카드 잔액이 없으신 상황이시군요.
+
+내일배움카드 잔액이 부족한 경우
+신용카드로 직접 충전 후 결제하시거나,
+신용카드 결제로도 가능해요.
+
+단, KDT 5년 이력이 있으신 경우엔
+잔액과 무관하게 수강이 어려울 수 있으니
+먼저 훈련 이력 확인 부탁드려요."`,
+    tip:'💡 카드 잔액과 KDT 이력은 별개. 이력 먼저 확인 후 안내.',
+    sms:'kdt',
+    btns:[
+      {label:'✅ 이력 없음 → 다음',cls:'yes',next:'step4',msg:'이력은 없어요.'},
+      {label:'📋 이력 확인 필요',cls:'hold',next:'step1_kdt',msg:'이력 있는 것 같아요.'}
+    ]
+  },
+  step4:{
+    label:'STEP 4 · 자비부담 안내',
+    script:`"자비부담금이 발생하는 부분 안내드릴게요.
+
+자비부담금을 결제하셔야 최종 참여가 가능하고요,
+국취제 참여 유형에 따라 0원~최대 40만원이에요.
+
+단, 국민취업지원제도 참여 유형이나
+국가 지원 제도에 따라 금액이 달라질 수 있어서
+고용24 수강신청 페이지에서 직접 확인하실 수 있어요.
+
+결제는 반드시 내일배움카드로만 가능해요."`,
+    tip:'⚠️ 확정 금액 절대 언급 금지 — "고용24 확인" 유도. 국취제 병행 가능 안내.',
+    btns:[
+      {label:'✅ 안내 완료 → 합격',cls:'yes',next:'step5',msg:'알겠습니다.'},
+      {label:'💸 비용 부담 고민',cls:'hold',next:'step4_cost',msg:'40만원이 좀 부담되는데요.'}
+    ]
+  },
+  step4_cost:{
+    label:'STEP 4 · 비용 부담',
+    script:`"비용 부분이 부담되시는군요.
+국민취업지원제도 활용하시면 자비부담금이 면제될 수도 있어요.
+또한 출석만 성실히 하시면 매달 훈련장려금도 받으실 수 있고요.
+
+6월 29일까지 고민해보시고 연락 주세요."`,
+    tip:null,
+    btns:[{label:'⏸ 예비 처리',cls:'hold',next:'BEND_HOLD',msg:'생각해볼게요.'}]
+  },
+  step5:{
+    label:'STEP 5 · 최종 안내',
+    script:`"정보 확인 감사합니다.
+
+검토 후 개별적으로 결과를 안내드릴 예정이에요.
+이메일로 안내드릴 테니 꼭 확인 부탁드립니다.
+
+궁금하신 점 있으시면 채널톡이나 이 번호로 편하게 연락 주세요.
+
+지원해주셔서 감사합니다! 😊"`,
+    tip:'✅ CRM 최종 구간 — 합격 여부는 매니저가 결정. CRM은 "검토 후 안내 예정"으로만 마무리.',
+    btns:[ {label:'✅ 통화 완료 (매니저 전달)',cls:'yes',next:'BEND_COMPLETE',msg:'감사합니다!'}]
+  }
+};
+
+const BEJV_END={
+  BEND_COMPLETE:{label:'✅ 정보 수집 완료',color:'#22c55e',msg:'정보 수집 완료. 매니저에게 전달.'},
+  BEND_HOLD:{label:'⏸ 예비 처리',color:'#f59e0b',msg:'예비 처리. 기한: 6월 29일'},
+  BEND_CANCEL:{label:'❌ 취소 처리',color:'#ef4444',msg:'지원 취소 처리 완료.'},
+  BEND_KDT:{label:'📋 KDT 확인 필요',color:'#8b5cf6',msg:'KDT 이력 확인 후 매니저 판단 필요.'},
+  BEND_CALLBACK:{label:'⏰ 재연락 예약',color:'#6366f1',msg:'재연락 일정 등록.'},
+  BEND_ABSENT:{label:'📵 부재 처리',color:'#64748b',msg:'문자 발송 완료.'},
+  BEND_PENDING:{label:'🔄 카드 발급 대기',color:'#f59e0b',msg:'카드 발급 후 재연락.'},
+  BEND_CARD:{label:'💳 카드 신청 안내',color:'#f59e0b',msg:'내배카 신청 안내 문자 발송 완료.'}
+};
+
+const BEJV_ORDER=['opening','step1','step2','step3','step4','step5'];
+let bejvCur='opening';
+
+function bejvInit(){
+  bejvCur='opening';
+  ['bsp0','bsp1','bsp2','bsp3','bsp4','bsp5'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){el.className='sp-dot'+(i===0?' active':'');}
+  });
+  document.getElementById('bejvMsgs').innerHTML='<div style="text-align:center;color:#ccc;font-size:13px;padding:40px 0">오른쪽 버튼으로 단계를 진행하세요</div>';
+  // 마감 임박 주의 배너
+  const banner=document.getElementById('bejvDeadlineBanner');
+  if(banner){
+    const near=isNearDeadline('bejv');
+    banner.style.display=near?'block':'none';
+    if(near){const bc=BOOTCAMPS.find(b=>b.id==='bejv');const dl=getRecruitEndDate(bc.recruit);banner.textContent=`📌 주의: 모집 마감 ${businessDaysUntil(dl)}영업일 남음 — 국취제 권유 자제`;}
+  }
+  bejvRender();
+}
+
+function bejvRender(){
+  if(BEJV_END[bejvCur]){
+    const e=BEJV_END[bejvCur];
+    document.getElementById('bejvStepLabel').textContent=e.label;
+    document.getElementById('bejvScript').textContent='';
+    document.getElementById('bejvTipLabel').textContent='';
+    document.getElementById('bejvTip').style.display='none';
+    document.getElementById('bejvSmsArea').style.display='none';
+    document.getElementById('bejvBtns').innerHTML=`<div style="background:${e.color};color:#fff;border-radius:9px;padding:12px;text-align:center;font-weight:700;font-size:14px">${e.label}</div><div style="font-size:12px;color:#888;text-align:center;margin-top:6px">${e.msg}</div><button onclick="bejvReset()" style="margin-top:10px;width:100%;padding:9px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#444">↩ 처음부터 다시</button>`;
+    return;
+  }
+  const step=BEJV_STEPS[bejvCur];if(!step)return;
+  document.getElementById('bejvStepLabel').textContent=step.label;
+  document.getElementById('bejvScript').textContent=step.script;
+  const tipLabel=document.getElementById('bejvTipLabel');
+  const tipBox=document.getElementById('bejvTip');
+  if(step.tip){tipLabel.textContent='💡 상담사 팁';tipBox.textContent=step.tip;tipBox.style.display='block';}
+  else{tipLabel.textContent='';tipBox.style.display='none';}
+  // SMS 추천
+  const smsArea=document.getElementById('bejvSmsArea');
+  if(smsArea){
+    const smsKey=step.sms;
+    if(smsKey&&SMS[smsKey]){
+      const s=SMS[smsKey];
+      smsArea.style.display='block';
+      smsArea.innerHTML=`<div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:6px">📱 발송 추천 문자</div>
+        <div style="background:#fff;border:1.5px solid #3b82f6;border-radius:10px;overflow:hidden">
+          <div style="background:#3b82f6;color:#fff;padding:6px 12px;font-weight:700;font-size:12px">${s.title}</div>
+          <div style="padding:10px 12px;font-size:12px;color:#555;white-space:pre-wrap;max-height:120px;overflow-y:auto">${s.body}</div>
+          <button onclick="cpTxt(this)" style="width:100%;padding:7px;background:#eff6ff;border:none;border-top:1px solid #bfdbfe;font-size:12px;color:#3b82f6;cursor:pointer;font-weight:600">📋 클립보드 복사</button>
+        </div>`;
+    } else {smsArea.style.display='none';smsArea.innerHTML='';}
+  }
+  const btnsEl=document.getElementById('bejvBtns');
+  btnsEl.innerHTML='';
+  if(BEJV_END[bejvCur]){
+    const e=BEJV_END[bejvCur];
+    btnsEl.innerHTML=`<div style="background:${e.color};color:#fff;border-radius:9px;padding:12px;text-align:center;font-weight:700;font-size:14px">${e.label}</div><div style="font-size:12px;color:#888;text-align:center;margin-top:8px">${e.msg}</div>`;
+    return;
+  }
+  step.btns&&step.btns.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='ainlp-btn '+b.cls;
+    btn.style.cssText='margin:4px;';
+    btn.textContent=b.label;
+    btn.onclick=()=>bejvNext(b.next,b.msg);
+    btnsEl.appendChild(btn);
+  });
+}
+
+function bejvNext(nextKey,customerMsg){
+  const msgs=document.getElementById('bejvMsgs');
+  const curStep=BEJV_STEPS[bejvCur];
+  if(curStep){
+    const agDiv=document.createElement('div');
+    agDiv.style.cssText='background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;max-width:85%';
+    agDiv.textContent='🦁 '+curStep.script;
+    msgs.appendChild(agDiv);
+  }
+  if(customerMsg){
+    const cuDiv=document.createElement('div');
+    cuDiv.style.cssText='background:#f3f4f6;border-radius:10px;padding:10px 14px;font-size:13px;align-self:flex-end;max-width:75%';
+    cuDiv.textContent='👤 '+customerMsg;
+    msgs.appendChild(cuDiv);
+  }
+  msgs.scrollTop=msgs.scrollHeight;
+  const curIdx=BEJV_ORDER.indexOf(bejvCur);
+  const nextIdx=BEJV_ORDER.indexOf(nextKey);
+  ['bsp0','bsp1','bsp2','bsp3','bsp4','bsp5'].forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    if(i<Math.max(curIdx,0))el.className='sp-dot done';
+    else if(i===Math.max(nextIdx,0))el.className='sp-dot active';
+    else el.className='sp-dot';
+  });
+  bejvCur=nextKey;
+  bejvRender();
+}
+
+function bejvReset(){bejvInit();}
+
+// ── GM 그로스마케팅 6기 아웃콜 ──
+const GM_STEPS={
+  opening:{
+    label:'📞 오프닝',
+    script:`"OOO님 안녕하세요!
+멋쟁이사자처럼 그로스마케팅 담당자입니다.
+
+그로스마케팅 과정 지원해주셔서 감사드리며,
+안내 차원으로 전화드렸습니다.
+잠시 통화 가능하실까요?"`,
+    tip:null,
+    btns:[
+      {label:'📞 통화 가능',cls:'yes',next:'step1',msg:'네, 잠깐 통화 가능해요.'},
+      {label:'⏰ 통화 불가',cls:'no',next:'gcallback',msg:'지금은 어려워요.'},
+      {label:'📵 부재',cls:'hold',next:'gabsent',msg:'(부재)'},
+      {label:'🔇 사명 후 즉시 종료',cls:'no',next:'ghangup',msg:'(즉시 종료)'}
+    ]
+  },
+  gcallback:{
+    label:'⏰ 재연락 일정',
+    script:`"네, 불편하셨을 텐데 감사합니다.
+혹시 편하신 시간을 말씀해주시면 그때 다시 연락드릴게요."`,
+    sms:'callback',
+    btns:[{label:'✅ 일정 확인 완료',cls:'next',next:'GEND_CALLBACK',msg:'재연락 일정 확인 완료.'}]
+  },
+  gabsent:{
+    label:'📵 부재 처리',
+    script:`[부재 시 처리]
+1. GM 부재 문자 발송
+2. 당일 재시도 (1회)
+3. 2회 부재 시 → 예비 처리`,
+    tip:'💡 발신번호 02-6216-0203 명시해서 발송.',
+    sms:'gm_absent',
+    btns:[{label:'✅ 문자 발송 완료',cls:'next',next:'GEND_ABSENT',msg:'(문자 발송 완료)'}]
+  },
+  ghangup:{
+    label:'📵 통화 즉시 종료',
+    script:`[사명 청취 직후 통화 종료]
+1. GM 부재 문자 즉시 발송
+2. 당일 재시도 (010 번호로)
+3. 재시도 무응답 시 → 예비 처리`,
+    sms:'gm_absent',
+    btns:[{label:'✅ 문자 발송 완료',cls:'next',next:'GEND_ABSENT',msg:'(문자 발송)'}]
+  },
+  step1:{
+    label:'STEP 1 · 기본 안내',
+    script:`"먼저 과정 안내드릴게요.
+
+1. 그로스마케팅 6기는 7월 21일(화)부터 11월 4일(수)까지
+   약 4개월간 진행되는 과정이에요.
+   전체 기간 참여 가능하실까요?
+
+2. 평일 오전 9시부터 오후 7시까지
+   비대면 실시간으로 진행돼요.
+
+3. 혹시 이전에 K-디지털 트레이닝 과정 수강하신 적 있으세요?
+   KDT 과정은 5년에 1회만 참여 가능하거든요.
+
+4. 2번의 팀 프로젝트가 진행되는데,
+   개인 프로젝트로 변경이 어려운 점 사전 안내드립니다."`,
+    tip:`✅ 필수 안내 4가지
+• 교육기간 7/21~11/4 (약 4개월)
+• 평일 9~19시 비대면 실시간 (6기부터 시간 변경!)
+• KDT 이력 확인
+• 팀프로젝트 2회 (개인 변경 불가)`,
+    btns:[
+      {label:'✅ 정보 수집 완료',cls:'yes',next:'step2',msg:'네, 다 확인됐어요.'},
+      {label:'❓ 수강시간 변경 문의',cls:'hold',next:'step1_time',msg:'기존이랑 시간이 다른데요?'},
+      {label:'❌ 참여 어려워요',cls:'no',next:'step1_no',msg:'일정이 안 맞아서요...'},
+      {label:'📋 KDT 이력 있어요',cls:'hold',next:'step1_kdt',msg:'이전에 KDT 들었어요.'}
+    ]
+  },
+  step1_time:{
+    label:'STEP 1 · 수강시간 변경 안내',
+    script:`"네, 6기부터 운영 방식이 변경되었어요!
+
+09:00~19:00으로 조정되었고,
+단순 강의가 아니라 전날 학습 복습, 이론 실습 강화 등
+양방향 수업 구조로 운영될 예정이에요.
+
+배운 내용을 바로 점검하고 실제 과제와 프로젝트에
+적용할 수 있도록 지원하기 위한 변화입니다!"`,
+    tip:'💡 6기부터 09:00~19:00으로 변경. 양방향 실습 중심 운영.',
+    btns:[
+      {label:'✅ 이해했어요',cls:'yes',next:'step2',msg:'알겠어요.'},
+      {label:'⏸ 시간이 부담돼요',cls:'hold',next:'step1_no',msg:'9~7시가 좀 부담이에요.'}
+    ]
+  },
+  step1_no:{
+    label:'STEP 1 · 참여 불가',
+    script:`"혹시 참여가 어려우신 상황인지,
+아니면 고민 중이신 부분이 있으신지 여쭤봐도 될까요?
+
+지원 취소를 원하시면 처리해드릴게요."`,
+    tip:'⚠️ 바로 취소 처리하지 말 것 — 고민 사항 먼저 파악',
+    btns:[
+      {label:'✅ 취소 의사 확인',cls:'no',next:'GEND_CANCEL',msg:'네, 취소할게요.'},
+      {label:'💼 취업 확정됐어요',cls:'no',next:'gm_employed',msg:'취업이 됐어요.'},
+      {label:'⚖️ 다른 과정 비교 중',cls:'hold',next:'gm_comparison',msg:'다른 곳이랑 비교 중이에요.'},
+      {label:'🎓 비전공자라 불안해요',cls:'hold',next:'gm_nonmajor',msg:'비전공자라서 잘 따라갈 수 있을지 걱정돼요.'},
+      {label:'📚 커리큘럼이 궁금해요',cls:'hold',next:'gm_curriculum',msg:'어떤 내용인지 더 알고 싶어요.'},
+      {label:'💭 고민 중이에요',cls:'hold',next:'step2',msg:'조금 더 생각해볼게요.'}
+    ]
+  },
+  gm_nonmajor:{
+    label:'🎓 비전공자 어필',
+    script:`"걱정 안 하셔도 돼요!
+
+사실 4기 수강생 중 비전공자 비율이 70%였어요.
+비전공자라고 해서 수강에 불이익이 있지 않으며,
+얼마나 열심히 참여하느냐에 따라 강의 적응도가 달라지는 편이에요.
+
+강사진도 비전공자도 잘 따라올 수 있도록 진행하시니
+걱정보다는 도전해보시는 건 어떨까요~?
+
+6월 30일(화) 18시 사전설명회에서
+직접 강사님께 여쭤보실 수도 있어요!"`,
+    tip:'💡 비전공자 70% (4기 기준) 적극 어필. 불안감 → 도전 의지로 전환. 사전설명회 연결.',
+    sms:'gm_info',
+    btns:[
+      {label:'✅ 도전해볼게요',cls:'yes',next:'step2',msg:'그렇군요, 한번 해볼게요.'},
+      {label:'📺 설명회 먼저 들어볼게요',cls:'hold',next:'GEND_HOLD',msg:'설명회 들어보고 결정할게요.'}
+    ]
+  },
+  gm_curriculum:{
+    label:'📚 커리큘럼/인턴십 안내',
+    script:`"커리큘럼 자세한 내용은 6월 30일(화) 오후 6시
+사전설명회에서 강사님께 직접 여쭤보실 수 있어요!
+
+추가로 말씀드리면, 저희 과정은
+우수 훈련생 대상으로 인턴십 기회도 제공돼요.
+수료 이후에도 채용 연계 프로그램이 진행되면
+수료생분들께 개별 연락드리고 있어요.
+
+내부 인턴십만이 아니라 외부 채용 연계도 함께 진행되니
+열심히 참여하시면 취업까지 연결될 수 있는 구조예요!
+
+상세 자료 문자로 보내드릴까요?"`,
+    tip:'💡 인턴십 = 우수 훈련생 대상 (기준은 개강 후 안내). 내부+외부 채용 연계. 사전설명회 적극 유도.',
+    sms:'gm_info',
+    btns:[
+      {label:'📱 문자 발송 · 대화 계속',cls:'yes',next:'step2',msg:'감사해요, 들어볼게요.'},
+      {label:'⏸ 설명회 후 결정할게요',cls:'hold',next:'GEND_HOLD',msg:'설명회 먼저 들어볼게요.'}
+    ]
+  },
+  step1_kdt:{
+    label:'STEP 1 · KDT 이력',
+    script:`"아, 이전에 KDT 과정을 수강하셨군요.
+KDT 과정은 동일 유형으로 5년에 1회만 참여가 가능해서
+추가 수강이 어려우실 수 있어요.
+
+고용24 마이페이지에서 훈련 참여 이력 확인해보시는 게 좋을 것 같아요.
+확인 방법 문자로 보내드릴까요?"`,
+    tip:'⚠️ 바로 불합격 처리하지 말 것 — KDT 이력 유형 확인 필요',
+    sms:'kdt',
+    btns:[{label:'✅ 문자 발송 후 종료',cls:'next',next:'GEND_KDT',msg:'(문자 발송)'}]
+  },
+  gm_employed:{
+    label:'💼 취업 확정 대응',
+    script:`"네 알려주셔서 감사합니다.
+신청하신 부트캠프 수강이 어려우시다면
+취소로 도움드릴까요?"`,
+    tip:'💡 고객 의사 확인 후 처리.',
+    btns:[
+      {label:'✅ 취소 원하심',cls:'yes',next:'GEND_CANCEL',msg:'네, 취소 부탁드려요.'},
+      {label:'💭 조금 더 생각해볼게요',cls:'hold',next:'GEND_HOLD',msg:'조금 더 생각해볼게요.'}
+    ]
+  },
+  gm_comparison:{
+    label:'⚖️ 타 과정 비교 중',
+    script:`"충분히 비교해보시는 게 맞아요.
+저희 그로스마케팅 과정 강점을 간단히 안내드릴게요.
+
+✔ 비전공자도 수강 가능 (4기 비전공자 70%)
+✔ 수도권 특별훈련수당 포함 — 지원금 유리
+✔ 2회 팀 프로젝트 — 실무 협업 경험
+✔ 커리큘럼 궁금하시면 사전설명회(6/30 18시)에서 직접 확인 가능
+
+7월 19일 23시 마감 전까지 비교해보시고 결정하셔도 돼요.
+상세 자료 문자로 보내드릴까요?"`,
+    tip:'💡 강요 금지. 6/30 사전설명회 안내 적극 활용.',
+    sms:'gm_info',
+    btns:[
+      {label:'📱 사전설명회 문자 발송',cls:'hold',next:'GEND_HOLD',msg:'네, 들어보고 결정할게요.'},
+      {label:'✅ 바로 진행할게요',cls:'yes',next:'step2',msg:'설명 들으니 진행하고 싶어요.'}
+    ]
+  },
+  step2:{
+    label:'STEP 2 · 수강의지 확인',
+    script:`"감사합니다. 조금 더 여쭤볼게요.
+
+1. 7월 21일부터 11월 4일까지 전체 기간 동안
+   온전히 참여 가능하시다는 말씀이시죠?
+
+2. 팀 프로젝트가 2회 진행되는데,
+   개인 프로젝트로 변경이 어려워요.
+   적극적으로 참여 가능하신가요?"`,
+    tip:`✅ 수강의지 더블체크
+• 전체 기간(7/21~11/4) 온전히 참여 가능 여부
+• 팀프로젝트 2회 적극 참여 가능 여부`,
+    btns:[
+      {label:'✅ 정보 수집 완료',cls:'yes',next:'step3',msg:'네, 다 가능해요.'},
+      {label:'👔 재직 중이에요',cls:'hold',next:'gm_job',msg:'재직 중이라 고민돼요.'},
+      {label:'💼 취업 확정됐어요',cls:'no',next:'gm_employed',msg:'취업이 됐어요.'},
+      {label:'🎓 비전공자라 걱정돼요',cls:'hold',next:'gm_nonmajor',msg:'비전공자라서 걱정돼요.'},
+      {label:'💼 인턴십 어떻게 돼요',cls:'hold',next:'gm_intern',msg:'인턴십은 어떻게 운영되나요?'},
+      {label:'⏸ 예비 판단',cls:'hold',next:'step2_hold',msg:'조금 더 고민해볼게요.'},
+      {label:'📺 사전설명회 안내',cls:'hold',next:'gm_info_step',msg:'설명회 들어보고 싶어요.'}
+    ]
+  },
+  gm_intern:{
+    label:'💼 인턴십/취업 연계 어필',
+    script:`"인턴십은 우수 훈련생 대상으로 기회가 제공되는 혜택이에요.
+
+우수 훈련생 기준은 개강 이후 담당자분이 상세 안내드릴 예정이에요.
+수료 이후에도 채용 연계 프로그램이 진행되면
+수료생분들께 개별 연락드리고 있어요.
+
+내부 인턴십만이 아니라 외부 채용 연계도 함께 진행되니
+열심히 참여하시면 취업까지 연결될 수 있는 구조예요!
+
+그만큼 적극적으로 수강에 참여해보시는 건 어떨까요~?"`,
+    tip:'💡 인턴십 = 우수 훈련생 대상. 내부+외부 채용 연계. 열심히 하면 기회 → 동기부여 방향으로 마무리.',
+    btns:[
+      {label:'✅ 동기부여 됐어요',cls:'yes',next:'step3',msg:'열심히 해볼게요!'},
+      {label:'⏸ 조금 더 생각해볼게요',cls:'hold',next:'step2_hold',msg:'조금 더 생각해볼게요.'}
+    ]
+  },
+  gm_info_step:{
+    label:'📺 GM 사전설명회 안내',
+    script:`"참고로, 6월 30일(화) 오후 6시에
+YouTube 라이브로 사전설명회가 예정되어 있어요!
+
+강사님께 직접 질문하실 수 있고,
+커리큘럼, 프로젝트, 취업 연계 등
+궁금한 점을 실시간으로 해결하실 수 있어요.
+
+사전 참여 링크 문자로 함께 보내드릴게요.
+혹시 다른 궁금하신 점은 없으신가요?"`,
+    tip:'💡 필수 아님 — 가볍게 안내하고 대화 계속 이어가기.',
+    sms:'gm_info',
+    btns:[
+      {label:'✅ 문자 발송 · 대화 계속',cls:'yes',next:'step3',msg:'감사해요, 들어볼게요.'},
+      {label:'⏸ 더 고민해볼게요',cls:'hold',next:'GEND_HOLD',msg:'들어보고 생각해볼게요.'}
+    ]
+  },
+  step2_hold:{
+    label:'STEP 2 · 예비',
+    script:`"네, 알겠습니다.
+7월 19일 23시 마감 전까지 고민해보시고
+수강 여부 연락 주실 수 있을까요?"`,
+    btns:[{label:'✅ 예비 처리',cls:'hold',next:'GEND_HOLD',msg:'네, 생각해볼게요.'}]
+  },
+  gm_job:{
+    label:'👔 재직자 대응',
+    script:`"재직 중이시군요.
+
+저희 과정은 평일 09:00~19:00 풀타임으로 진행되는 과정이라
+재직 중 병행이 어려운 구조예요.
+
+개강일(7월 21일) 전까지 퇴직 또는 휴직이 가능하신 상황이라면
+참여 가능하세요.
+
+혹시 개강 전에 상황 정리가 가능하실까요?"`,
+    tip:'💡 개강일(7/21) 전 퇴직/휴직 가능 여부 확인.',
+    btns:[
+      {label:'✅ 개강 전 정리 가능',cls:'yes',next:'step3',msg:'퇴직 예정이에요.'},
+      {label:'❌ 어렵습니다',cls:'no',next:'gm_job_cancel',msg:'현실적으로 어려워요.'}
+    ]
+  },
+  gm_job_cancel:{
+    label:'👔 재직자 취소 처리',
+    script:`"그렇군요, 충분히 이해해요.
+
+이번 기수는 어려우시겠네요.
+지원 취소 처리해드리겠습니다.
+
+통화 응해주셔서 감사합니다.
+좋은 하루 되세요!"`,
+    btns:[{label:'✅ 취소 처리 완료',cls:'no',next:'GEND_CANCEL',msg:'감사합니다.'}]
+  },
+  step3:{
+    label:'STEP 3 · 내배카 확인',
+    script:`"혹시 지금 내일배움카드 보유하고 계세요?"`,
+    tip:`✅ CRM 처리 가능 구간
+• 보유 → STEP4 진행
+• 발급 중 → 발급일 확인
+• 미신청 → 발급 방법 문자 발송 (7/19까지)`,
+    btns:[
+      {label:'✅ 카드 있어요',cls:'yes',next:'step4',msg:'네, 가지고 있어요.'},
+      {label:'🔄 발급 중이에요',cls:'hold',next:'step3_pending',msg:'신청은 했는데 아직 안 왔어요.'},
+      {label:'❌ 아직 없어요',cls:'no',next:'step3_none',msg:'아직 신청 안 했어요.'},
+      {label:'💸 잔액 소진',cls:'no',next:'step3_limit',msg:'카드 잔액이 없어요.'}
+    ]
+  },
+  step3_pending:{
+    label:'STEP 3 · 발급 대기',
+    script:`"신청은 언제 하셨어요?
+
+카드 받으시면 모집 마감(7월 19일 23시) 전까지
+고용24에서 수강신청까지 완료하셔야 참여 확정돼요.
+
+카드 받으시면 저희가 다시 연락드릴게요!"`,
+    tip:'💡 발급 후 고용24 수강신청 완료까지 안내 필수. 모집 마감 7/19.',
+    btns:[{label:'✅ 안내 완료 · 재연락 예정',cls:'hold',next:'GEND_PENDING',msg:'알겠어요, 카드 받으면 연락드릴게요.'}]
+  },
+  step3_none:{
+    label:'STEP 3 · 미신청',
+    script:`"과정 참여를 위해서는 내일배움카드 발급이 필수예요.
+발급까지 약 일주일 정도 소요되어서
+모집 마감(7월 19일 23시) 전까지 신청해주셔야 해요.
+
+카드 받으시면 고용24에서 수강신청까지 완료하셔야 참여 확정되니
+발급 후 저희가 다시 연락드릴게요!
+
+발급 방법 문자로 보내드릴게요."`,
+    tip:'💡 신한 앱카드 추천. 발급 후 고용24 수강신청 완료까지 안내 필요. 모집 마감 7/19.',
+    sms:'card',
+    btns:[{label:'✅ 문자 발송 · 재연락 예정',cls:'next',next:'GEND_CARD',msg:'네, 신청해볼게요.'}]
+  },
+  step3_limit:{
+    label:'STEP 3 · 내배카 한도 소진',
+    script:`"내일배움카드 잔액이 없으신 상황이시군요.
+
+KDT 과정은 잔액이 1원만 있어도 1회에 한하여 수강이 가능해요!
+단, KDT 5년 이력이 있으신 경우엔 수강이 어려울 수 있으니
+먼저 훈련 이력 확인 부탁드려요."`,
+    tip:'💡 KDT는 1원도 OK (1회 한정). KDT 이력 여부 먼저 확인.',
+    sms:'kdt',
+    btns:[
+      {label:'✅ 이력 없음 → 다음',cls:'yes',next:'step4',msg:'이력은 없어요.'},
+      {label:'📋 이력 확인 필요',cls:'hold',next:'step1_kdt',msg:'이력 있는 것 같아요.'}
+    ]
+  },
+  step4:{
+    label:'STEP 4 · 자비부담금 안내',
+    script:`"자비부담금이 발생하는 부분 안내드릴게요.
+
+수강 참여를 위해 자비부담금 결제가 필요하며,
+국취제 참여 유형에 따라 0원~최대 40만원이에요.
+
+결제는 반드시 내일배움카드로만 가능해요.
+정확한 금액은 고용24 수강신청 페이지에서 확인하실 수 있어요.
+
+혹시 국민취업지원제도 활용하고 계세요?"`,
+    tip:'⚠️ 확정 금액 절대 금지 — "최대 40만원", "고용24 확인" 표현만 사용\n• 국취제 I유형: 자비부담금 면제 가능\n• 국취제 아직 신청 전: 고용24 먼저 수강신청하지 말 것!',
+    btns:[
+      {label:'✅ 안내 완료 → 정보 수집 완료',cls:'yes',next:'step5',msg:'알겠습니다.'},
+      {label:'💸 비용 부담 고민',cls:'hold',next:'step4_cost',msg:'40만원이 좀 부담되는데요.'},
+      {label:'🏛️ 국취제 미신청',cls:'hold',next:'step4_gov',msg:'국취제 아직 신청 안 했어요.'}
+    ]
+  },
+  step4_cost:{
+    label:'STEP 4 · 비용 부담',
+    script:`"비용 부분이 부담되시는군요.
+국민취업지원제도 활용하시면 자비부담금이 면제될 수도 있어요.
+또한 출석만 성실히 하시면 KDT 훈련장려금도 받으실 수 있고요.
+
+7월 19일 23시까지 고민해보시고 연락 주세요."`,
+    sms:'gov',
+    btns:[{label:'⏸ 예비 처리',cls:'hold',next:'GEND_HOLD',msg:'생각해볼게요.'}]
+  },
+  step4_gov:{
+    label:'STEP 4 · 국취제 미신청',
+    script:`"국취제 신청 전이시라면 중요한 점 안내드려요!
+
+국취제 유형에 따라 자비부담금 금액이 달라져요.
+고용24에서 먼저 수강신청하시면 나중에 확정 금액이
+반영되지 않을 수 있어서,
+
+국취제 신청 후 상담사와 함께 고용24 수강신청 진행해주시는 게 좋아요!
+국취제 등록 방법 문자로 안내드릴게요."`,
+    tip:'💡 국취제 → 고용24 순서 반드시 안내!',
+    sms:'gov',
+    btns:[{label:'✅ 문자 발송 후 안내 완료',cls:'next',next:'step5',msg:'알겠어요, 신청해볼게요.'}]
+  },
+  step5:{
+    label:'STEP 5 · 최종 안내',
+    script:`"정보 확인 감사합니다.
+
+검토 후 개별적으로 결과를 안내드릴 예정이에요.
+이메일로 안내드릴 테니 꼭 확인 부탁드립니다.
+
+궁금하신 점 있으시면 채널톡이나 이 번호(02-6216-0203)로
+편하게 연락 주세요.
+
+지원해주셔서 감사합니다! 😊"`,
+    tip:'✅ CRM 최종 구간 — 합격 여부는 매니저가 결정. CRM은 "검토 후 안내 예정"으로만 마무리.',
+    btns:[{label:'✅ 통화 완료 (매니저 전달)',cls:'yes',next:'GEND_COMPLETE',msg:'감사합니다!'}]
+  }
+};
+
+const GEND={
+  GEND_COMPLETE:{label:'✅ 정보 수집 완료',color:'#22c55e',msg:'정보 수집 완료. 매니저에게 전달.'},
+  GEND_HOLD:{label:'⏸ 예비 처리',color:'#f59e0b',msg:'예비 처리. 기한: 7월 19일 23시'},
+  GEND_CANCEL:{label:'❌ 취소 처리',color:'#ef4444',msg:'지원 취소 처리 완료.'},
+  GEND_KDT:{label:'📋 KDT 확인 필요',color:'#8b5cf6',msg:'KDT 이력 확인 후 매니저 판단 필요.'},
+  GEND_CALLBACK:{label:'⏰ 재연락 예약',color:'#6366f1',msg:'재연락 일정 등록.'},
+  GEND_ABSENT:{label:'📵 부재 처리',color:'#64748b',msg:'문자 발송 완료.'},
+  GEND_PENDING:{label:'🔄 카드 발급 대기',color:'#f59e0b',msg:'카드 발급 후 재연락.'},
+  GEND_CARD:{label:'💳 카드 신청 안내',color:'#f59e0b',msg:'내배카 신청 안내 문자 발송 완료.'}
+};
+
+const GM_ORDER=['opening','step1','step2','step3','step4','step5'];
+let gmCur='opening';
+
+function gmInit(){
+  gmCur='opening';
+  ['gsp0','gsp1','gsp2','gsp3','gsp4','gsp5'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){el.className='sp-dot'+(i===0?' active':'');}
+  });
+  document.getElementById('gmMsgs').innerHTML='<div style="text-align:center;color:#ccc;font-size:13px;padding:40px 0">오른쪽 버튼으로 단계를 진행하세요</div>';
+  const banner=document.getElementById('gmDeadlineBanner');
+  if(banner){
+    const near=isNearDeadline('gm');
+    banner.style.display=near?'block':'none';
+    if(near){const bc=BOOTCAMPS.find(b=>b.id==='gm');const dl=getRecruitEndDate(bc.recruit);banner.textContent=`📌 주의: 모집 마감 ${businessDaysUntil(dl)}영업일 남음 — 국취제 권유 자제`;}
+  }
+  gmRender();
+}
+
+function gmRender(){
+  if(GEND[gmCur]){
+    const e=GEND[gmCur];
+    document.getElementById('gmStepLabel').textContent=e.label;
+    document.getElementById('gmScript').textContent='';
+    document.getElementById('gmTipLabel').textContent='';
+    document.getElementById('gmTip').style.display='none';
+    document.getElementById('gmSmsArea').style.display='none';
+    document.getElementById('gmBtns').innerHTML=`<div style="background:${e.color};color:#fff;border-radius:9px;padding:12px;text-align:center;font-weight:700;font-size:14px">${e.label}</div><div style="font-size:12px;color:#888;text-align:center;margin-top:6px">${e.msg}</div><button onclick="gmReset()" style="margin-top:10px;width:100%;padding:9px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#444">↩ 처음부터 다시</button>`;
+    return;
+  }
+  const step=GM_STEPS[gmCur];if(!step)return;
+  document.getElementById('gmStepLabel').textContent=step.label;
+  document.getElementById('gmScript').textContent=step.script;
+  const tipLabel=document.getElementById('gmTipLabel');
+  const tipBox=document.getElementById('gmTip');
+  if(step.tip){tipLabel.textContent='💡 상담사 팁';tipBox.textContent=step.tip;tipBox.style.display='block';}
+  else{tipLabel.textContent='';tipBox.style.display='none';}
+  const smsArea=document.getElementById('gmSmsArea');
+  if(smsArea){
+    const smsKey=step.sms;
+    if(smsKey&&SMS[smsKey]){
+      const s=SMS[smsKey];
+      smsArea.style.display='block';
+      smsArea.innerHTML=`<div style="font-size:11px;font-weight:700;color:#10b981;margin-bottom:6px">📱 발송 추천 문자</div>
+        <div style="background:#fff;border:1.5px solid #10b981;border-radius:10px;overflow:hidden">
+          <div style="background:#10b981;color:#fff;padding:6px 12px;font-weight:700;font-size:12px">${s.title}</div>
+          <div style="padding:10px 12px;font-size:12px;color:#555;white-space:pre-wrap;max-height:120px;overflow-y:auto">${s.body}</div>
+          <button onclick="cpTxt(this)" data-txt="${s.body.replace(/"/g,'&quot;')}" style="width:100%;padding:7px;background:#f0fdf4;border:none;border-top:1px solid #bbf7d0;font-size:12px;color:#10b981;cursor:pointer;font-weight:600">📋 문자 내용 복사</button>
+        </div>`;
+    } else {smsArea.style.display='none';smsArea.innerHTML='';}
+  }
+  const btnsEl=document.getElementById('gmBtns');
+  btnsEl.innerHTML='';
+  if(GEND[gmCur]){
+    const e=GEND[gmCur];
+    btnsEl.innerHTML=`<div style="background:${e.color};color:#fff;border-radius:9px;padding:12px;text-align:center;font-weight:700;font-size:14px">${e.label}</div><div style="font-size:12px;color:#888;text-align:center;margin-top:8px">${e.msg}</div>`;
+    return;
+  }
+  step.btns&&step.btns.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='ainlp-btn '+b.cls;
+    btn.style.cssText='margin:4px;';
+    btn.textContent=b.label;
+    btn.onclick=()=>gmNext(b.next,b.msg);
+    btnsEl.appendChild(btn);
+  });
+}
+
+function gmNext(nextKey,customerMsg){
+  const sc=GM_STEPS[gmCur];
+  const msgs=document.getElementById('gmMsgs');
+  if(msgs.children[0]?.style.textAlign==='center') msgs.innerHTML='';
+  if(sc){
+    const agDiv=document.createElement('div');
+    agDiv.style.cssText='background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;max-width:85%';
+    agDiv.textContent='📈 '+sc.script;
+    msgs.appendChild(agDiv);
+  }
+  if(customerMsg){
+    const cuDiv=document.createElement('div');
+    cuDiv.style.cssText='background:#f3f4f6;border-radius:10px;padding:10px 14px;font-size:13px;align-self:flex-end;max-width:75%';
+    cuDiv.textContent='👤 '+customerMsg;
+    msgs.appendChild(cuDiv);
+  }
+  msgs.scrollTop=msgs.scrollHeight;
+  const curIdx=GM_ORDER.indexOf(gmCur);
+  const nextIdx=GM_ORDER.indexOf(nextKey);
+  ['gsp0','gsp1','gsp2','gsp3','gsp4','gsp5'].forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    if(i<Math.max(curIdx,0))el.className='sp-dot done';
+    else if(i===Math.max(nextIdx,0))el.className='sp-dot active';
+    else el.className='sp-dot';
+  });
+  gmCur=nextKey;
+  gmRender();
+}
+
+function gmReset(){gmInit();}
+
+// 모객 예정 표시 자동 제거
+function checkGmRecruitStart(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const recruitStart=new Date(2026,5,16); // 6/16
+  const statusEl=document.getElementById('gm_status');
+  if(statusEl&&today>=recruitStart){
+    statusEl.textContent='모집 06.16~07.19\n09:00~19:00 · 자부담 0~40만원';
+  }
+}
+
+// 페이지 로드 시 기본 스크립트로 전체 문서 초기화
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('docSub').textContent='기본 스크립트 표시 중. 📂 스크립트 로드 후 최신 내용으로 업데이트하세요.';
+  renderDoc();
+  checkGmRecruitStart();
+});
+</script>
+</body>
+</html>

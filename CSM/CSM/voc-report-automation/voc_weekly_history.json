@@ -1,0 +1,20 @@
+{
+  "weeks": [
+    {"week_end": "2026-05-11", "label": "05/11", "frt_sec": 1151, "alf_rate": 65.7, "alf_n": 54, "alf_pool": 90},
+    {"week_end": "2026-05-18", "label": "05/18", "frt_sec": 1086, "alf_rate": 66.7, "alf_n": 45, "alf_pool": 75},
+    {"week_end": "2026-05-25", "label": "05/25", "frt_sec": 504,  "alf_rate": 69.4, "alf_n": 63, "alf_pool": 101},
+    {"week_end": "2026-06-01", "label": "06/01", "frt_sec": 502,  "alf_rate": 70.4, "alf_n": 54, "alf_pool": 90},
+    {"week_end": "2026-06-08", "label": "06/08", "frt_sec": 509,  "alf_rate": 71.4, "alf_n": 48, "alf_pool": 70},
+    {"week_end": "2026-06-15", "label": "06/15", "frt_sec": 329,  "alf_rate": 71.4, "alf_n": 32, "alf_pool": 82},
+    {"week_end": "2026-06-22", "label": "06/22", "frt_sec": 380,  "alf_rate": 70.7, "alf_n": 63, "alf_pool": 88},
+    {"week_end": "2026-06-29", "label": "06/29", "frt_sec": 347,  "alf_rate": 72.3, "alf_n": 68, "alf_pool": 94},
+    {"week_end": "2026-07-06", "label": "07/06", "frt_sec": 447,  "alf_rate": 69.1, "alf_n": 65, "alf_pool": 94}
+  ],
+  "cumulative": {
+    "as_of": "2026-07-06",
+    "frt_cum_sec": 1125,
+    "alf_cum_rate": 61.1,
+    "alf_cum_n": 1610,
+    "alf_cum_total": 2637
+  }
+}
