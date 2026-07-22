@@ -1,0 +1,51 @@
+name: Campaign Data Update (Ads Automation)
+
+on:
+  schedule:
+    # 1. 한국 시간 20:00 (UTC 11:00) : 업무 마감 및 당일 성과 확인용
+    - cron: '0 11 * * *'
+
+    # 2. 한국 시간 02:00 (UTC 17:00) : 전일 데이터 최종 확정 및 새벽 자동 업데이트
+    - cron: '0 17 * * *'
+  workflow_dispatch:              # 수동 실행 버튼
+  repository_dispatch:            # 외부 시스템에서 보내는 수동 실행 신호
+    types: [manual-trigger]
+
+jobs:
+  run-automation:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: campaign_data_update
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run script
+        env:
+          NAVER_CUSTOMER_ID: ${{ secrets.NAVER_CUSTOMER_ID }}
+          NAVER_API_KEY: ${{ secrets.NAVER_API_KEY }}
+          NAVER_SECRET: ${{ secrets.NAVER_SECRET }}
+          GOOGLE_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_DEVELOPER_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_LOGIN_CUSTOMER_ID }}
+          GOOGLE_CUSTOMER_ID: ${{ secrets.GOOGLE_CUSTOMER_ID }}
+          META_TOKEN: ${{ secrets.META_TOKEN }}
+          META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
+          META_API_VER: ${{ secrets.META_API_VER }}
+          TIKTOK_TOKEN: ${{ secrets.TIKTOK_TOKEN }}
+          TIKTOK_AD_ACCOUNT_ID: ${{ secrets.TIKTOK_AD_ACCOUNT_ID }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python main.py
