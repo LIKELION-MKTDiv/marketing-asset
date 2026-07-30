@@ -25,6 +25,9 @@ TARGET_SHEET_NAME = "[RAW] 매체 데이터"
 # 슬랙 웹훅 URL
 SLACK_WEBHOOK_URL = os.environ["SLACK_WEBHOOK_URL"]
 
+# 💡 카카오모먼트 - 대행사가 데이터 공급 중이라 기본은 꺼둠. 직접 수집 전환 시 True로.
+ENABLE_KAKAO = False
+
 KEYS = {
     "NAVER": {
         "CUSTOMER_ID": os.environ["NAVER_CUSTOMER_ID"],
@@ -47,6 +50,11 @@ KEYS = {
     "TIKTOK": {
         "TOKEN": os.environ["TIKTOK_TOKEN"],
         "AD_ACCOUNT_ID": os.environ["TIKTOK_AD_ACCOUNT_ID"]
+    },
+    "KAKAO": {
+        # ENABLE_KAKAO가 False인 동안은 Secrets가 없어도 에러 안 나도록 .get() 사용
+        "BUSINESS_TOKEN": os.environ.get("KAKAO_BUSINESS_TOKEN", ""),
+        "AD_ACCOUNT_ID": os.environ.get("KAKAO_AD_ACCOUNT_ID", "")
     }
 }
 
@@ -384,7 +392,6 @@ def fetch_naver():
                 f"차이: {diff_total:,.0f}"
             )
 
-        # 🌟 네이버 SA 데이터는 어떤 필터링도 거치지 않고 온전하게 보존되어 반환됩니다.
         return final_df
 
     except Exception as e:
@@ -404,7 +411,6 @@ def fetch_google():
         rows = []
         q_since, q_until = SINCE.replace("/","-"), UNTIL.replace("/","-")
 
-        # 💡 1. 검색 광고 수집 - NOT LIKE 조건에 cld08 추가
         q_kw = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_criterion.keyword.text, metrics.impressions, metrics.clicks, metrics.cost_micros FROM keyword_view WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%bejv26%' AND campaign.name NOT LIKE '%cld08%'"
         for r in run_gaql(q_kw):
             camp_name, group_name = r.campaign.name, r.ad_group.name
@@ -412,13 +418,11 @@ def fetch_google():
                 group_name = "new_v2_4_developer_1834_pcmo"
             rows.append([str(r.segments.date).replace("-","/"), camp_name, group_name, r.ad_group_criterion.keyword.text, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
-        # 💡 2. 디스플레이/동영상 광고 수집 - NOT LIKE 조건에 cld08 추가
         q_ad = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_ad.ad.name, ad_group_ad.ad.id, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group_ad WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type NOT IN ('SEARCH', 'PERFORMANCE_MAX') AND campaign.name NOT LIKE '%bejv26%' AND campaign.name NOT LIKE '%cld08%'"
         for r in run_gaql(q_ad):
             content = r.ad_group_ad.ad.name.strip() if getattr(r.ad_group_ad.ad, "name", None) else f"ad_{r.ad_group_ad.ad.id}"
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, r.ad_group.name, content, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
-        # 💡 3. 실적 최대화 광고 수집 - NOT LIKE 조건에 cld08 추가
         q_pmax = f"SELECT segments.date, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM campaign WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'PERFORMANCE_MAX' AND campaign.name NOT LIKE '%bejv26%' AND campaign.name NOT LIKE '%cld08%'"
         for r in run_gaql(q_pmax):
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, "PMax", "PMax", int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
@@ -440,7 +444,6 @@ def fetch_meta():
             data.append([x["date_start"].replace("-","/"), camp_name, x.get("adset_name", ""), ad_name, int(x.get("impressions", 0)), int(x.get("clicks", 0)), float(x.get("spend", 0))])
 
         df = pd.DataFrame(data, columns=["날짜","캠페인","그룹","콘텐츠","노출","클릭","비용"])
-        # 💡 메타 캠페인명에서 bejv26 또는 cld08이 포함된 행 필터링 제거
         df = df[~df["캠페인"].str.lower().str.contains("bejv26|cld08", na=False)]
         return df
     except: return pd.DataFrame()
@@ -483,17 +486,102 @@ def fetch_tiktok():
             rows.append([clean_date, names["campaign_name"], names["adgroup_name"], names["ad_name"], impressions, int(m.get("clicks", 0)), float(m.get("spend", 0))])
 
         df = pd.DataFrame(rows, columns=["날짜", "캠페인", "그룹", "콘텐츠", "노출", "클릭", "비용"])
-        # 💡 틱톡 캠페인명에서 bejv26 또는 cld08이 포함된 행 필터링 제거
         df = df[~df["캠페인"].str.lower().str.contains("bejv26|cld08", na=False)]
         return df
     except: return pd.DataFrame()
+
+def fetch_kakao():
+    print(f"🚀 카카오모먼트 수집 중 (디스플레이+비즈보드만)... ({SINCE} ~ {UNTIL})")
+    BASE_URL = "https://apis.moment.kakao.com/openapi/v4"
+    HEADERS = {"Authorization": f"Bearer {KEYS['KAKAO']['BUSINESS_TOKEN']}", "adAccountId": KEYS["KAKAO"]["AD_ACCOUNT_ID"]}
+    DELAY = 0.5
+    ALLOWED_CAMPAIGN_TYPES = {"DISPLAY", "TALK_BIZ_BOARD"}
+    name_cache = {}
+
+    def _get(path, params, max_retry=5):
+        for attempt in range(1, max_retry + 1):
+            r = requests.get(f"{BASE_URL}{path}", headers=HEADERS, params=params)
+            data = r.json()
+            if data.get("msg") == "KakaoMomentException":
+                extras = data.get("extras", {})
+                if "허용된 API 요청을 초과" in extras.get("message", ""):
+                    time.sleep(3 * attempt); continue
+                raise RuntimeError(f"카카오 API 에러: {data}")
+            time.sleep(DELAY)
+            return data
+        raise RuntimeError(f"재시도 초과: {path}")
+
+    def _lookup_name(entity, entity_id):
+        key = (entity, entity_id)
+        if key in name_cache: return name_cache[key]
+        try:
+            data = _get(f"/{entity}/{entity_id}", {})
+            name = data.get("name", str(entity_id)) if "name" in data else f"(삭제됨) {entity_id}"
+        except RuntimeError:
+            name = f"(삭제됨) {entity_id}"
+        name_cache[key] = name
+        return name
+
+    def _get_campaign_info(campaign_id):
+        key = ("campaign_info", campaign_id)
+        if key in name_cache: return name_cache[key]
+        try:
+            data = _get(f"/campaigns/{campaign_id}", {})
+            info = {"name": data.get("name", str(campaign_id)), "type": data.get("campaignTypeGoal", {}).get("campaignType", "")}
+        except RuntimeError:
+            info = {"name": f"(삭제됨) {campaign_id}", "type": ""}
+        name_cache[key] = info
+        return info
+
+    try:
+        rows = []
+        # 당일 데이터는 조회 불가 -> 어제까지만 (월초라 조회 범위가 없으면 빈 DataFrame 반환)
+        kakao_until = today - timedelta(days=1)
+        kakao_since = today.replace(day=1)
+        if kakao_since > kakao_until:
+            print("ℹ️ 카카오모먼트: 조회 가능한 기간 없음 (월초)")
+            return pd.DataFrame(columns=["날짜", "캠페인", "그룹", "콘텐츠", "노출", "클릭", "비용"])
+
+        date_params = {"start": kakao_since.strftime("%Y%m%d"), "end": kakao_until.strftime("%Y%m%d"), "timeUnit": "DAY", "metricsGroup": "BASIC"}
+
+        camp_report = _get("/adAccounts/report", {**date_params, "level": "CAMPAIGN"})
+        campaign_ids = sorted({d["dimensions"]["campaign_id"] for d in camp_report.get("data", [])})
+
+        for campaign_id in campaign_ids:
+            info = _get_campaign_info(campaign_id)
+            if info["type"] not in ALLOWED_CAMPAIGN_TYPES:
+                continue
+            campaign_name = info["name"]
+
+            group_report = _get("/campaigns/report", {**date_params, "campaignId": [campaign_id], "level": "AD_GROUP"})
+            adgroup_ids = sorted({d["dimensions"]["ad_group_id"] for d in group_report.get("data", []) if "ad_group_id" in d.get("dimensions", {})})
+
+            for adgroup_id in adgroup_ids:
+                adgroup_name = _lookup_name("adGroups", adgroup_id)
+                creative_report = _get("/adGroups/report", {**date_params, "adGroupId": [adgroup_id], "level": "CREATIVE"})
+
+                for d in creative_report.get("data", []):
+                    m = d["metrics"]
+                    if int(m.get("imp", 0)) <= 0:
+                        continue
+                    creative_id = d["dimensions"].get("creative_id")
+                    creative_name = _lookup_name("creatives", creative_id) if creative_id else ""
+                    rows.append([d["start"].replace("-","/"), campaign_name, adgroup_name, creative_name, m.get("imp", 0), m.get("click", 0), m.get("cost", 0)])
+
+        return pd.DataFrame(rows, columns=["날짜", "캠페인", "그룹", "콘텐츠", "노출", "클릭", "비용"])
+    except Exception as e:
+        print(f"❌ 카카오 수집 실패: {e}")
+        send_slack_message(f"❌ 카카오모먼트 수집 실패\n에러: {e}")
+        return pd.DataFrame(columns=["날짜", "캠페인", "그룹", "콘텐츠", "노출", "클릭", "비용"])
 
 # ==========================================
 # 3. 메인 실행부
 # ==========================================
 def main():
+    fetch_list = [fetch_naver, fetch_google, fetch_meta, fetch_tiktok] + ([fetch_kakao] if ENABLE_KAKAO else [])
+
     all_dfs = []
-    for f in [fetch_naver, fetch_google, fetch_meta, fetch_tiktok]:
+    for f in fetch_list:
         try:
             df = f()
             if not df.empty: all_dfs.append(df)
@@ -504,8 +592,7 @@ def main():
     final_df = pd.concat(all_dfs, ignore_index=True)
     final_df["비용"] = final_df["비용"].round(0).astype(int)
 
-    service_account_info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
-    creds = Credentials.from_service_account_info(service_account_info, scopes=["https://www.googleapis.com/auth/spreadsheets"])
+    creds = Credentials.from_service_account_info(json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]), scopes=["https://www.googleapis.com/auth/spreadsheets"])
     gc = gspread.authorize(creds)
 
     try:
@@ -527,9 +614,9 @@ def main():
                 msg = (
                     f"*[마케팅 대시보드 업데이트 알림]*\n"
                     f"안녕하세요, 금일 KDT 부트캠프 대시보드 업데이트 완료되었습니다.\n"
-                    f"4개 매체 통합 데이터 확인 및 오류 체크 부탁드립니다! @황성진\n\n"
+                    f"매체 통합 데이터 확인 및 오류 체크 부탁드립니다! @황성진\n\n"
                     f"좋은 하루 되세요! ☀️\n\n"
-                    f"• *성공여부*: 정상 ✅ (대행사 데이터 제외)\n"
+                    f"• *성공여부*: 정상 ✅ (대행사 데이터 제외{' / 카카오모먼트 포함' if ENABLE_KAKAO else ''})\n"
                     f"• *완료시간*: {now_str}\n"
                     f"• *반영행수*: {len(data_to_write)}행\n\n"
                     f"👉 <https://lookerstudio.google.com/u/0/reporting/ddd5366d-25fa-4aea-93ff-82b0f0c24450/page/p_wxro0jirzd|NEW DASHBOARD 2026 1.5ver>"

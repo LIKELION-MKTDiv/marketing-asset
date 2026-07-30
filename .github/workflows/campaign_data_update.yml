@@ -48,4 +48,6 @@ jobs:
           TIKTOK_AD_ACCOUNT_ID: ${{ secrets.TIKTOK_AD_ACCOUNT_ID }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          KAKAO_BUSINESS_TOKEN: ${{ secrets.KAKAO_BUSINESS_TOKEN }}
+          KAKAO_AD_ACCOUNT_ID: ${{ secrets.KAKAO_AD_ACCOUNT_ID }}
         run: python main.py

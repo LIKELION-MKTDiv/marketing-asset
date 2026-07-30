@@ -10,7 +10,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| 수집 대상 매체 | 네이버 SA, 구글 Ads(검색/디스플레이·동영상/PMax), 메타, 틱톡 |
+| 수집 대상 매체 | 네이버 SA, 구글 Ads(검색/디스플레이·동영상/PMax), 메타, 틱톡 (+ 카카오모먼트, 현재 비활성) |
 | 실행 방식 | `python main.py` (로컬) 또는 GitHub Actions 워크플로우 |
 | 반영 위치 | 구글시트 `1Nqsc6xvHu-V1u7jyAgPvS1il0jIs9LK6cGRs4f98Qro` → `[RAW] 매체 데이터` 시트 |
 | 실패 알림 | 슬랙 웹훅으로 자동 전송 |
@@ -40,6 +40,15 @@
 | `TIKTOK_TOKEN` / `TIKTOK_AD_ACCOUNT_ID` | 틱톡 비즈니스 API 인증 | 틱톡 비즈니스 → 액세스 토큰 관리 |
 | `SLACK_WEBHOOK_URL` | 성공/실패 알림 전송 | 슬랙 앱 관리 → Incoming Webhooks |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | 구글시트 쓰기 권한 (서비스 계정) | 구글 클라우드 콘솔 프로젝트 `ga4-bigquery-377201` → IAM 및 관리자 → 서비스 계정 → 키 |
+| `KAKAO_BUSINESS_TOKEN` / `KAKAO_AD_ACCOUNT_ID` | 카카오모먼트 API 인증 (현재 `main.py`의 `ENABLE_KAKAO = False`라 미사용, 대행사가 데이터 공급 중이기 때문) | 카카오 비즈니스 → 비즈니스 토큰 발급 (`kapi.kakao.com/v1/business/tokeninfo`로 유효성 확인 가능) |
+
+---
+
+## 카카오모먼트 관련 참고
+
+- 대행사가 카카오모먼트 데이터를 공급 중이라, `main.py` 상단의 `ENABLE_KAKAO`가 `False`로 꺼져 있습니다. 직접 수집으로 전환 시 이 값만 `True`로 바꾸면 됩니다 (Secrets는 이미 등록되어 있어 별도 작업 불필요).
+- 카카오모먼트 API는 당일 데이터 조회가 안 되고(다음날 08시까지 미확정), 캠페인/그룹/소재 이름을 개별 조회해야 하는 등 다른 매체와 API 구조가 많이 달라서, `fetch_kakao()` 함수만 별도로 재시도 로직과 3단계 드릴다운 구조로 되어 있습니다.
+- 메시지/톡채널/푸시형 캠페인(`campaignType: TALK_CHANNEL`)은 제외하고 디스플레이(`DISPLAY`)·비즈보드(`TALK_BIZ_BOARD`)만 수집하도록 필터링되어 있습니다.
 
 ---
 
