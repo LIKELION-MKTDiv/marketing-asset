@@ -1,0 +1,55 @@
+{
+  "personal_info": {
+    "name": "샘플지원자1",
+    "email": "sample.student1@example.com",
+    "phone": "01011112222"
+  },
+  "bootcamp_info": {
+    "bootcamp_name": "멋쟁이사자처럼 KDT 자바 백엔드 부트캠프 27기",
+    "track": "Backend",
+    "duration": "6개월 (960시간)",
+    "curriculum": [
+      "자바 프로그래밍 기초",
+      "객체지향 프로그래밍과 관계형 데이터베이스",
+      "Front-End Programming",
+      "Back-End Programming (Spring Boot)",
+      "DevOps",
+      "심화 프로젝트와 취업지원 프로그램"
+    ],
+    "projects": [
+      "1차 기초 프로젝트: AI 활용 카페 메뉴 관리 서비스",
+      "2차 응용 프로젝트: 유료 구독 SNS 솔루션",
+      "3차 심화 프로젝트(기업 연계): 서비스 모니터링 시스템 구축"
+    ],
+    "internship_info": "멋쟁이사자처럼 단독 인턴십 — 기획자·프론트엔드 개발자·클라우드 엔지니어 등과 협업",
+    "partnerships": ["미래내일 일경험 운영 기관 협약 기업 다수"],
+    "benefits": ["현직자 멘토링", "취업지원 프로그램", "IntelliJ·Claude AI 지원"],
+    "operation_method": "오프라인 + 실무형 팀 프로젝트",
+    "instructors": ["예시 주강사"],
+    "tech_stack": ["Java", "Spring Boot", "React", "Docker", "AWS"],
+    "available_fields": ["백엔드 개발"],
+    "raw": {}
+  },
+  "essays": [
+    {
+      "question": "지원 동기를 작성해주세요.",
+      "answer": "예시 자기소개서 발췌 — 학부 시절 팀 프로젝트에서 백엔드 API 설계를 담당하며 서버 개발에 흥미를 느꼈고, 체계적인 실무 교육을 통해 정식으로 백엔드 개발자로 전환하고자 지원하였습니다. (더미 데이터)",
+      "extracted_education": "OO대학교 컴퓨터공학과 학사 졸업",
+      "extracted_experience": "학내 팀 프로젝트 2건, 교내 해커톤 참가",
+      "extracted_skills": ["Java", "MySQL", "Git"],
+      "extracted_motivation": "체계적인 실무형 백엔드 교육을 통한 정식 개발자 전환",
+      "extracted_goals": "실무 수준의 서버 개발 역량 확보 후 백엔드 개발자로 취업"
+    },
+    {
+      "question": "본인의 강점과 이를 발휘한 경험을 작성해주세요.",
+      "answer": "예시 자기소개서 발췌 — 새로운 기술을 빠르게 학습하는 편이며, 교내 스터디를 직접 개설해 학기 내내 운영한 경험이 있습니다. (더미 데이터)",
+      "extracted_education": "",
+      "extracted_experience": "교내 알고리즘 스터디 운영 (8개월)",
+      "extracted_skills": ["자기주도 학습", "커뮤니케이션"],
+      "extracted_motivation": "",
+      "extracted_goals": ""
+    }
+  ],
+  "extraction_notes": ["더미 데이터 — 렌더 데모 전용, 실제 지원자 아님"],
+  "raw_application": {}
+}

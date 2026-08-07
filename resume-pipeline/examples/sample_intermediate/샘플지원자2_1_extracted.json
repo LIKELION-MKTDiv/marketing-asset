@@ -1,0 +1,49 @@
+{
+  "personal_info": {
+    "name": "샘플지원자2",
+    "email": "sample.career2@example.com",
+    "phone": "01033334444"
+  },
+  "bootcamp_info": {
+    "bootcamp_name": "멋쟁이사자처럼 KDT 자바 백엔드 부트캠프 27기",
+    "track": "Backend",
+    "duration": "6개월 (960시간)",
+    "curriculum": [
+      "자바 프로그래밍 기초",
+      "객체지향 프로그래밍과 관계형 데이터베이스",
+      "Front-End Programming",
+      "Back-End Programming (Spring Boot)",
+      "DevOps",
+      "심화 프로젝트와 취업지원 프로그램"
+    ],
+    "projects": [
+      "1차 기초 프로젝트: AI 활용 카페 메뉴 관리 서비스",
+      "2차 응용 프로젝트: 유료 구독 SNS 솔루션",
+      "3차 심화 프로젝트(기업 연계): 서비스 모니터링 시스템 구축"
+    ],
+    "internship_info": "멋쟁이사자처럼 단독 인턴십 — 기획자·프론트엔드 개발자·클라우드 엔지니어 등과 협업",
+    "partnerships": ["미래내일 일경험 운영 기관 협약 기업 다수"],
+    "benefits": ["현직자 멘토링", "취업지원 프로그램", "IntelliJ·Claude AI 지원"],
+    "operation_method": "오프라인 + 실무형 팀 프로젝트",
+    "instructors": ["예시 주강사"],
+    "tech_stack": ["Java", "Spring Boot", "Docker", "AWS"],
+    "available_fields": ["백엔드 개발"],
+    "raw": {}
+  },
+  "essays": [
+    {
+      "question": "지원 동기를 작성해주세요.",
+      "answer": "예시 자기소개서 발췌 — 비IT 직군에서 3년간 근무하며 사내 업무 자동화 도구를 스스로 만들어보면서 개발자로의 전환을 결심하였습니다. 학력 관련 자기소개서 문항에는 별도로 응답하지 않았습니다. (더미 데이터)",
+      "extracted_education": "",
+      "extracted_experience": "비IT 직군 3년 근무, 사내 업무 자동화 도구 자체 제작 경험",
+      "extracted_skills": ["엑셀 매크로", "Python 기초"],
+      "extracted_motivation": "실무 자동화 경험을 계기로 정식 백엔드 개발자로 커리어 전환",
+      "extracted_goals": "비전공 배경을 극복하고 실무 수준 백엔드 개발 역량 확보"
+    }
+  ],
+  "extraction_notes": [
+    "더미 데이터 — 렌더 데모 전용, 실제 지원자 아님",
+    "자기소개서에 학력 관련 언급 없음 — 학력/배경 섹션 생략 케이스 시연용"
+  ],
+  "raw_application": {}
+}

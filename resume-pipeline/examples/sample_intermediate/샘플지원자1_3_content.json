@@ -1,0 +1,36 @@
+{
+  "headline": "성장 지향형 신입 백엔드 개발자 (더미 데이터)",
+  "career_objective": "체계적인 백엔드 실무 교육을 통해 Java·Spring Boot 기반 서버 개발 역량을 확보하였습니다. 팀 프로젝트에서 요구사항 분석부터 배포까지 전 과정을 경험하며 협업형 개발 프로세스에 익숙해졌습니다. 앞으로는 안정적인 서비스 운영과 성능 최적화에 기여하는 백엔드 개발자로 성장하고자 합니다. (본 문단은 렌더 데모용 더미 텍스트입니다.)",
+  "bootcamp_highlight": "6개월 심화 과정에서 기업 연계 프로젝트를 포함한 3단계 프로젝트를 완주하였습니다.",
+  "template_type": "student",
+  "sections": [
+    {
+      "section_id": "tech_stack",
+      "title": "기술 스택",
+      "content": "**Backend**\nJava, Spring Boot, JPA, MySQL, QueryDSL\n\n**Frontend**\nHTML, CSS, JavaScript, React\n\n**DevOps & Infra**\nDocker, GitHub Actions, AWS, Nginx",
+      "order": 2,
+      "is_projected": true
+    },
+    {
+      "section_id": "portfolio_projects",
+      "title": "프로젝트 포트폴리오",
+      "content": "V2 렌더러는 이 섹션 대신 과정 공통 고정 블록(templates/bootcamp_common/{class_id}.md '프로젝트 경험')을 렌더합니다 — 이 필드는 참고용이며 실제 출력에는 반영되지 않습니다. (더미 데이터)",
+      "order": 3,
+      "is_projected": true
+    },
+    {
+      "section_id": "core_competencies",
+      "title": "핵심 역량 및 활동",
+      "content": "- 자기주도적 학습 능력: 부트캠프 심화 프로젝트에서 새로운 기술 스택(Kubernetes, Prometheus)을 짧은 기간 내 학습하여 프로젝트에 적용하였습니다 (수료 후 예상)\n- 협업 커뮤니케이션: 팀 스크럼과 데일리 코드 리뷰를 통해 의견을 논리적으로 조율하는 역량을 길렀습니다 (수료 후 예상)\n\n**프로젝트 활동**\n- 멋쟁이사자처럼 KDT 자바 백엔드 27기 팀 프로젝트 3건 참여\n- 교내 알고리즘 스터디 8개월 운영",
+      "order": 4,
+      "is_projected": true
+    },
+    {
+      "section_id": "education",
+      "title": "학력",
+      "content": "**OO대학교** 컴퓨터공학과 학사 졸업 (2022.02)\n- 데이터베이스 및 알고리즘 전공 심화 과정 이수 (더미 데이터)",
+      "order": 5,
+      "is_projected": false
+    }
+  ]
+}

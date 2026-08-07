@@ -22,8 +22,13 @@ def run_single(
     essay_columns: list[str],
     output_dir: Path,
     log_lines: list[str],
+    class_id: str | None = None,
 ) -> dict[str, Any]:
-    """단일 지원자에 대해 파이프라인 실행 → 미래이력서(MD+HTML) 생성."""
+    """단일 지원자에 대해 파이프라인 실행 → 미래이력서(MD+HTML) 생성.
+
+    class_id: templates/bootcamp_common/{class_id}.md 존재 시 부트캠프 교육 이수 내역 등
+    5개 섹션을 LLM 생성 대신 과정 공통 고정 블록으로 병합한다(V2). 미지정(None) 시 기존 동작 그대로.
+    """
     t0 = time.time()
     intermediate_dir = output_dir / "intermediate"
     intermediate_dir.mkdir(parents=True, exist_ok=True)
@@ -56,11 +61,11 @@ def run_single(
     prof_dict = profile.to_dict()
     content_dict = resume_content.to_dict()
 
-    md_text = render_md(ext_dict, prof_dict, content_dict)
+    md_text = render_md(ext_dict, prof_dict, content_dict, class_id=class_id)
     md_path = output_dir / f"{name}_미래이력서.md"
     md_path.write_text(md_text, encoding="utf-8")
 
-    html_text = render_html(ext_dict, prof_dict, content_dict)
+    html_text = render_html(ext_dict, prof_dict, content_dict, class_id=class_id)
     html_path = output_dir / f"{name}_미래이력서.html"
     html_path.write_text(html_text, encoding="utf-8")
 
@@ -104,6 +109,7 @@ def run_batch(
     personal_info_mapping: dict[str, str | None],
     essay_columns: list[str],
     output_base: Path | None = None,
+    class_id: str | None = None,
 ) -> Path:
     """배치 처리: 전체 지원자에 대해 파이프라인 실행."""
     run_date = datetime.now().strftime("%Y-%m-%d")
@@ -152,6 +158,7 @@ def run_batch(
                 bootcamp_raw, applicant_raw,
                 personal_info_mapping, essay_columns,
                 output_dir, log_lines,
+                class_id=class_id,
             )
             results.append(result)
             success_count += 1

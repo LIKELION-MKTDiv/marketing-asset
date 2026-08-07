@@ -1,0 +1,29 @@
+{
+  "headline": "비IT 실무 경험을 갖춘 커리어 전환형 백엔드 개발자 (더미 데이터)",
+  "career_objective": "비IT 직군에서 3년간 근무하며 반복 업무를 자동화 도구로 직접 해결한 경험을 계기로 백엔드 개발자로 전환을 결심하였습니다. 부트캠프에서 Java·Spring Boot 기반 서버 개발 역량을 체계적으로 습득하였습니다. 실무에서 쌓은 문제 정의 능력과 새로 익힌 개발 역량을 결합해 안정적인 서비스를 만드는 개발자로 성장하고자 합니다. (본 문단은 렌더 데모용 더미 텍스트입니다.)",
+  "bootcamp_highlight": "비전공 배경에서 출발해 기업 연계 프로젝트까지 3단계 프로젝트를 완주하였습니다.",
+  "template_type": "career_changer",
+  "sections": [
+    {
+      "section_id": "tech_stack",
+      "title": "기술 스택",
+      "content": "### Backend\n- Java\n- Spring Boot\n- MySQL\n\n### DevOps & Infra\n- Docker\n- GitHub Actions\n- AWS",
+      "order": 2,
+      "is_projected": true
+    },
+    {
+      "section_id": "portfolio_projects",
+      "title": "프로젝트 포트폴리오",
+      "content": "V2 렌더러는 이 섹션 대신 과정 공통 고정 블록(templates/bootcamp_common/{class_id}.md '프로젝트 경험')을 렌더합니다 — 이 필드는 참고용이며 실제 출력에는 반영되지 않습니다. (더미 데이터)",
+      "order": 3,
+      "is_projected": true
+    },
+    {
+      "section_id": "core_competencies",
+      "title": "핵심 역량 및 활동",
+      "content": "- 문제 정의 능력: 비IT 직군 재직 중 반복 업무를 발견하고 자동화 도구를 직접 설계·제작한 경험이 있습니다\n- 실무 커뮤니케이션: 비개발 직군과의 협업 경험을 바탕으로 기획·현직자 멘토와의 소통에 강점을 보였습니다 (수료 후 예상)\n\n**프로젝트 활동**\n- 멋쟁이사자처럼 KDT 자바 백엔드 27기 팀 프로젝트 3건 참여",
+      "order": 4,
+      "is_projected": true
+    }
+  ]
+}
