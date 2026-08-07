@@ -3,16 +3,20 @@
 KDT 부트캠프 지원자의 자기소개서 + 부트캠프 정보를 조합해 "미래이력서(MD + HTML)"를 생성하는
 파이프라인. 이 fork는 렌더러(Phase 4) V2 구조를 공유용으로 정리한 버전이다.
 
-## 3줄 재현 (더미 데이터로 즉시 확인)
+## 즉시 재현 (더미 데이터 · 설치 불필요)
 
 ```bash
 git clone <this-repo>
 cd resume-pipeline
-pip install -r requirements.txt
-python examples/render_demo.py
+python examples/render_demo.py     # 순수 stdlib — pip install 불필요
 ```
 
 `examples/output/`에 더미 지원자 2명의 미래이력서(HTML+MD, 총 4파일)가 생성된다.
+`render_demo`는 파이썬 표준 라이브러리만 사용하므로 **클론 직후 설치 없이 바로 실행**되며,
+**클론할 때마다 결과가 바이트 단위로 동일**하다(결정적).
+
+> `requirements.txt`(anthropic·pandas 등)는 아래 **풀 파이프라인**(Phase 1~3, Claude 호출)을
+> 실제로 돌릴 때만 필요하다. 위 데모 재현에는 필요 없다.
 
 ## 왜 재현되는가 — 렌더는 결정적(Deterministic)이다
 
