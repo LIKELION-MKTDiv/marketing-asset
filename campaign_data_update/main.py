@@ -411,19 +411,19 @@ def fetch_google():
         rows = []
         q_since, q_until = SINCE.replace("/","-"), UNTIL.replace("/","-")
 
-        q_kw = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_criterion.keyword.text, metrics.impressions, metrics.clicks, metrics.cost_micros FROM keyword_view WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%bejv26%' AND campaign.name NOT LIKE '%cld08%'"
+        q_kw = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_criterion.keyword.text, metrics.impressions, metrics.clicks, metrics.cost_micros FROM keyword_view WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%mtp%'"
         for r in run_gaql(q_kw):
             camp_name, group_name = r.campaign.name, r.ad_group.name
             if camp_name == "kdtbejv23_google_search_2601_new_v2" and group_name == "new_v2_1834_pcmo":
                 group_name = "new_v2_4_developer_1834_pcmo"
             rows.append([str(r.segments.date).replace("-","/"), camp_name, group_name, r.ad_group_criterion.keyword.text, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
-        q_ad = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_ad.ad.name, ad_group_ad.ad.id, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group_ad WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type NOT IN ('SEARCH', 'PERFORMANCE_MAX') AND campaign.name NOT LIKE '%bejv26%' AND campaign.name NOT LIKE '%cld08%'"
+        q_ad = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_ad.ad.name, ad_group_ad.ad.id, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group_ad WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type NOT IN ('SEARCH', 'PERFORMANCE_MAX') AND campaign.name NOT LIKE '%mtp%'"
         for r in run_gaql(q_ad):
             content = r.ad_group_ad.ad.name.strip() if getattr(r.ad_group_ad.ad, "name", None) else f"ad_{r.ad_group_ad.ad.id}"
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, r.ad_group.name, content, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
-        q_pmax = f"SELECT segments.date, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM campaign WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'PERFORMANCE_MAX' AND campaign.name NOT LIKE '%bejv26%' AND campaign.name NOT LIKE '%cld08%'"
+        q_pmax = f"SELECT segments.date, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM campaign WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'PERFORMANCE_MAX' AND campaign.name NOT LIKE '%mtp%'"
         for r in run_gaql(q_pmax):
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, "PMax", "PMax", int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
