@@ -400,7 +400,7 @@ def fetch_naver():
         return pd.DataFrame(columns=["날짜", "캠페인", "그룹", "콘텐츠", "노출", "클릭", "비용"])
 
 def fetch_google():
-    print("🚀 구글 Ads 수집 중 (gm 수집 허용, bejv26 및 cld08 제외)...")
+    print("🚀 구글 Ads 수집 중 (gm 수집 허용, mtp 제외, 삭제키워드 보정 포함)...")
     try:
         VAT = 1.1; config = {"developer_token": KEYS["GOOGLE"]["developer_token"], "client_id": KEYS["GOOGLE"]["client_id"], "client_secret": KEYS["GOOGLE"]["client_secret"], "refresh_token": KEYS["GOOGLE"]["refresh_token"], "login_customer_id": KEYS["GOOGLE"]["login_customer_id"], "use_proto_plus": True}
         client = GoogleAdsClient.load_from_dict(config); ga_service = client.get_service("GoogleAdsService")
@@ -411,24 +411,63 @@ def fetch_google():
         rows = []
         q_since, q_until = SINCE.replace("/","-"), UNTIL.replace("/","-")
 
+        # 1. 검색광고 키워드 단위 수집
+        kw_sum_by_day_ag = {}
         q_kw = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_criterion.keyword.text, metrics.impressions, metrics.clicks, metrics.cost_micros FROM keyword_view WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%mtp%'"
         for r in run_gaql(q_kw):
             camp_name, group_name = r.campaign.name, r.ad_group.name
             if camp_name == "kdtbejv23_google_search_2601_new_v2" and group_name == "new_v2_1834_pcmo":
                 group_name = "new_v2_4_developer_1834_pcmo"
-            rows.append([str(r.segments.date).replace("-","/"), camp_name, group_name, r.ad_group_criterion.keyword.text, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
+            d_sheet = str(r.segments.date).replace("-","/")
+            cost = r.metrics.cost_micros / 1000000.0
+            rows.append([d_sheet, camp_name, group_name, r.ad_group_criterion.keyword.text, int(r.metrics.impressions), int(r.metrics.clicks), cost*VAT])
+            key = (d_sheet, camp_name, group_name)
+            if key not in kw_sum_by_day_ag:
+                kw_sum_by_day_ag[key] = {"impCnt": 0, "clkCnt": 0, "cost": 0}
+            kw_sum_by_day_ag[key]["impCnt"] += int(r.metrics.impressions)
+            kw_sum_by_day_ag[key]["clkCnt"] += int(r.metrics.clicks)
+            kw_sum_by_day_ag[key]["cost"] += cost
 
+        # 💡 2. 검색광고 그룹 단위 총액과 대조해서 삭제/변경된 키워드 등 누락 비용 보정
+        #    keyword_view는 삭제되었거나 매치타입이 바뀐(=내부적으로 삭제+재생성되는) 키워드의 비용을 누락시키는 경우가 있어,
+        #    ad_group 리소스 기준 실제 총액과 차이가 날 수 있음
+        recon_count = 0
+        recon_cost_total = 0
+        q_ag = f"SELECT segments.date, campaign.name, ad_group.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%mtp%'"
+        for r in run_gaql(q_ag):
+            d_sheet = str(r.segments.date).replace("-","/")
+            key = (d_sheet, r.campaign.name, r.ad_group.name)
+            ag_cost = r.metrics.cost_micros / 1000000.0
+            ag_imp, ag_clk = int(r.metrics.impressions), int(r.metrics.clicks)
+            kw_sum = kw_sum_by_day_ag.get(key, {"impCnt": 0, "clkCnt": 0, "cost": 0})
+
+            diff_cost = round(ag_cost - kw_sum["cost"], 0)
+            diff_imp = max(ag_imp - kw_sum["impCnt"], 0)
+            diff_clk = max(ag_clk - kw_sum["clkCnt"], 0)
+
+            if abs(diff_cost) >= 1:
+                rows.append([d_sheet, r.campaign.name, r.ad_group.name, "[삭제키워드_보정]", diff_imp, diff_clk, diff_cost*VAT])
+                recon_count += 1
+                recon_cost_total += diff_cost
+
+        if recon_count:
+            print(f"✅ 구글 SA 삭제키워드 보정: {recon_count}건, 보정 비용 합계(VAT 미포함): {recon_cost_total:,.0f}")
+
+        # 3. 디스플레이/동영상 광고 수집
         q_ad = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_ad.ad.name, ad_group_ad.ad.id, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group_ad WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type NOT IN ('SEARCH', 'PERFORMANCE_MAX') AND campaign.name NOT LIKE '%mtp%'"
         for r in run_gaql(q_ad):
             content = r.ad_group_ad.ad.name.strip() if getattr(r.ad_group_ad.ad, "name", None) else f"ad_{r.ad_group_ad.ad.id}"
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, r.ad_group.name, content, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
+        # 4. 실적 최대화 광고 수집
         q_pmax = f"SELECT segments.date, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM campaign WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'PERFORMANCE_MAX' AND campaign.name NOT LIKE '%mtp%'"
         for r in run_gaql(q_pmax):
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, "PMax", "PMax", int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
         return pd.DataFrame(rows, columns=["날짜","캠페인","그룹","콘텐츠","노출","클릭","비용"])
-    except: return pd.DataFrame()
+    except Exception as e:
+        print(f"❌ 구글 수집 실패: {e}")
+        return pd.DataFrame()
 
 def fetch_meta():
     print("🚀 메타 Ads 수집 중 (소재명 보정 및 bejv26/cld08 필터링)...")
