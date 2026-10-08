@@ -470,7 +470,7 @@ def fetch_google():
         return pd.DataFrame()
 
 def fetch_meta():
-    print("🚀 메타 Ads 수집 중 (소재명 보정 및 bejv26/cld08 필터링)...")
+    print("🚀 메타 Ads 수집 중 (소재명 보정)...")
     try:
         url = f"https://graph.facebook.com/{KEYS['META']['API_VER']}/{KEYS['META']['AD_ACCOUNT_ID']}/insights"
         params = {"access_token": KEYS["META"]["TOKEN"], "level": "ad", "time_increment": 1, "time_range": json.dumps({"since": SINCE.replace("/","-"), "until": UNTIL.replace("/","-")}), "fields": "date_start,campaign_name,adset_name,ad_name,impressions,clicks,spend", "limit": 5000}
@@ -483,12 +483,11 @@ def fetch_meta():
             data.append([x["date_start"].replace("-","/"), camp_name, x.get("adset_name", ""), ad_name, int(x.get("impressions", 0)), int(x.get("clicks", 0)), float(x.get("spend", 0))])
 
         df = pd.DataFrame(data, columns=["날짜","캠페인","그룹","콘텐츠","노출","클릭","비용"])
-        df = df[~df["캠페인"].str.lower().str.contains("bejv26|cld08", na=False)]
         return df
     except: return pd.DataFrame()
 
 def fetch_tiktok():
-    print(f"🚀 틱톡 Ads 수집 및 소재명 매핑 중 (bejv26/cld08 필터링)... ({SINCE} ~ {UNTIL})")
+    print(f"🚀 틱톡 Ads 수집 및 소재명 매핑 중... ({SINCE} ~ {UNTIL})")
     try:
         headers = {"Access-Token": KEYS["TIKTOK"]["TOKEN"]}
         adv_id = KEYS["TIKTOK"]["AD_ACCOUNT_ID"]
@@ -525,7 +524,6 @@ def fetch_tiktok():
             rows.append([clean_date, names["campaign_name"], names["adgroup_name"], names["ad_name"], impressions, int(m.get("clicks", 0)), float(m.get("spend", 0))])
 
         df = pd.DataFrame(rows, columns=["날짜", "캠페인", "그룹", "콘텐츠", "노출", "클릭", "비용"])
-        df = df[~df["캠페인"].str.lower().str.contains("bejv26|cld08", na=False)]
         return df
     except: return pd.DataFrame()
 
