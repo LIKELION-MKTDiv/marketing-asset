@@ -433,7 +433,7 @@ def fetch_google():
         #    ad_group 리소스 기준 실제 총액과 차이가 날 수 있음
         recon_count = 0
         recon_cost_total = 0
-        q_ag = f"SELECT segments.date, campaign.name, ad_group.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%mtp%'"
+        q_ag = f"SELECT segments.date, campaign.name, ad_group.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%mtp%' AND campaign.name NOT LIKE '%kdtbejv29_google_pmax_conversion_2610_new%' AND campaign.name NOT LIKE '%kdtbejv29_google_demandgen_conversion_2610_new%'"
         for r in run_gaql(q_ag):
             d_sheet = str(r.segments.date).replace("-","/")
             key = (d_sheet, r.campaign.name, r.ad_group.name)
@@ -454,7 +454,7 @@ def fetch_google():
             print(f"✅ 구글 SA 삭제키워드 보정: {recon_count}건, 보정 비용 합계(VAT 미포함): {recon_cost_total:,.0f}")
 
         # 3. 디스플레이/동영상 광고 수집
-        q_ad = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_ad.ad.name, ad_group_ad.ad.id, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group_ad WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type NOT IN ('SEARCH', 'PERFORMANCE_MAX') AND campaign.name NOT LIKE '%mtp%'"
+        q_ad = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_ad.ad.name, ad_group_ad.ad.id, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ad_group_ad WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type NOT IN ('SEARCH', 'PERFORMANCE_MAX') AND campaign.name NOT LIKE '%mtp%' AND campaign.name NOT LIKE '%kdtbejv29_google_pmax_conversion_2610_new%' AND campaign.name NOT LIKE '%kdtbejv29_google_demandgen_conversion_2610_new%'"
         for r in run_gaql(q_ad):
             content = r.ad_group_ad.ad.name.strip() if getattr(r.ad_group_ad.ad, "name", None) else f"ad_{r.ad_group_ad.ad.id}"
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, r.ad_group.name, content, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
