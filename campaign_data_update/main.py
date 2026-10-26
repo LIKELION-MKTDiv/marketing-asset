@@ -413,7 +413,7 @@ def fetch_google():
 
         # 1. 검색광고 키워드 단위 수집
         kw_sum_by_day_ag = {}
-        q_kw = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_criterion.keyword.text, metrics.impressions, metrics.clicks, metrics.cost_micros FROM keyword_view WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%mtp%'"
+        q_kw = f"SELECT segments.date, campaign.name, ad_group.name, ad_group_criterion.keyword.text, metrics.impressions, metrics.clicks, metrics.cost_micros FROM keyword_view WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'SEARCH' AND campaign.name NOT LIKE '%kdtall%' AND campaign.name NOT LIKE '%mtp%' AND campaign.name NOT LIKE '%kdtbejv29_google_pmax_conversion_2610_new%' AND campaign.name NOT LIKE '%kdtbejv29_google_demandgen_conversion_2610_new%'"
         for r in run_gaql(q_kw):
             camp_name, group_name = r.campaign.name, r.ad_group.name
             if camp_name == "kdtbejv23_google_search_2601_new_v2" and group_name == "new_v2_1834_pcmo":
