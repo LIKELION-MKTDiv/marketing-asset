@@ -459,8 +459,8 @@ def fetch_google():
             content = r.ad_group_ad.ad.name.strip() if getattr(r.ad_group_ad.ad, "name", None) else f"ad_{r.ad_group_ad.ad.id}"
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, r.ad_group.name, content, int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
-        # 4. 실적 최대화 광고 수집
-        q_pmax = f"SELECT segments.date, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM campaign WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'PERFORMANCE_MAX' AND campaign.name NOT LIKE '%mtp%'"
+        # 4. 실적 최대화 광고 수집 (✅ bejv29 pmax 제외 조건 추가)
+        q_pmax = f"SELECT segments.date, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros FROM campaign WHERE segments.date BETWEEN '{q_since}' AND '{q_until}' AND metrics.cost_micros > 0 AND campaign.advertising_channel_type = 'PERFORMANCE_MAX' AND campaign.name NOT LIKE '%mtp%' AND campaign.name NOT LIKE '%kdtbejv29_google_pmax_conversion_2610_new%'"
         for r in run_gaql(q_pmax):
             rows.append([str(r.segments.date).replace("-","/"), r.campaign.name, "PMax", "PMax", int(r.metrics.impressions), int(r.metrics.clicks), (r.metrics.cost_micros/1000000.0)*VAT])
 
