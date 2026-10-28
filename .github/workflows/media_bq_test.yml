@@ -1,0 +1,46 @@
+name: "[TEST] Media Data to BigQuery"
+
+on:
+  workflow_dispatch:   # 수동 실행 버튼으로만 실행 (자동 스케줄 없음)
+
+jobs:
+  run-bq-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: campaign_data_update
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install google-cloud-bigquery pyarrow
+
+      - name: Run BigQuery test script
+        env:
+          NAVER_CUSTOMER_ID: ${{ secrets.NAVER_CUSTOMER_ID }}
+          NAVER_API_KEY: ${{ secrets.NAVER_API_KEY }}
+          NAVER_SECRET: ${{ secrets.NAVER_SECRET }}
+          GOOGLE_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_DEVELOPER_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_LOGIN_CUSTOMER_ID }}
+          GOOGLE_CUSTOMER_ID: ${{ secrets.GOOGLE_CUSTOMER_ID }}
+          META_TOKEN: ${{ secrets.META_TOKEN }}
+          META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
+          META_API_VER: ${{ secrets.META_API_VER }}
+          TIKTOK_TOKEN: ${{ secrets.TIKTOK_TOKEN }}
+          TIKTOK_AD_ACCOUNT_ID: ${{ secrets.TIKTOK_AD_ACCOUNT_ID }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          KAKAO_BUSINESS_TOKEN: ${{ secrets.KAKAO_BUSINESS_TOKEN }}
+          KAKAO_AD_ACCOUNT_ID: ${{ secrets.KAKAO_AD_ACCOUNT_ID }}
+        run: python main_bq_test.py
