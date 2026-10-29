@@ -1,7 +1,10 @@
 name: "[TEST] Media Data to BigQuery"
 
 on:
-  workflow_dispatch:   # 수동 실행 버튼으로만 실행 (자동 스케줄 없음)
+  workflow_dispatch:              # 수동 실행 버튼 (계속 사용 가능)
+  schedule:
+    - cron: '30 11 * * *'         # 한국 시간 20:30 (UTC 11:30)
+    - cron: '30 17 * * *'         # 한국 시간 02:30 (UTC 17:30)
 
 jobs:
   run-bq-test:
