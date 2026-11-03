@@ -646,7 +646,8 @@ def main():
             ws.update(range_name="E2", values=data_to_write, value_input_option='USER_ENTERED')
             print(f"✅ 안전 업데이트 완료! {len(data_to_write)}행 반영.")
 
-            if now_kst.hour in [8, 9]:
+            # 💡 GitHub 자체 스케줄(schedule)은 지연되어 8~9시에 걸릴 수 있으므로 슬랙 발송 제외 (cron-job.org/수동 실행만 발송)
+            if now_kst.hour in [8, 9] and os.environ.get("GITHUB_EVENT_NAME") != "schedule":
                 now_str = now_kst.strftime('%Y-%m-%d %H:%M')
                 msg = (
                     f"*[마케팅 대시보드 업데이트 알림]*\n"
@@ -660,7 +661,7 @@ def main():
                 )
                 send_slack_message(msg)
             else:
-                print(f"ℹ️ {now_kst.hour}시는 정기 알림 시간이 아니므로 슬랙은 생략합니다.")
+                print(f"ℹ️ 슬랙 생략 ({now_kst.hour}시 / 실행 방식: {os.environ.get('GITHUB_EVENT_NAME', 'unknown')})")
 
     except Exception as e:
         send_slack_message(f"❌ 대시보드 업데이트 실패\n에러: {e}")
