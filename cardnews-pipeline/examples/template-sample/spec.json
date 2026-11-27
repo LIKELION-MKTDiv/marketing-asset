@@ -1,0 +1,42 @@
+{
+  "title": "템플릿 샘플 (질문형 커버 → 정답 → 근거 차트 → 주의 → CTA)",
+  "assets": {},
+  "slides": [
+    {
+      "id": "01_title",
+      "bg": {"kind": "gradient", "value": "linear-gradient(200deg, #24345C 0%, #101828 70%)"},
+      "next": "정답은 다음 장에서",
+      "html": "<div class='at' style='bottom:190px'><span class='pill' style='margin-bottom:34px'>시리즈 이름</span><div class='t-cover'>질문형 커버,<br>정답은<br><span class='hl'>이것</span>일까요?</div><div class='t-sub' style='margin-top:30px;opacity:.88'>근거 자료로 본 진짜 순위,<br>그리고 우리 이야기</div></div>"
+    },
+    {
+      "id": "02_answer",
+      "bg": {"kind": "color", "value": "bg"},
+      "next": "1위부터 4위까지",
+      "html": "<div class='t-h'>1위는 <span class='hl'>A</span>였어요</div><div class='t-sub' style='margin-top:20px;opacity:.88'>예시 데이터, 출처는 실제 콘텐츠에서 꼭 적어요</div><div class='panel' style='margin-top:80px;padding:70px 10px 50px'>{{chart:gauge}}</div>"
+    },
+    {
+      "id": "03_rank",
+      "bg": {"kind": "color", "value": "bg"},
+      "next": "그런데, 잠깐만요",
+      "html": "<div class='t-h'>항목별 비율<br>1위부터 4위까지</div><div class='panel' style='margin-top:56px;padding:56px 50px 40px'>{{chart:rank}}</div><div class='t-note' style='margin-top:30px;opacity:.8'>출처: 실제 콘텐츠에서는 원문 출처를 여기에 적어요</div>"
+    },
+    {
+      "id": "04_caution",
+      "bg": {"kind": "color", "value": "bg"},
+      "next": "우리 기준으로 고르기",
+      "html": "<div class='at' style='top:380px;text-align:center'><span class='num'>!</span><div class='t-h' style='margin-top:40px'>“모두에게 이 순서라는<br>뜻은 <span class='hl2'>아니에요</span>”</div><div class='t-body' style='margin-top:44px;opacity:.85'>순위는 참고만 하고<br>내 상황에 맞게 판단해요</div></div>"
+    },
+    {
+      "id": "05_cta",
+      "bg": {"kind": "gradient", "value": "linear-gradient(180deg, #101828 0%, #1E2A44 100%)"},
+      "html": "<div class='at' style='bottom:190px'><div class='t-outro'>지금 바로<br>확인해 보세요</div><div class='btn' style='margin-top:44px;color:var(--c-secondary)'>프로필 링크에서 바로 시작</div><div class='t-sub' style='margin-top:26px;text-align:center;font-size:32px'>또는 검색창에 「브랜드명」 검색</div></div>"
+    }
+  ],
+  "charts": {
+    "gauge": {"type": "gauge", "unit": "%", "ink": "ink", "track": "track",
+              "items": [{"value": 34, "label": "A · 1위", "color": "primary"}, {"value": 15, "label": "C · 3위", "color": "secondary"}]},
+    "rank": {"type": "bars", "rows": [["A", 34], ["B", 17], ["C", 15], ["D", 13]], "max": 40, "unit": "%",
+             "ticks": [0, 10, 20, 30, 40], "highlight": [0], "color": "primary", "color_rest": "secondary",
+             "ink": "ink", "sub": "ink-2", "grid": "track"}
+  }
+}
