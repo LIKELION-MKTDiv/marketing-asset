@@ -1,0 +1,40 @@
+{
+  "title": "멋사 브랜드 샘플 (부트캠프 커리큘럼 반전형 구조, 예시 카피)",
+  "slides": [
+    {
+      "id": "01_cover",
+      "bg": {"kind": "gradient", "value": "radial-gradient(circle at 82% 18%, rgba(255,96,0,.38), transparent 52%), #1C1C1C"},
+      "logo": "white",
+      "html": "<div class='t-kicker'>OO 부트캠프 · 22주</div><div class='t-cover' style='margin-top:40px'>코딩 캠프인 줄 알았는데,<br>커리큘럼 보고<br>진짜 놀랐어요</div><div class='at' style='bottom:190px;text-align:right'><span class='sticker' style='font-size:35px'>옆으로 넘겨보세요 →</span></div>"
+    },
+    {
+      "id": "02_problem",
+      "bg": {"kind": "gradient", "value": "linear-gradient(160deg, #2A2A2A 0%, #1C1C1C 60%)"},
+      "logo": "none",
+      "html": "<div class='t-kicker'>STEP 1 · 1~6주차</div><div class='t-h' style='margin-top:34px'>커리큘럼표 첫 줄은<br>기초 개발,<br>그다음은 프레임워크</div><div class='t-sub hl' style='margin-top:40px'>핵심 주제는 아직 안 나왔어요</div>"
+    },
+    {
+      "id": "03_data",
+      "bg": {"kind": "color", "value": "#1C1C1C"},
+      "logo": "none",
+      "html": "<div class='t-h'>22주를 나눠 보면</div><div class='t-sub hl' style='margin-top:20px'>개발은 6주, 나머지 16주는 실무 단계예요</div><div class='panel' style='margin-top:60px;padding:56px 50px 36px'>{{chart:weeks}}</div><div class='t-label' style='margin-top:30px'>예시 데이터</div>"
+    },
+    {
+      "id": "04_brand_cta",
+      "bg": {"kind": "color", "value": "primary"},
+      "logo": "black",
+      "html": "<div class='at' style='bottom:190px'><div class='t-outro-sub ink'>단순히 코드만 짜는 사람이 아닌</div><div class='t-outro ink' style='margin-top:16px'>운영까지 책임지는<br>엔지니어를 만듭니다.</div></div>"
+    },
+    {
+      "id": "05_end_instagram",
+      "bg": {"kind": "gradient", "value": "radial-gradient(circle at 50% 60%, rgba(255,96,0,.30), transparent 55%), #1C1C1C"},
+      "logo": "white",
+      "html": "<div class='t-outro' style='margin-top:66px'>이 길을 꿈꾸는<br>친구에게 공유해 보세요!</div><div class='at t-sub hl' style='bottom:200px'>저장해두고 다시 보기</div>"
+    }
+  ],
+  "charts": {
+    "weeks": {"type": "bars", "rows": [["개발", 6], ["배포", 5], ["운영", 6], ["보안", 5]], "max": 8, "unit": "주",
+              "ticks": [0, 2, 4, 6, 8], "highlight": [0], "color": "primary", "color_rest": "secondary",
+              "ink": "ink", "sub": "ink-2", "grid": "track"}
+  }
+}

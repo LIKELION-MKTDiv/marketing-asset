@@ -1,0 +1,4 @@
+playwright>=1.40
+pillow>=10.0
+numpy>=1.24
+# 누끼(cutout) 쓸 때만: rembg>=2.0

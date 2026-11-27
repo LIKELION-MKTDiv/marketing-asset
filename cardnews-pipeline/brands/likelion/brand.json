@@ -1,0 +1,48 @@
+{
+  "name": "LIKELION 멋쟁이사자처럼",
+  "guide": "DESIGN_GUIDE.md",
+  "canvas": {"width": 1080, "height": 1350},
+  "safe_area": {"top": 100, "right": 100, "bottom": 100, "left": 100},
+  "fonts": {
+    "family": "Pretendard",
+    "css": "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css"
+  },
+  "colors": {
+    "primary": "#FF6000",
+    "secondary": "#1C1C1C",
+    "accent": "#FFE066",
+    "bg": "#1C1C1C",
+    "text": "#FFFFFF",
+    "ink": "#1C1C1C",
+    "ink-2": "#5B5B5B",
+    "muted": "#B8B8B8",
+    "panel": "#F9F9F9",
+    "base": "#F2EDE6",
+    "track": "#E6E1DA",
+    "scrim": "rgba(28,28,28,.78)"
+  },
+  "default_bg": "bg",
+  "type": {
+    "cover":     {"size": 90, "weight": 800, "line": 1.34},
+    "cover-sub": {"size": 40, "weight": 700, "line": 1.45},
+    "h":         {"size": 65, "weight": 800, "line": 1.35},
+    "sub":       {"size": 35, "weight": 700, "line": 1.45},
+    "outro":     {"size": 70, "weight": 800, "line": 1.35},
+    "outro-sub": {"size": 35, "weight": 700, "line": 1.45},
+    "kicker":    {"size": 40, "weight": 700, "line": 1.3, "color": "primary"},
+    "label":     {"size": 35, "weight": 500, "line": 1.3, "color": "muted"},
+    "num":       {"size": 135, "weight": 800, "line": 1.0, "color": "primary"}
+  },
+  "logo": {
+    "files": {"white": "assets/logo_white.png", "black": "assets/logo_black.png"},
+    "default": "white",
+    "ink_width": 188,
+    "bottom": 100
+  },
+  "chrome": {"handle": null, "teaser_bar": false, "page_counter": false, "grain": false},
+  "audit": {
+    "min_font_px": 35,
+    "bg_percentile": 98,
+    "contrast": {"default": 4.5, "#FF6000": 3.5, "#1C1C1C": 3.5}
+  }
+}
